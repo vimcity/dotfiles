@@ -1,0 +1,20 @@
+# Git and version control
+.git/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Oh My Zsh is installed via install.sh, not tracked in dotfiles
+
+# Atuin - ignore database and keys
+atuin/*.db
+atuin/*.db-shm
+atuin/*.db-wal
+atuin/key
+
+# Backup directory
+.dotfiles_backup_*
+
+# Machine-specific configs
+.zshrc.local

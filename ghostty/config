@@ -1,0 +1,34 @@
+# Ghostty Configuration with Catppuccin Frappe Theme
+# ==================================================
+
+# Use the built-in Catppuccin Frappe theme
+theme = "Catppuccin Frappe"
+
+# Window settings
+window-padding-x = 20
+window-padding-y = 20
+
+# Translucency settings
+#background-opacity = 0.95
+
+# Font settings
+font-family = "JetBrainsMono Nerd Font", "JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Ubuntu Mono", "Liberation Mono", "monospace"
+font-size = 14
+
+# Catppuccin Frappe Color Scheme (using built-in theme)
+# =====================================================
+
+# Background and foreground
+# Override with a darker background than default Frappe (#303446)
+background = #232634
+
+# Cursor and selection (handled by built-in theme)
+
+# Color palette (handled by built-in Catppuccin Frappe theme)
+
+# Shell integration
+shell-integration = zsh
+
+# Copy on select
+copy-on-select = clipboard
+
