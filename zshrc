@@ -194,7 +194,6 @@ alias c='clear'
 alias find='fd'
 
 # Quick directory navigation
-alias proj='cd /Users/rgaur/Projects'
 alias home='cd ~'
 alias desk='cd ~/Desktop'
 alias docs='cd ~/Documents'

@@ -63,6 +63,8 @@ backup_if_exists "$HOME/.config/neofetch"
 backup_if_exists "$HOME/.hammerspoon"
 backup_if_exists "$HOME/.vimrc"
 backup_if_exists "$HOME/.zshrc"
+backup_if_exists "$HOME/.tmux.conf"
+backup_if_exists "$HOME/.fdignore"
 
 # Create symlinks
 echo "🔗 Creating symlinks..."
@@ -74,6 +76,8 @@ ln -sf "$HOME/dotfiles/neofetch" "$HOME/.config/neofetch"
 ln -sf "$HOME/dotfiles/hammerspoon" "$HOME/.hammerspoon"
 ln -sf "$HOME/dotfiles/vimrc" "$HOME/.vimrc"
 ln -sf "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
+ln -sf "$HOME/dotfiles/tmux.conf" "$HOME/.tmux.conf"
+ln -sf "$HOME/dotfiles/fdignore" "$HOME/.fdignore"
 
 echo "✅ Dotfiles installed successfully!"
 echo ""
