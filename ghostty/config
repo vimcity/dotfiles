@@ -2,18 +2,24 @@
 # ==================================================
 
 # Use the built-in Catppuccin Frappe theme
-theme = "Catppuccin Frappe"
+#theme = "Catppuccin Frappe"
+theme = "Ayu Mirage"
 
 # Window settings
 window-padding-x = 20
 window-padding-y = 20
+
+# Launch maximized
+window-decoration = true
+window-step-resize = true
+window-save-state = always
 
 # Translucency settings
 #background-opacity = 0.95
 
 # Font settings
 font-family = "JetBrainsMono Nerd Font", "JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Ubuntu Mono", "Liberation Mono", "monospace"
-font-size = 14
+font-size = 16
 
 # Catppuccin Frappe Color Scheme (using built-in theme)
 # =====================================================
