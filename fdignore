@@ -9,3 +9,16 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+.pyenv/
+.ollama/
+.vscode-insiders/
+.vscode/
+Library/
+.cache/
+.npm/
+.cargo/
+.cursor
+.zsh_sessions
+.gemini
+.codex
+.lmstudio

@@ -53,7 +53,7 @@ plugins=(
   copyfile
   copypath
   dirhistory
-  per-directory-history
+  # per-directory-history  # Disabled - conflicts with Atuin
   z
 )
 
@@ -82,17 +82,16 @@ setopt HIST_VERIFY
 # ===========================================
 # Atuin Configuration (Ctrl+R only)
 # ===========================================
-# Configure atuin to not override up/down arrow keys
-export ATUIN_NOBIND=1
+# Enable auto-sync for cross-shell history
 export ATUIN_AUTO_SYNC=1
 export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
-# Initialize atuin
-eval "$(atuin init zsh)"
+# Initialize atuin with up arrow disabled (use standard zsh history for up/down)
+eval "$(atuin init zsh --disable-up-arrow)"
 
-# Bind Ctrl+R to atuin search
-bindkey "^R" atuin-search
+# Ctrl+R uses atuin search with popup (already set by atuin init)
+# Up/down arrows use standard zsh history (default behavior restored)
 
 # ===========================================
 # Work-Specific Configuration Section
@@ -116,12 +115,16 @@ export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
 alias vimz="vim ~/.zshrc"
+alias sourz="source ~/.zshrc"
+alias sz="source ~/.zshrc"
 alias vi=vim
 alias ls=eza
 export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
+export PATH="$PYENV_ROOT/shims:$PATH"
+# Lazy load pyenv to avoid slow shell startup
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init - --no-rehash)"
+fi
 
 # Python utilities
 alias pipr="pip install -r requirements.txt"
@@ -177,6 +180,9 @@ alias fdm='fd --ignore-file ~/.fdignore --search-path ~ --changed-within'
 alias fds='fd --ignore-file ~/.fdignore --search-path ~ --size'
 alias fdempty='fd --ignore-file ~/.fdignore --search-path ~ --type empty'
 
+# Ripgrep configuration
+alias rg='rg --ignore-file ~/dotfiles/rgignore'
+
 # Modern terminal tools
 alias cat='bat'
 alias less='bat'
@@ -185,7 +191,6 @@ alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'
 alias df='df -h'
-alias grep='rg'
 alias du='du -h'
 alias free='free -h'
 alias ps='ps aux'
@@ -203,8 +208,11 @@ alias down='cd ~/Downloads'
 alias gcs='gh copilot suggest'
 alias gce='gh copilot explain'
 
+# Claude Code shortcuts
+alias clont='claude --continue'  # Resume latest chat
+
 # Display system info on terminal launch
-neofetch
+fastfetch
 
 # ===========================================
 # Machine-Specific Configuration
