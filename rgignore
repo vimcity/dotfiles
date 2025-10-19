@@ -18,7 +18,11 @@ Library/
 .npm/
 .cargo/
 .cursor
-.zsh_sessions
 .gemini
-.codex
+.fzf*
 .lmstudio
+.qwen
+conversations.json
+Documents
+.claude
+.claude.json
