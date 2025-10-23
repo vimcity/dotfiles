@@ -101,8 +101,8 @@ show_preview = true
 # ctrl_n_shortcuts = false
 
 ## default history list format - can also be specified with the --format arg
-history_format = "{time} - {relativetime} - [{duration}] - {directory}$\t{command}"
-
+#history_format = "{time} - {relativetime} - [{duration}] - {directory}$\t{command}"
+history_format = "{relativetime} | {directory} | {command}"
 ## prevent commands matching any of these regexes from being written to history.
 ## Note that these regular expressions are unanchored, i.e. if they don't start
 ## with ^ or end with $, they'll match anywhere in the command.
