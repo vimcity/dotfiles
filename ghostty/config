@@ -18,7 +18,7 @@ window-save-state = always
 #background-opacity = 0.95
 
 # Font settings
-font-family = "JetBrainsMono Nerd Font", "JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Ubuntu Mono", "Liberation Mono", "monospace"
+font-family = "JetBrains Mono NF", "Fira Code", "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Ubuntu Mono", "Liberation Mono", "monospace"
 font-size = 16
 
 # Catppuccin Frappe Color Scheme (using built-in theme)
@@ -28,7 +28,8 @@ font-size = 16
 # Override with a darker background than default Frappe (#303446)
 background = #232634
 
-# Cursor and selection (handled by built-in theme)
+# Cursor and selection
+cursor-color = #ca9ee6
 
 # Color palette (handled by built-in Catppuccin Frappe theme)
 
@@ -37,4 +38,17 @@ shell-integration = zsh
 
 # Copy on select
 copy-on-select = clipboard
+
+# Keybindings
+# Pass Alt+j/k to terminal apps (for nvim line movement)
+keybind = alt+j=ignore
+keybind = alt+k=ignore
+
+keybind = shift+enter=text:\x1b\r
+
+# Quick terminal toggle (Quake-style dropdown terminal)
+keybind = global:cmd+backquote=toggle_quick_terminal
+
+# Custom cursor shader
+custom-shader = shaders/cursor_smear_fade.glsl
 

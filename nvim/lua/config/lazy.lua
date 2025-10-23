@@ -16,13 +16,38 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   spec = {
-    -- add LazyVim and import its plugins
+    -- 1. LazyVim base plugins (must be first)
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- import/override with your plugins
+
+    -- 2. LazyVim extras (must come after base plugins)
+    { import = "lazyvim.plugins.extras.dap.core" }, -- Enable debugging support
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.python" },
-    
+    { import = "lazyvim.plugins.extras.lang.java" },
+
+    -- Editor enhancements
+    { import = "lazyvim.plugins.extras.editor.illuminate" }, -- Highlight matching words
+    { import = "lazyvim.plugins.extras.editor.inc-rename" }, -- Live preview for LSP rename
+    { import = "lazyvim.plugins.extras.editor.mini-move" }, -- Move lines/blocks with Alt+j/k
+    { import = "lazyvim.plugins.extras.editor.mini-diff" }, -- Show git changes inline
+
+    -- Coding enhancements
+    { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- Edit surrounding characters
+    { import = "lazyvim.plugins.extras.coding.yanky" }, -- Yank history
+
+    -- UI enhancements
+    { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- Show current function/class at top
+    { import = "lazyvim.plugins.extras.ui.indent-blankline" }, -- Visual indentation guides
+
+    -- Utilities
+    { import = "lazyvim.plugins.extras.util.project" }, -- Project management
+
+    -- AI
+    { import = "lazyvim.plugins.extras.ai.copilot" }, -- GitHub Copilot autocomplete
+    { import = "lazyvim.plugins.extras.ai.claudecode" }, -- Claude Code integration
+
+    -- 3. Your custom plugins (must come last)
     { import = "plugins" },
   },
   defaults = {
