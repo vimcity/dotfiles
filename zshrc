@@ -197,3 +197,5 @@ export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
 if [ -f ~/.zshrc.local ]; then
     source ~/.zshrc.local
 fi
+
+fastfetch

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://fastfetch.org/schema.json",
+  "modules": [
+    "Title",
+    "Break",
+    "OS",
+    "Host",
+    "Kernel",
+    "Uptime",
+    "Packages",
+    "Shell",
+    "Display",
+    "Terminal",
+    "TerminalFont",
+    "CPU",
+    "GPU",
+    "Memory",
+    "Swap",
+    "Disk",
+    "LocalIp",
+    "Battery",
+    "PowerAdapter",
+    "Locale",
+    "Break",
+    "Colors"
+  ]
+}
