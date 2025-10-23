@@ -18,7 +18,7 @@ window-save-state = always
 #background-opacity = 0.95
 
 # Font settings
-font-family = "JetBrains Mono NF", "Fira Code", "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Ubuntu Mono", "Liberation Mono", "monospace"
+font-family = "JetBrains Mono NF", "JetBrains Mono"
 font-size = 16
 
 # Catppuccin Frappe Color Scheme (using built-in theme)
@@ -35,6 +35,9 @@ cursor-color = #ca9ee6
 
 # Shell integration
 shell-integration = zsh
+
+# Enable vim mode
+vim-mode = true
 
 # Copy on select
 copy-on-select = clipboard
