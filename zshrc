@@ -1,11 +1,4 @@
 # ===========================================
-# Simple Shell Configuration
-# ===========================================
-# Up/Down Arrow: Default zsh history (current session)
-# Ctrl+R: Atuin global history search
-# Oh My Zsh: theme/plugins only
-
-# ===========================================
 # Oh My Zsh Configuration
 # ===========================================
 export ZSH="$HOME/.oh-my-zsh"
@@ -89,28 +82,9 @@ export ATUIN_FILTER_MODE=global
 
 # Initialize atuin with up arrow disabled (use standard zsh history for up/down)
 eval "$(atuin init zsh --disable-up-arrow)"
-
+alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (already set by atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
-
-# ===========================================
-# Work-Specific Configuration Section
-# ===========================================
-# NOTE: On work machines, add work-specific configuration to ~/.zshrc.local
-# This file will be sourced automatically at the end of this zshrc.
-# 
-# Work-specific items include:
-# - Java/Maven/MySQL paths and environment variables
-# - Project-specific aliases and functions
-# - AWS credentials and profiles
-# - API keys (Anthropic, Jira, Confluence, Artifactory, etc.)
-# - Company-specific tooling and shortcuts
-#
-# See zshrc.local.template in the dotfiles repo for examples.
-
-# ===========================================
-# Developer Services - start of common config
-# ===========================================
 export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
@@ -211,8 +185,9 @@ alias gce='gh copilot explain'
 # Claude Code shortcuts
 alias clont='claude --continue'  # Resume latest chat
 
-# Display system info on terminal launch
-fastfetch
+# OpenCode shortcuts
+alias oc='opencode'  # Quick access to OpenCode
+export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
 
 # ===========================================
 # Machine-Specific Configuration
