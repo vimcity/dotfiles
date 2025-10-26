@@ -27,27 +27,26 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-  zsh-completions
-  docker
-  docker-compose
-  brew
-  macos
-  python
-  node
-  npm
-  yarn
-  vscode
-  sublime
-  tmux
-  colored-man-pages
-  command-not-found
-  extract
-  web-search
-  copyfile
-  copypath
-  dirhistory
-  # per-directory-history  # Disabled - conflicts with Atuin
-  z
+  # zsh-completions
+  # docker
+  # docker-compose
+  # brew
+  # macos
+  # python
+  # node
+  # npm
+  # yarn
+  # vscode
+  # sublime
+  # tmux
+  # colored-man-pages
+  # command-not-found
+  # extract
+  # web-search
+  # copyfile
+  # copypath
+  # dirhistory
+  # z
 )
 
 # Load Oh My Zsh
@@ -198,4 +197,4 @@ if [ -f ~/.zshrc.local ]; then
     source ~/.zshrc.local
 fi
 
-fastfetch
+#fastfetch
