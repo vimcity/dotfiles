@@ -8,12 +8,13 @@ Personal configuration files synced between work and personal machines.
 - **atuin/** - Shell history sync config
 - **starship.toml** - Starship prompt config
 - **zshrc** - Zsh configuration (work-specific items filtered out)
+- **tmux.conf** - Tmux configuration with Catppuccin theme and plugins
 - **neofetch/** - Neofetch system info config
 - **hammerspoon/** - Hammerspoon automation config
 - **vimrc** - Vim configuration
 - **bat/** - Bat (cat replacement) config with Catppuccin theme
 
-Note: Oh My Zsh and its plugins are installed automatically by the install script.
+Note: Oh My Zsh plugins and TPM (Tmux Plugin Manager) are installed automatically by the install script.
 
 ## Setup on new machine
 
@@ -73,3 +74,65 @@ alias projects='cd ~/personal-projects'
 ```
 
 This file is **not tracked** in the repository - keep it local to each machine.
+
+## Tmux Usage
+
+Tmux is configured with Catppuccin Mocha theme and useful plugins. The prefix key is `Ctrl+a`.
+
+### Essential Key Bindings:
+
+**Window & Pane Management:**
+- `Ctrl+a v` - Split pane vertically
+- `Ctrl+a s` - Split pane horizontally
+- `Ctrl+a h/j/k/l` - Navigate panes (Vim-style)
+- `Ctrl+a c` - Create new window
+- `Ctrl+a 1-9` - Switch to window by number
+- `Ctrl+a x` - Kill current pane
+- `Ctrl+a w` - Kill current window
+- `Ctrl+a z` - Zoom/unzoom current pane
+
+**Session Management:**
+- `Ctrl+a d` - Detach from session
+- `Ctrl+a Ctrl+s` - Choose session
+- `tmux new -s name` - Create named session
+- `tmux attach -t name` - Attach to session
+- `tmux ls` - List sessions
+
+**Copy Mode (Vim-style):**
+- `Ctrl+a [` - Enter copy mode
+- `v` - Begin selection
+- `y` - Copy selection
+- `Ctrl+a p` - Paste
+
+**Utilities:**
+- `Ctrl+a r` - Reload config
+- `Ctrl+a I` - Install plugins (after first setup)
+- `Ctrl+a U` - Update plugins
+
+### Installed Plugins:
+- **tmux-resurrect** - Save/restore sessions
+- **tmux-continuum** - Auto-save sessions every 15 minutes
+- **tmux-yank** - Better copy/paste integration
+- **catppuccin/tmux** - Beautiful Catppuccin theme
+
+### Recommended Workflow:
+
+Use one terminal tab with tmux for your entire workspace:
+```bash
+# Start tmux
+tmux new -s work
+
+# Create panes:
+# - Pane 1: Neovim for editing
+# - Pane 2: Running dev server
+# - Pane 3: Git commands
+# - Pane 4: Monitoring/logs
+
+# Split panes as needed with Ctrl+a v or Ctrl+a s
+# Navigate with Ctrl+a h/j/k/l
+```
+
+**Benefits:**
+- .zshrc loads only once (faster than multiple tabs)
+- Session persistence (survives terminal crashes)
+- Better workspace organization

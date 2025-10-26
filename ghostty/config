@@ -36,9 +36,6 @@ cursor-color = #ca9ee6
 # Shell integration
 shell-integration = zsh
 
-# Enable vim mode
-vim-mode = true
-
 # Copy on select
 copy-on-select = clipboard
 
@@ -50,8 +47,8 @@ keybind = alt+k=ignore
 keybind = shift+enter=text:\x1b\r
 
 # Quick terminal toggle (Quake-style dropdown terminal)
-keybind = global:cmd+backquote=toggle_quick_terminal
+keybind = global:cmd+shift+backquote=toggle_quick_terminal
+
 
 # Custom cursor shader
 custom-shader = shaders/cursor_smear_fade.glsl
-
