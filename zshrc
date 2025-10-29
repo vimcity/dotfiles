@@ -28,8 +28,8 @@ plugins=(
   zsh-autosuggestions
   zsh-syntax-highlighting
   # zsh-completions
-  # docker
-  # docker-compose
+   docker
+   docker-compose
   # brew
   # macos
   # python
