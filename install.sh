@@ -55,6 +55,14 @@ else
     echo "  ✓ zsh-completions already installed"
 fi
 
+# Install TPM (Tmux Plugin Manager)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+    echo "📦 Installing TPM (Tmux Plugin Manager)..."
+    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+else
+    echo "✓ TPM already installed"
+fi
+
 # Backup existing files
 backup_if_exists "$HOME/.config/ghostty"
 backup_if_exists "$HOME/.config/atuin"
@@ -88,6 +96,11 @@ echo "   - Company-specific tooling and aliases"
 echo "   - Machine-specific performance tweaks"
 echo ""
 echo "   This file will be automatically sourced by .zshrc if it exists."
+echo ""
+echo "🔌 To install Tmux plugins:"
+echo "   1. Start tmux: tmux"
+echo "   2. Press: Ctrl+a then I (capital i)"
+echo "   3. Wait for plugins to install"
 echo ""
 if [ -d "$backup_dir" ] && [ "$(ls -A $backup_dir)" ]; then
     echo "💾 Original configs backed up to: $backup_dir"
