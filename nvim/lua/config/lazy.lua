@@ -39,9 +39,11 @@ require("lazy").setup({
     -- UI enhancements
     { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- Show current function/class at top
     { import = "lazyvim.plugins.extras.ui.indent-blankline" }, -- Visual indentation guides
+    { import = "lazyvim.plugins.extras.ui.mini-indentscope" }, -- Highlight current indentation scope
 
     -- Utilities
     { import = "lazyvim.plugins.extras.util.project" }, -- Project management
+    { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
 
     -- AI
     { import = "lazyvim.plugins.extras.ai.copilot" }, -- GitHub Copilot autocomplete

@@ -87,7 +87,8 @@ alias ahl="atuin history list"
 export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
-alias vimz="vim ~/.zshrc"
+alias vimz="nvim ~/.zshrc"
+alias vim="nvim"
 alias sourz="source ~/.zshrc"
 alias sz="source ~/.zshrc"
 alias vi=vim
@@ -198,3 +199,8 @@ if [ -f ~/.zshrc.local ]; then
 fi
 
 #fastfetch
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.lmstudio/bin"
+# End of LM Studio CLI section
+
