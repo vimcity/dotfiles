@@ -88,6 +88,7 @@ export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
 alias vimz="nvim ~/.zshrc"
+alias zz="z"
 alias vim="nvim"
 alias sourz="source ~/.zshrc"
 alias sz="source ~/.zshrc"
@@ -113,6 +114,11 @@ eval "$(starship init zsh)"
 
 # fzf configuration (for file search only)
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
+
+# Load fzf key bindings and completion
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+fi
 
 # ===========================================
 # Search & Navigation Shortcuts
