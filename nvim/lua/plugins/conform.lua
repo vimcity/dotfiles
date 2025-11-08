@@ -6,6 +6,6 @@ return {
   },
   init = function()
     -- Disable auto-formatting globally
-    vim.g.autoformat = false
+    vim.g.autoformat = true 
   end,
 }
