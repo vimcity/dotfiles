@@ -165,8 +165,8 @@ alias rg='rg --ignore-file ~/dotfiles/rgignore'
 
 # Modern terminal tools
 alias cat='bat'
-alias less='bat'
-alias more='bat'
+# bat will automatically use less as a pager for large files
+export BAT_PAGER="less -RF"
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'
@@ -194,6 +194,22 @@ alias clont='claude --continue'  # Resume latest chat
 # OpenCode shortcuts
 alias oc='opencode'  # Quick access to OpenCode
 export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
+
+# OpenCode pipe function - analyze command output with AI
+ocparse() {
+  local model="${1:-github-copilot/gpt-4.1}"
+  local prompt="${2:-Analyze and summarize this output. Highlight any errors, warnings, or important information.}"
+  local input=$(cat)
+  
+  # Run opencode and render markdown output with glow (using global config style)
+  echo "$input" | opencode run --model "$model" "$prompt" | glow -p
+}
+
+# Usage examples:
+# docker ps | ocparse
+# npm test | ocparse
+# git log | ocparse "github/gpt-4.1" "Summarize these commits"
+# cat error.log | ocparse "github/gpt-4.1" "Find the root cause of errors"
 
 # ===========================================
 # Machine-Specific Configuration
