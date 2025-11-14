@@ -43,7 +43,7 @@ require("lazy").setup({
 
     -- Utilities
     { import = "lazyvim.plugins.extras.util.project" }, -- Project management
-    { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
+    -- { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
 
     -- AI
     { import = "lazyvim.plugins.extras.ai.copilot" }, -- GitHub Copilot autocomplete
