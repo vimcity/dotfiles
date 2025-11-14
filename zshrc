@@ -197,12 +197,12 @@ export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
 
 # OpenCode pipe function - analyze command output with AI
 ocparse() {
-  local model="${1:-github-copilot/gpt-4.1}"
-  local prompt="${2:-Analyze and summarize this output. Highlight any errors, warnings, or important information.}"
+  local model="${1:-llama3.2:latest}"
+  local prompt="${2:-Analyze and summarize this output.}"
   local input=$(cat)
   
-  # Run opencode and render markdown output with glow (using global config style)
-  echo "$input" | opencode run --model "$model" "$prompt" | glow -p
+  # Run ollama and render markdown output with glow (using global config style)
+  echo "$input" | ollama run $model "$prompt" | glow -p
 }
 
 # Usage examples:
