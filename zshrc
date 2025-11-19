@@ -227,4 +227,5 @@ export PATH="$PATH:$HOME/.lmstudio/bin"
 # End of LM Studio CLI section
 alias brain='killall NordVPN 2>/dev/null; tailscale up; echo "🧠 Brain mode active"'
 alias browse='tailscale down; open -a NordVPN; echo "🌐 Browse mode - click Connect in NordVPN"'
+alias killer='kill $(lsof -t -i:$1)'                                                                                                                                                                                       
 
