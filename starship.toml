@@ -28,6 +28,7 @@ $line_break\
 $character"""
 
 palette = 'catppuccin_mocha'
+command_timeout = 1000
 
 [os]
 disabled = false
@@ -129,7 +130,6 @@ format = '[[ $symbol( $version)(\(#$virtualenv\)) ](fg:crust bg:green)]($style)'
 detect_extensions = ["py"]
 detect_files = [".python-version", "Pipfile", "pyproject.toml", "requirements.txt", "setup.py", "poetry.lock"]
 detect_folders = ["venv", ".venv", "env"]
-command_timeout = 1000
 
 [docker_context]
 symbol = ""
