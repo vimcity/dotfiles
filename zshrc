@@ -28,7 +28,7 @@ plugins=(
   zsh-autosuggestions
   zsh-syntax-highlighting
   # zsh-completions
-   docker
+  # docker
    docker-compose
   # brew
   # macos
@@ -95,7 +95,8 @@ alias sourz="source ~/.zshrc"
 alias sz="source ~/.zshrc"
 alias vi=vim
 alias ls=eza
-export PYENV_ROOT="$HOME/.pyenv"
+alias lsa="eza --icons=always -s=time -la"
+export PYENV_ROOT=
 export PATH="$PYENV_ROOT/shims:$PATH"
 # Lazy load pyenv to avoid slow shell startup
 if command -v pyenv 1>/dev/null 2>&1; then
@@ -166,6 +167,8 @@ alias rg='rg --ignore-file ~/dotfiles/rgignore'
 
 # Modern terminal tools
 alias cat='bat'
+# Pretty man pages with bat
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # bat will automatically use less as a pager for large files
 export BAT_PAGER="less -RF"
 alias ll='eza -la --git --icons'
