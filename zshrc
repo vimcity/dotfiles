@@ -88,6 +88,7 @@ export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
 alias vimz="nvim ~/.zshrc"
+alias neo="z ~/Projects && nvim"
 alias zz="z"
 alias vim="nvim"
 alias sourz="source ~/.zshrc"
@@ -184,10 +185,6 @@ alias desk='cd ~/Desktop'
 alias docs='cd ~/Documents'
 alias down='cd ~/Downloads'
 
-# GitHub Copilot CLI shortcuts
-alias gcs='gh copilot suggest'
-alias gce='gh copilot explain'
-
 # Claude Code shortcuts
 alias clont='claude --continue'  # Resume latest chat
 
@@ -196,20 +193,35 @@ alias oc='opencode'  # Quick access to OpenCode
 export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
 
 # OpenCode pipe function - analyze command output with AI
-ocparse() {
+ocprompt() {
+  # local model="${1:-github-copilot/gpt-4.1}"
+  local prompt="${1:-Analyze and summarize this output.}"
+  local input=$(cat)
+  
+  # Run opencode and render markdown output with glow (using global config style)
+  echo "$input" | opencode run -m "github-copilot/gpt-4.1" "Be concise. $prompt"
+}
+
+olparse() {
   local model="${1:-llama3.2:latest}"
   local prompt="${2:-Analyze and summarize this output.}"
   local input=$(cat)
   
   # Run ollama and render markdown output with glow (using global config style)
-  echo "$input" | ollama run $model "$prompt" | glow -p
+  echo "$input" | ollama run $model "Be concise. $prompt" | glow -p
 }
+
+alias ocp='ocprompt'
+alias ocl='olprompt'
 
 # Usage examples:
 # docker ps | ocparse
 # npm test | ocparse
 # git log | ocparse "github/gpt-4.1" "Summarize these commits"
 # cat error.log | ocparse "github/gpt-4.1" "Find the root cause of errors"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.lmstudio/bin"
 
 # ===========================================
 # Machine-Specific Configuration
@@ -221,11 +233,16 @@ if [ -f ~/.zshrc.local ]; then
 fi
 
 #fastfetch
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:$HOME/.lmstudio/bin"
-# End of LM Studio CLI section
-alias brain='killall NordVPN 2>/dev/null; tailscale up; echo "🧠 Brain mode active"'
-alias browse='tailscale down; open -a NordVPN; echo "🌐 Browse mode - click Connect in NordVPN"'
+alias ffs='fastfetch'
 alias killer='kill $(lsof -t -i:$1)'                                                                                                                                                                                       
 
+
+# Git Worktree Aliases
+alias gwl='git worktree list'
+alias gwa='git worktree add'
+alias gwr='git worktree remove'
+alias gwp='git worktree prune'
+
+# Smart aliases that auto-create path from branch name
+alias gwab='f(){ git worktree add -b "$1" "../$1" }; f'  # new branch
+alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
