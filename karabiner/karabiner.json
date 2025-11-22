@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "profiles": [
+    {
+      "name": "Default",
+      "virtual_hid_keyboard": {
+        "keyboard_type_v2": "ansi"
+      },
+      "rules": [
+        {
+          "description": "Homerow mods (left hand)",
+          "manipulators": [
+            {
+              "type": "basic",
+              "from": { "key_code": "a" },
+              "to_if_held_down": [{ "key_code": "left_shift" }],
+              "to_if_alone": [{ "key_code": "a" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "s" },
+              "to_if_held_down": [{ "key_code": "left_alt" }],
+              "to_if_alone": [{ "key_code": "s" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "d" },
+              "to_if_held_down": [{ "key_code": "left_command" }],
+              "to_if_alone": [{ "key_code": "d" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "f" },
+              "to_if_held_down": [{ "key_code": "left_control" }],
+              "to_if_alone": [{ "key_code": "f" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            }
+          ]
+        },
+        {
+          "description": "Homerow mods (right hand)",
+          "manipulators": [
+            {
+              "type": "basic",
+              "from": { "key_code": "j" },
+              "to_if_held_down": [{ "key_code": "left_control" }],
+              "to_if_alone": [{ "key_code": "j" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "k" },
+              "to_if_held_down": [{ "key_code": "left_command" }],
+              "to_if_alone": [{ "key_code": "k" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "l" },
+              "to_if_held_down": [{ "key_code": "left_alt" }],
+              "to_if_alone": [{ "key_code": "l" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            },
+            {
+              "type": "basic",
+              "from": { "key_code": "semicolon" },
+              "to_if_held_down": [{ "key_code": "left_shift" }],
+              "to_if_alone": [{ "key_code": "semicolon" }],
+              "parameters": { "basic.hold_down_milliseconds": 100 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
