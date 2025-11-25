@@ -84,7 +84,6 @@ eval "$(atuin init zsh --disable-up-arrow)"
 alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (already set by atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
-export BAT_THEME="Catppuccin-mocha"
 
 # Python environment
 alias vimz="nvim ~/.zshrc"
@@ -92,12 +91,13 @@ alias neo="z ~/Projects && nvim"
 alias zz="z"
 alias vim="nvim"
 alias sourz="source ~/.zshrc"
-alias sz="source ~/.zshrc"
+alias sdf="source ~/.zshrc"
 alias vi=vim
 alias ls=eza
 alias lsa="eza --icons=always -s=time -la"
 export PYENV_ROOT=
 export PATH="$PYENV_ROOT/shims:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 # Lazy load pyenv to avoid slow shell startup
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init - --no-rehash)"
@@ -136,7 +136,9 @@ search-in-files() {
 }
 
 alias sif='search-in-files'
-alias ff='fd --type f --hidden --exclude .git | fzf --preview "bat --color=always --style=header,grid --line-range :300 {}"'
+alias ff='fd --type f --hidden --exclude .git | fzf --preview-window=right:60% --preview "bat --color=always --style=header,grid --line-range :300 {}"'
+
+# alias ff='fd --type f --hidden --exclude .git | fzf --preview "bat --color=always --style=header,grid --line-range :300 {}"'
 alias fdir='fd --type d --hidden --exclude .git | fzf --preview "eza --tree --level=2 --icons {}"'
 alias ffe='fd --type f --hidden --exclude .git | fzf --preview "bat --color=always --style=header,grid --line-range :300 {}" | xargs ${EDITOR:-vim}'
 alias gcof='git checkout $(git branch | fzf | sed "s/^[ *]*//")'
@@ -171,6 +173,7 @@ alias cat='bat'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # bat will automatically use less as a pager for large files
 export BAT_PAGER="less -RF"
+export BAT_THEME="Catppuccin Frappe"
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'
