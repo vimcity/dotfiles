@@ -1,11 +1,8 @@
 return {
     "stevearc/conform.nvim",
     opts = {
-        -- Formatters configuration (if you need custom formatters)
-        formatters_by_ft = {},
+        formatters_by_ft = {
+            org = { "trim_whitespace", "trim_newlines" },
+        },
     },
-    init = function()
-        -- Disable auto-formatting globally
-        vim.g.autoformat = false
-    end,
 }
