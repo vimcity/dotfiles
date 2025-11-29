@@ -14,7 +14,7 @@ export TMUX_POWERLINE_ERROR_LOGS_SCOPES=""
 export TMUX_POWERLINE_PATCHED_FONT_IN_USE="true"
 
 # The theme to use.
-export TMUX_POWERLINE_THEME="cat-theme"
+export TMUX_POWERLINE_THEME="default-theme"
 # Overlay directory to look for themes. There you can put your own themes outside the repo. Fallback will still be the "themes" directory in the repo.
 export TMUX_POWERLINE_DIR_USER_THEMES="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-powerline/themes"
 # Overlay directory to look for segments. There you can put your own segments outside the repo. Fallback will still be the "segments" directory in the repo.
@@ -363,7 +363,7 @@ export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PREFIX="Continuum status: "
 # tmux_mem_cpu_load.sh {
 # Arguments passed to tmux-mem-cpu-load.
 # See https://github.com/thewtex/tmux-mem-cpu-load for all available options.
-# export TMUX_POWERLINE_SEG_TMUX_MEM_CPU_LOAD_ARGS="-v"
+export TMUX_POWERLINE_SEG_TMUX_MEM_CPU_LOAD_ARGS="-v"
 # }
 
 # tmux_session_info.sh {
