@@ -92,6 +92,7 @@ alias zz="z"
 alias vim="nvim"
 alias sourz="source ~/.zshrc"
 alias sdf="source ~/.zshrc"
+alias cl=clear
 alias vi=vim
 alias ls=eza
 alias lsa="eza --icons=always -s=time -la"
@@ -252,3 +253,8 @@ alias gwp='git worktree prune'
 # Smart aliases that auto-create path from branch name
 alias gwab='f(){ git worktree add -b "$1" "../$1" }; f'  # new branch
 alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
+# End of LM Studio CLI section
+

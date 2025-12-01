@@ -96,7 +96,7 @@ if [ -z "$TMUX_POWERLINE_WINDOW_STATUS_FORMAT" ]; then
         "#[$(tp_format regular)]"
         # "  #I#{?window_flags,#F, } "
         " "
-        "#I"
+        "#I#F"
         # " #{?window_flags,,} "
         # "$TMUX_POWERLINE_SEPARATOR_THIN"
         # " #W#{?window_zoomed_flag, 󰁌,} "
