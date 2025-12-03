@@ -19,3 +19,4 @@ atuin/key
 # Machine-specific configs
 .zshrc.local
 lazy.lock
+.claude
