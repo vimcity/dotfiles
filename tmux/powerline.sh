@@ -229,7 +229,7 @@ export TMUX_POWERLINE_SEG_MAILCOUNT_GMAIL_INTERVAL="5"
 
 ## Maildir
 # Path to the maildir to check.
-export TMUX_POWERLINE_SEG_MAILCOUNT_MAILDIR_INBOX="/Users/ritvik/.mail/inbox/new"
+export TMUX_POWERLINE_SEG_MAILCOUNT_MAILDIR_INBOX="$HOME/.mail/inbox/new"
 
 ## mbox
 # Path to the mbox to check.
@@ -350,12 +350,12 @@ export TMUX_POWERLINE_SEG_TIME_FORMAT="%H:%M"
 
 # tmux_continuum_save.sh {
 # Path to the tmux-continuum git repo.
-export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PATH="/Users/ritvik/.tmux/plugins//tmux-continuum"
+export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PATH="$HOME/.tmux/plugins/tmux-continuum"
 # }
 
 # tmux_continuum_status.sh {
 # Path to the tmux-continuum git repo.
-export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PATH="/Users/ritvik/.tmux/plugins//tmux-continuum"
+export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PATH="$HOME/.tmux/plugins/tmux-continuum"
 # Message to perfix the status indication with.
 export TMUX_POWERLINE_SEG_TMUX_CONTINUUM_PREFIX="Continuum status: "
 # }

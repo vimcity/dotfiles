@@ -180,7 +180,7 @@ return {
           {
             name = "💼 Work",
             matcher = function(i)
-              return i:has_tag("work")
+              return i.file:match("work%.org$") and i.todo_state ~= "DONE"
             end,
           },
           {
