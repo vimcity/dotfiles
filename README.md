@@ -27,7 +27,9 @@ This configuration emphasizes:
 ## Tools & Configuration
 
 ### Terminal
-**Ghostty** - Modern GPU-accelerated terminal
+**Ghostty** - Modern GPU-accelerated terminal emulator
+> Fast, native macOS terminal with GPU rendering for smooth scrolling and animations
+
 - Catppuccin Frappe theme with custom darker background
 - JetBrains Mono Nerd Font at 16pt
 - Custom cursor shader (blaze effect)
@@ -35,7 +37,9 @@ This configuration emphasizes:
 - Ligatures disabled
 
 ### Shell Environment
-**Zsh** with Oh My Zsh
+**Zsh** - Unix shell with powerful customization
+> Primary command-line interface with enhanced features via Oh My Zsh framework
+
 - **Prompt**: Starship (customized with Catppuccin Mocha colors, shows OS, directory, git status, language versions)
 - **Plugins**: git, zsh-autosuggestions, zsh-syntax-highlighting, docker-compose
 - **History**: Standard zsh history for up/down arrow, Atuin for fuzzy search (`Ctrl+R`)
@@ -43,7 +47,9 @@ This configuration emphasizes:
 - **Python**: pyenv for version management (lazy-loaded)
 
 ### Shell History
-**Atuin** - Encrypted, synced shell history
+**Atuin** - Shell history database with sync capabilities
+> Replaces default shell history with searchable, encrypted, cross-machine synced command database
+
 - Fuzzy search mode
 - Cross-machine sync enabled
 - History preview
@@ -51,52 +57,99 @@ This configuration emphasizes:
 - Customized format showing relative time and directory
 
 ### Modern CLI Tools
-- **bat** - Syntax-highlighted cat replacement (Catppuccin Frappe theme, used as man pager)
-- **eza** - Modern ls replacement with icons and git integration
-- **fd** - Fast find alternative with ignore file support
-- **ripgrep (rg)** - Fast grep with custom ignore rules
-- **fzf** - Fuzzy finder for files and commands
-- **delta** - Better git diffs (used in lazygit)
-- **glow** - Markdown renderer in terminal
+- **bat** - Syntax-highlighted file viewer
+  > Drop-in cat replacement with syntax highlighting, line numbers, and git integration. Used as default pager for man pages
+  - Catppuccin Frappe theme, used as man pager
+  
+- **eza** - Modern file lister
+  > Replacement for ls with colors, icons, git status, and tree views
+  - Icons and git integration enabled
+  
+- **fd** - Fast file finder
+  > Simpler, faster alternative to find with sensible defaults and ignore patterns
+  - Custom ignore file support
+  
+- **ripgrep (rg)** - Fast text search tool
+  > Blazingly fast grep alternative that respects gitignore and uses smart defaults
+  - Custom ignore rules for better search results
+  
+- **fzf** - Fuzzy finder
+  > Interactive filter for command-line that enables fuzzy searching for files, history, and more
+  - Integrated for file search, command history, git branch selection
+  
+- **delta** - Enhanced git diff viewer
+  > Syntax-highlighting pager for git diffs with side-by-side view support
+  - Used in lazygit for better diff visualization
+  
+- **glow** - Markdown renderer
+  > Command-line markdown reader with styled formatting
+  - For viewing documentation in terminal
 
 ### Terminal Multiplexer
-**Tmux** - Session and window management
+**Tmux** - Terminal session and window manager
+> Allows multiple terminal sessions in one window, with session persistence and detach/reattach capabilities
+
 - **Prefix**: `Ctrl+Space`
 - **Theme**: tmux-powerline
 - **Modular config** split into settings, plugins, and keybindings
 - **Vim-style navigation** between panes
 - **Plugins**:
-  - tmux-resurrect & continuum (session persistence)
-  - tmux-yank (better clipboard)
-  - tmux-thumbs (hint-based selection)
-  - tmux-fzf-url (open URLs from terminal)
-  - tmux-sessionist (session management)
-  - tmux-battery & cpu (status indicators)
+  - tmux-resurrect & continuum (session persistence - survive reboots)
+  - tmux-yank (better clipboard integration)
+  - tmux-thumbs (hint-based text selection, like vimium)
+  - tmux-fzf-url (fuzzy find and open URLs from terminal output)
+  - tmux-sessionist (enhanced session management shortcuts)
+  - tmux-battery & cpu (system resource monitoring in status bar)
 - Mouse support enabled
 - History limit: 1 million lines
 - Auto-save sessions every 15 minutes
 
 ### Text Editor
-**Neovim (LazyVim)** - Modern Neovim distribution
-- **Language Support**: TypeScript, Python, Java, JSON with full LSP
-- **AI Integration**: GitHub Copilot and Claude Code
-- **Debugging**: DAP core enabled
+**Neovim (LazyVim)** - Modern modal text editor
+> Highly extensible Vim-based editor with LSP, treesitter, and modern IDE features. LazyVim provides sensible defaults and plugin management
+
+- **Language Support**: TypeScript, Python, Java, JSON with full LSP (autocomplete, go-to-definition, refactoring)
+- **AI Integration**: GitHub Copilot (code suggestions) and Claude Code (chat-based assistance)
+- **Debugging**: DAP (Debug Adapter Protocol) for in-editor debugging
 - **Extras**: 
-  - Editor: illuminate (highlight matching), inc-rename, mini-move, mini-diff
-  - Coding: mini-surround, yanky (yank history)
-  - UI: treesitter-context, indent-blankline, mini-indentscope
-  - Project management
+  - Editor: illuminate (highlight matching words), inc-rename (live preview renames), mini-move (move lines/blocks), mini-diff (inline git changes)
+  - Coding: mini-surround (edit surrounding quotes/brackets), yanky (yank history manager)
+  - UI: treesitter-context (show current function at top), indent-blankline (visual indent guides), mini-indentscope (highlight current scope)
+  - Project management (find/search across project)
 
 ### Git Tools
-**Lazygit** - Terminal UI for git
+**Lazygit** - Terminal UI for git operations
+> Interactive terminal interface for git that simplifies staging, committing, branching, merging, and rebasing
+
 - GitHub-style diff colors
 - Delta integration for better diffs
 - File tree view enabled
 - Custom theme matching overall color scheme
 
+### Keyboard Customization
+**Karabiner-Elements** - Keyboard modifier for macOS
+> Enables advanced keyboard customization, used here for home row mods to reduce hand movement
+
+- Left hand: a=Shift, s=Alt, d=Cmd, f=Ctrl (when held)
+- Right hand: j=Ctrl, k=Cmd, l=Alt, ;=Shift (when held)
+- 100ms hold threshold
+- Tap for normal key, hold for modifier
+
 ### System Info
-**Fastfetch** - Fast system info display
+**Fastfetch** - System information tool
+> Fast neofetch alternative that displays system specs (OS, CPU, memory, etc.) with styling
+
 - Shows OS, kernel, uptime, packages, terminal, CPU, GPU, memory, battery, etc.
+
+### Additional Tools
+**Starship** - Cross-shell prompt
+> Fast, customizable prompt that shows relevant context (git branch, language versions, execution time)
+
+**Zoxide** - Smart directory jumper
+> Replaces cd with an intelligent version that remembers your most-used directories
+
+**pyenv** - Python version manager
+> Manage multiple Python versions and easily switch between them per-project
 
 ### Search & Navigation Aliases
 Custom functions for fuzzy finding:
