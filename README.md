@@ -126,14 +126,6 @@ This configuration emphasizes:
 - File tree view enabled
 - Custom theme matching overall color scheme
 
-### Keyboard Customization
-**Karabiner-Elements** - Keyboard modifier for macOS
-> Enables advanced keyboard customization, used here for home row mods to reduce hand movement
-
-- Left hand: a=Shift, s=Alt, d=Cmd, f=Ctrl (when held)
-- Right hand: j=Ctrl, k=Cmd, l=Alt, ;=Shift (when held)
-- 100ms hold threshold
-- Tap for normal key, hold for modifier
 
 ### System Info
 **Fastfetch** - System information tool
