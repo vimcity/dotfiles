@@ -193,53 +193,6 @@ dotfiles/
 └── install.sh          # Installation script
 ```
 
-## Machine-Specific Configuration
-
-For machine-specific overrides (work configs, API keys, etc.), create `~/.zshrc.local`:
-
-```bash
-# Work machine example
-export JAVA_HOME=/path/to/work/java
-export AWS_PROFILE=work-profile
-alias deploy='./work-deploy-script.sh'
-
-# Personal machine example
-export ANTHROPIC_API_KEY="your-key"
-alias projects='cd ~/personal-projects'
-```
-
-This file is automatically sourced but not tracked in git.
-
-## Tmux Quick Reference
-
-**Prefix**: `Ctrl+Space`
-
-**Panes & Windows**:
-- `prefix v` - Split vertical
-- `prefix s` - Split horizontal  
-- `prefix h/j/k/l` - Navigate panes (Vim-style)
-- `prefix c` - New window
-- `prefix 1-9` - Switch window
-- `prefix z` - Zoom/unzoom pane
-
-**Sessions**:
-- `prefix d` - Detach
-- `prefix Ctrl+s` - Choose session
-- `tmux new -s name` - Create session
-- `tmux attach -t name` - Attach to session
-
-**Copy Mode** (Vim-style):
-- `prefix [` - Enter copy mode
-- `v` - Begin selection
-- `y` - Copy
-- `prefix p` - Paste
-
-**Plugins**:
-- `prefix I` - Install plugins
-- `prefix U` - Update plugins
-- `prefix S` - Save session (resurrect)
-- `prefix R` - Restore session (resurrect)
-
 ## Notable Features
 
 - **Catppuccin Frappe** theme consistently applied across terminal, tmux, neovim, and bat
