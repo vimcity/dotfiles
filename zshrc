@@ -166,7 +166,7 @@ alias fds='fd --ignore-file ~/.fdignore --search-path ~ --size'
 alias fdempty='fd --ignore-file ~/.fdignore --search-path ~ --type empty'
 
 # Ripgrep configuration
-alias rg='rg --ignore-file ~/dotfiles/rgignore'
+alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
 
 # Modern terminal tools
 alias cat='bat'
