@@ -5,3 +5,6 @@
 -- Move to start/end of line
 vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
+
+-- Project management
+vim.keymap.set("n", "<leader>fp", "<cmd>Telescope projects<cr>", { desc = "Find Projects" })

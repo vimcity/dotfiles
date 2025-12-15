@@ -192,8 +192,9 @@ alias desk='cd ~/Desktop'
 alias docs='cd ~/Documents'
 alias down='cd ~/Downloads'
 
-# Claude Code shortcuts
+# Claude Code config 
 alias clont='claude --continue'  # Resume latest chat
+export USE_BUILTIN_RIPGREP=0
 
 # OpenCode shortcuts
 alias oc='opencode'  # Quick access to OpenCode

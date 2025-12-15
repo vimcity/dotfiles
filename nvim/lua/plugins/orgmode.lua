@@ -195,6 +195,9 @@ return {
           },
         },
       })
+
+      -- Set up keybinding for org-super-agenda
+      vim.keymap.set("n", "<leader>os", "<cmd>OrgSuperAgenda<cr>", { desc = "open org super agenda" })
     end,
   },
   {
