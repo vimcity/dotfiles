@@ -4,10 +4,54 @@ return {
     event = "VeryLazy",
     ft = { "org" },
     config = function()
+      -- Get org path from environment variable
+      local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
+
+      -- Check if this is a personal machine (default to personal if not set or set to 1)
+      local personal_env = os.getenv("PERSONAL")
+      local is_personal = personal_env == nil or personal_env == "1"
+
+      -- Set up capture templates based on machine type
+      local capture_templates
+      if is_personal then
+        -- Personal machine: all templates
+        capture_templates = {
+          t = {
+            description = "Todo",
+            template = "* TODO %?\n  SCHEDULED: %t",
+            target = org_path .. "/todos.org",
+          },
+          i = {
+            description = "Idea",
+            template = "* %?\n  %U",
+            target = org_path .. "/ideas-organized.org",
+          },
+          n = {
+            description = "Notepad",
+            template = "%?",
+            target = org_path .. "/slate.org",
+          },
+        }
+      else
+        -- Work machine: only todo and slate
+        capture_templates = {
+          t = {
+            description = "Todo",
+            template = "* TODO %?\n  SCHEDULED: %t",
+            target = org_path .. "/todos.org",
+          },
+          n = {
+            description = "Notepad",
+            template = "%?",
+            target = org_path .. "/slate.org",
+          },
+        }
+      end
+
       -- Setup orgmode
       require("orgmode").setup({
-        org_agenda_files = "~/Documents/zorg/**/*",
-        org_default_notes_file = "~/Documents/zorg/refile.org",
+        org_agenda_files = org_path .. "/**/*",
+        org_default_notes_file = org_path .. "/refile.org",
         org_highlight_latex_and_related = "entities",
         org_todo_keyword_faces = {
           TODO = ":foreground:#8CAAEE :weight:bold", -- blue
@@ -15,23 +59,7 @@ return {
           WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
           DONE = ":foreground:#A6D854 :weight:bold", -- green
         },
-        org_capture_templates = {
-          t = {
-            description = "Todo",
-            template = "* TODO %?\n  SCHEDULED: %t",
-            target = "~/Documents/zorg/todos.org",
-          },
-          i = {
-            description = "Idea",
-            template = "* %?\n  %U",
-            target = "~/Documents/zorg/ideas-organized.org",
-          },
-          n = {
-            description = "Notepad",
-            template = "%?",
-            target = "~/Documents/zorg/slate.org",
-          },
-        },
+        org_capture_templates = capture_templates,
         mappings = {
           org_return_uses_meta_return = true,
           org = {
@@ -125,12 +153,15 @@ return {
     -- event = "VeryLazy",
     ft = { "org" },
     config = function()
+      -- Get org path from environment variable
+      local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
+
       require("org-super-agenda").setup({
-        org_directories = { "~/Documents/zorg" },
+        org_directories = { org_path },
         exclude_directories = {
-          "~/Documents/zorg/deep-stash/",
-          "~/Documents/zorg/stocks/",
-          "~/Documents/zorg/projects/",
+          org_path .. "/deep-stash/",
+          org_path .. "/stocks/",
+          org_path .. "/projects/",
         },
         todo_states = {
           {
@@ -147,13 +178,6 @@ return {
             strike_through = false,
             fields = { "filename", "todo", "headline", "priority", "date", "tags" },
           }, -- pink (active)
-          {
-            name = "WAITING",
-            keymap = "ow",
-            color = "#CA9EE6",
-            strike_through = false,
-            fields = { "filename", "todo", "headline", "priority", "date", "tags" },
-          }, -- mauve
           {
             name = "DONE",
             keymap = "od",
@@ -172,15 +196,9 @@ return {
             sort = { by = "date_nearest", order = "asc" },
           },
           {
-            name = "🏠 Personal",
+            name = "✅ TODO",
             matcher = function(i)
-              return i:has_tag("personal")
-            end,
-          },
-          {
-            name = "💼 Work",
-            matcher = function(i)
-              return i.file:match("work%.org$") and i.todo_state ~= "DONE"
+              return i.todo_state == "TODO"
             end,
           },
           {
