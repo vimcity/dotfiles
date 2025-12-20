@@ -198,7 +198,6 @@ export USE_BUILTIN_RIPGREP=0
 
 # OpenCode shortcuts
 alias oc='opencode'  # Quick access to OpenCode
-export OPENCODE_CONFIG="$HOME/dotfiles/opencode.json"
 
 # OpenCode pipe function - analyze command output with AI
 ocprompt() {
