@@ -23,7 +23,6 @@ This configuration emphasizes:
 - **Vim-style keybindings** everywhere
 - **Cross-machine sync** with machine-specific overrides
 - **Performance** with lazy-loading and optimized startup
-
 ## Tools & Configuration
 
 ### Terminal
