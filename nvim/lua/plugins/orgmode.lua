@@ -141,13 +141,13 @@ return {
       require("org-bullets").setup()
     end,
   },
-  {
-    "lukas-reineke/headlines.nvim",
-    -- event = "VeryLazy",
-    ft = { "org" },
-    dependencies = "nvim-treesitter/nvim-treesitter",
-    config = true,
-  },
+  -- {
+  --   "lukas-reineke/headlines.nvim",
+  --   -- event = "VeryLazy",
+  --   ft = { "org" },
+  --   dependencies = "nvim-treesitter/nvim-treesitter",
+  --   config = true,
+  -- },
   {
     "hamidi-dev/org-super-agenda.nvim",
     -- event = "VeryLazy",
