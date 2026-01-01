@@ -11,7 +11,8 @@ window-padding-x = 20
 window-padding-y = 20
 
 # Launch maximized
-window-decoration = true
+window-decoration = false 
+macos-titlebar-style = native 
 window-step-resize = true
 window-save-state = always
 
