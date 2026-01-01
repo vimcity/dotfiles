@@ -11,14 +11,13 @@ return {
       local personal_env = os.getenv("PERSONAL")
       local is_personal = personal_env == nil or personal_env == "1"
 
-      -- Set up capture templates based on machine type
+      -- Setup org capture templates
       local capture_templates
-      if is_personal then
-        -- Personal machine: all templates
-        capture_templates = {
+      capture_templates =
+        {
           t = {
             description = "Todo",
-            template = "* TODO %?\n  SCHEDULED: %t",
+            template = "* TODO %?\n  SCHEDULED: %^t",
             target = org_path .. "/todos.org",
           },
           i = {
@@ -26,55 +25,40 @@ return {
             template = "* %?\n  %U",
             target = org_path .. "/ideas-organized.org",
           },
-          n = {
-            description = "Notepad",
-            template = "%?",
-            target = org_path .. "/slate.org",
+          j = {
+            description = "Journal",
+            template = "*** [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n** Dreams",
+            target = "~/Documents/zorg/journal/journal.org",
           },
         }
-      else
-        -- Work machine: only todo and slate
-        capture_templates = {
-          t = {
-            description = "Todo",
-            template = "* TODO %?\n  SCHEDULED: %t",
-            target = org_path .. "/todos.org",
-          },
-          n = {
-            description = "Notepad",
-            template = "%?",
-            target = org_path .. "/slate.org",
-          },
-        }
-      end
-
       -- Setup orgmode
       require("orgmode").setup({
-        org_agenda_files = org_path .. "/**/*",
-        org_default_notes_file = org_path .. "/refile.org",
-        org_highlight_latex_and_related = "entities",
-        org_todo_keyword_faces = {
-          TODO = ":foreground:#8CAAEE :weight:bold", -- blue
-          PROGRESS = ":foreground:#F1A7F1 :weight:bold", -- pink
-          WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
-          DONE = ":foreground:#A6D854 :weight:bold", -- green
-        },
-        org_capture_templates = capture_templates,
-        mappings = {
-          org_return_uses_meta_return = true,
-          org = {
-            org_toggle_checkbox = "<C-y>",
+          org_agenda_files = org_path .. "/**/*",
+          org_default_notes_file = org_path .. "/refile.org",
+          org_highlight_latex_and_related = "entities",
+          org_todo_keyword_faces = {
+            TODO = ":foreground:#8CAAEE :weight:bold", -- blue
+            PROGRESS = ":foreground:#F1A7F1 :weight:bold", -- pink
+            WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
+            DONE = ":foreground:#A6D854 :weight:bold", -- green
           },
-        },
-        ui = {
-          fold = {
-            enable = true,
+          org_capture_templates = capture_templates,
+          mappings = {
+            org_return_uses_meta_return = true,
+            org = {
+              org_toggle_checkbox = "<C-y>",
+            },
           },
-        },
-        -- Performance optimizations
-        org_startup_folded = "showeverything",
-        org_log_done = false,
-      })
+          ui = {
+            fold = {
+              enable = true,
+            },
+          },
+          -- Performance optimizations
+          org_startup_folded = "showeverything",
+          org_log_done = true,
+          org_log_done_repeat_create_time = true,
+        })
 
       -- Set up proper highlights for org-mode after colorscheme loads
       vim.api.nvim_create_autocmd("ColorScheme", {
@@ -117,6 +101,14 @@ return {
           vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })
           vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.mantle })
           vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay0 })
+
+          -- Tag-specific colors
+          vim.api.nvim_set_hl(0, "@org.tag.work", { fg = colors.red, bold = true })
+          vim.api.nvim_set_hl(0, "@org.tag.personal", { fg = colors.green, bold = true })
+          vim.api.nvim_set_hl(0, "@org.tag.study", { fg = colors.blue, bold = true })
+          vim.api.nvim_set_hl(0, "@org.tag.health", { fg = colors.peach, bold = true })
+          vim.api.nvim_set_hl(0, "@org.tag.family", { fg = colors.pink, bold = true })
+          vim.api.nvim_set_hl(0, "@org.tag.delimiter", { fg = colors.overlay0 })
         end,
       })
 
@@ -156,6 +148,9 @@ return {
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
 
+      -- Get Catppuccin colors
+      local colors = require("catppuccin.palettes").get_palette()
+
       require("org-super-agenda").setup({
         org_directories = { org_path },
         exclude_directories = {
@@ -194,12 +189,14 @@ return {
                 and ((i.deadline and i.deadline:is_past()) or (i.scheduled and i.scheduled:is_past()))
             end,
             sort = { by = "date_nearest", order = "asc" },
+            header = { fg = colors.red, bold = true },
           },
           {
             name = "✅ TODO",
             matcher = function(i)
               return i.todo_state == "TODO"
             end,
+            header = { fg = colors.blue, bold = true },
           },
           {
             name = "📆 Upcoming",
@@ -210,6 +207,22 @@ return {
               return (d1 and d1 >= 0 and d1 <= days) or (d2 and d2 >= 0 and d2 <= days)
             end,
             sort = { by = "date_nearest", order = "asc" },
+            header = { fg = colors.green, bold = true },
+          },
+          {
+            name = "📚 Study",
+            filter = "+study", -- This groups items with :study: tag
+            header = { fg = colors.blue, bold = true },
+          },
+          {
+            name = "💼 Work",
+            filter = "+work",
+            header = { fg = colors.red, bold = true },
+          },
+          {
+            name = "🏠 Personal",
+            filter = "+personal",
+            header = { fg = colors.green, bold = true },
           },
         },
       })

@@ -197,6 +197,7 @@ alias clont='claude --continue'  # Resume latest chat
 export USE_BUILTIN_RIPGREP=0
 
 # OpenCode shortcuts
+export OPENCODE_CONFIG="$HOME/opencode.json"  # Point to OpenCode config
 alias oc='opencode'  # Quick access to OpenCode
 
 # OpenCode pipe function - analyze command output with AI
@@ -204,9 +205,12 @@ ocprompt() {
   # local model="${1:-github-copilot/gpt-4.1}"
   local prompt="${1:-Analyze and summarize this output.}"
   local input=$(cat)
-  
+  local model="anthropic/claude-haiku-4-5"
+  if [ -z "$PERSONAL" is 0 ]; then
+      model="github-copilot/gpt-4.1-personal"
+  fi
   # Run opencode and render markdown output with glow (using global config style)
-  echo "$input" | opencode run -m "github-copilot/gpt-4.1" "Be concise. $prompt"
+  echo "$input" | opencode run -m "$model" "Be concise. $prompt"
 }
 
 olparse() {
@@ -257,4 +261,6 @@ alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
 # End of LM Studio CLI section
-
+export CONTEXT7_API_KEY="ctx7sk-a935e543-b418-4f3b-864b-23ec538a9ceb"
+export ORG_PATH="$HOME/Documents/zorg"  
+alias habit_stats='~/Documents/zorg/scripts/habit_stats'
