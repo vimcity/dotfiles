@@ -262,5 +262,4 @@ alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
 export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
 # End of LM Studio CLI section
 export CONTEXT7_API_KEY="ctx7sk-a935e543-b418-4f3b-864b-23ec538a9ceb"
-export ORG_PATH="$HOME/Documents/zorg"  
 alias habit_stats='~/Documents/zorg/scripts/habit_stats'
