@@ -13,52 +13,51 @@ return {
 
       -- Setup org capture templates
       local capture_templates
-      capture_templates =
-        {
-          t = {
-            description = "Todo",
-            template = "* TODO %?\n  SCHEDULED: %^t",
-            target = org_path .. "/todos.org",
-          },
-          i = {
-            description = "Idea",
-            template = "* %?\n  %U",
-            target = org_path .. "/ideas-organized.org",
-          },
-          j = {
-            description = "Journal",
-            template = "*** [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n** Dreams",
-            target = "~/Documents/zorg/journal/journal.org",
-          },
-        }
+      capture_templates = {
+        t = {
+          description = "Todo",
+          template = "* TODO %?\n  SCHEDULED: %^t",
+          target = org_path .. "/todos.org",
+        },
+        i = {
+          description = "Idea",
+          template = "* %?\n  %U",
+          target = org_path .. "/ideas-organized.org",
+        },
+        j = {
+          description = "Journal",
+          template = "*** [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n** Dreams",
+          target = "~/Documents/zorg/journal/journal.org",
+        },
+      }
       -- Setup orgmode
       require("orgmode").setup({
-          org_agenda_files = org_path .. "/**/*",
-          org_default_notes_file = org_path .. "/refile.org",
-          org_highlight_latex_and_related = "entities",
-          org_todo_keyword_faces = {
-            TODO = ":foreground:#8CAAEE :weight:bold", -- blue
-            PROGRESS = ":foreground:#F1A7F1 :weight:bold", -- pink
-            WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
-            DONE = ":foreground:#A6D854 :weight:bold", -- green
+        org_agenda_files = org_path .. "/**/*",
+        org_default_notes_file = org_path .. "/refile.org",
+        org_highlight_latex_and_related = "entities",
+        org_todo_keyword_faces = {
+          TODO = ":foreground:#8CAAEE :weight:bold", -- blue
+          PROGRESS = ":foreground:#F1A7F1 :weight:bold", -- pink
+          WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
+          DONE = ":foreground:#A6D854 :weight:bold", -- green
+        },
+        org_capture_templates = capture_templates,
+        mappings = {
+          org_return_uses_meta_return = true,
+          org = {
+            org_toggle_checkbox = "<C-y>",
           },
-          org_capture_templates = capture_templates,
-          mappings = {
-            org_return_uses_meta_return = true,
-            org = {
-              org_toggle_checkbox = "<C-y>",
-            },
+        },
+        ui = {
+          fold = {
+            enable = true,
           },
-          ui = {
-            fold = {
-              enable = true,
-            },
-          },
-          -- Performance optimizations
-          org_startup_folded = "showeverything",
-          org_log_done = true,
-          org_log_done_repeat_create_time = true,
-        })
+        },
+        -- Performance optimizations
+        org_startup_folded = "showeverything",
+        org_log_done = true,
+        org_log_done_repeat_create_time = true,
+      })
 
       -- Set up proper highlights for org-mode after colorscheme loads
       vim.api.nvim_create_autocmd("ColorScheme", {
@@ -210,19 +209,11 @@ return {
             header = { fg = colors.green, bold = true },
           },
           {
-            name = "📚 Study",
-            filter = "+study", -- This groups items with :study: tag
-            header = { fg = colors.blue, bold = true },
-          },
-          {
             name = "💼 Work",
-            filter = "+work",
+            matcher = function(i)
+              return i:has_tag("work")
+            end,
             header = { fg = colors.red, bold = true },
-          },
-          {
-            name = "🏠 Personal",
-            filter = "+personal",
-            header = { fg = colors.green, bold = true },
           },
         },
       })
