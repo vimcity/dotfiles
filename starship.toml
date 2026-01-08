@@ -162,9 +162,11 @@ vimcmd_visual_symbol = '[❮](bold fg:yellow)'
 
 [cmd_duration]
 show_milliseconds = true
-format = " in $duration "
+format = " in $duration "
 style = "bg:lavender"
-disabled = false
+# DISABLED: Causes hanging prompt after long-running TUI apps (OpenCode, Neovim)
+# The cmd_duration calculation blocks when pipes don't close properly
+disabled = true
 show_notifications = true
 min_time_to_notify = 45000
 
