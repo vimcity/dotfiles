@@ -113,7 +113,11 @@ alias vnva="source venv/bin/activate"
 eval "$(zoxide init zsh)"
 
 # Starship prompt
-eval "$(starship init zsh)"
+# TEMPORARILY DISABLED for testing
+# eval "$(starship init zsh)"
+
+# Add spacing between prompts (adds blank line before each prompt)
+precmd() { print "" }
 
 # fzf configuration (for file search only)
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
