@@ -74,8 +74,8 @@ setopt HIST_VERIFY
 # ===========================================
 # Atuin Configuration (Ctrl+R only)
 # ===========================================
-# Enable auto-sync for cross-shell history
-export ATUIN_AUTO_SYNC=1
+# Auto-sync disabled (no cloud account)
+# export ATUIN_AUTO_SYNC=1
 export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
@@ -263,8 +263,6 @@ alias gwab='f(){ git worktree add -b "$1" "../$1" }; f'  # new branch
 alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
+export PATH="$PATH:$HOME/.lmstudio/bin"
 # End of LM Studio CLI section
-export CONTEXT7_API_KEY="ctx7sk-a935e543-b418-4f3b-864b-23ec538a9ceb"
-alias habit_stats='~/Documents/zorg/scripts/habit_stats'
-
+alias vimlocal="nvim ~/.zshrc.local"
