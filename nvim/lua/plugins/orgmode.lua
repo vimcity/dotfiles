@@ -27,7 +27,7 @@ return {
         j = {
           description = "Journal",
           template = "*** [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n** Dreams",
-          target = "~/Documents/zorg/journal/journal.org",
+          target = org_path .. "/journal/journal.org",
         },
       }
       -- Setup orgmode
