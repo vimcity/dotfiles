@@ -222,5 +222,5 @@ These tools should be installed via Homebrew or other package managers:
 - lazygit
 - fastfetch
 - pyenv (optional, for Python)
-
+- font - https://commitmono.com/
 The install script handles Oh My Zsh and plugin installation but assumes these tools are already present.
