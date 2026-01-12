@@ -3,66 +3,33 @@
 -- Debug configurations are in .vscode/launch.json (auto-discovered by jdtls)
 
 return {
-  -- Enable hot code replace
+  -- Configure nvim-jdtls to disable jdtls test runner in favor of NeoTest
   {
     "mfussenegger/nvim-jdtls",
-    opts = {
-      dap = {
+    opts = function(_, opts)
+      -- Disable jdtls test runner - we're using NeoTest instead
+      opts.test = false
+      
+      -- jdtls requires Java 21+ to run, but project uses Java 17
+      -- Set JAVA_HOME to Java 21 for jdtls wrapper script
+      local original_jdtls = opts.jdtls
+      opts.jdtls = function(jdtls_opts, root_dir)
+        if type(original_jdtls) == "function" then
+          jdtls_opts = original_jdtls(jdtls_opts, root_dir)
+        end
+        
+        -- Set environment variable for jdtls wrapper to find Java 21
+        jdtls_opts.cmd_env = jdtls_opts.cmd_env or {}
+        jdtls_opts.cmd_env.JAVA_HOME = "/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home"
+        
+        return jdtls_opts
+      end
+      
+      opts.dap = {
         hotcodereplace = "auto",
-      },
-    },
+      }
+      
+      return opts
+    end,
   },
-
-  -- Uncomment to add Maven keybindings
-  -- {
-  --   "nvim-telescope/telescope.nvim",
-  --   optional = true,
-  --   keys = {
-  --     {
-  --       "<leader>mm",
-  --       function()
-  --         vim.ui.select({
-  --           "clean",
-  --           "compile",
-  --           "test",
-  --           "package",
-  --           "install",
-  --           "verify",
-  --           "clean install",
-  --           "clean package",
-  --           "spring-boot:run",
-  --           "dependency:tree",
-  --         }, {
-  --           prompt = "Maven Command:",
-  --         }, function(choice)
-  --           if choice then
-  --             vim.cmd("terminal mvn " .. choice)
-  --           end
-  --         end)
-  --       end,
-  --       desc = "Maven Commands",
-  --     },
-  --     {
-  --       "<leader>mr",
-  --       function()
-  --         vim.cmd("terminal mvn spring-boot:run")
-  --       end,
-  --       desc = "Maven Run (Spring Boot)",
-  --     },
-  --     {
-  --       "<leader>mt",
-  --       function()
-  --         vim.cmd("terminal mvn test")
-  --       end,
-  --       desc = "Maven Test",
-  --     },
-  --     {
-  --       "<leader>mc",
-  --       function()
-  --         vim.cmd("terminal mvn clean install")
-  --       end,
-  --       desc = "Maven Clean Install",
-  --     },
-  --   },
-  -- },
 }
