@@ -21,6 +21,7 @@ require("lazy").setup({
 
     -- 2. LazyVim extras (must come after base plugins)
     { import = "lazyvim.plugins.extras.dap.core" }, -- Enable debugging support
+    { import = "lazyvim.plugins.extras.test.core" }, -- Enable testing support
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.python" },
