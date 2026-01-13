@@ -149,11 +149,9 @@ alias ffe='fd --type f --hidden --exclude .git | fzf --preview "bat --color=alwa
 alias gcof='git checkout $(git branch | fzf | sed "s/^[ *]*//")'
 alias gbdf='git branch -d $(git branch | fzf | sed "s/^[ *]*//")'
 
-# Interactive git log browser with fzf
-fzf-git-log() {
-    git log --oneline --graph --decorate --all | fzf --preview 'git show --stat {1}' | cut -d' ' -f1 | xargs git show
-}
-alias glog='fzf-git-log'
+# Open lazygit with commits panel focused
+alias glog='lazygit log'
+alias lz='lazygit'
 
 # fd helpers with ignore rules
 alias fdf='fd --ignore-file ~/.fdignore --search-path ~'
