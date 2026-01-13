@@ -178,7 +178,7 @@ alias cat='bat'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # bat will automatically use less as a pager for large files
 export BAT_PAGER="less -RF"
-export BAT_THEME="Catppuccin Frappe"
+export BAT_THEME="Catppuccin Macchiato"
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'

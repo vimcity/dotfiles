@@ -2,7 +2,7 @@
 # ==================================================
 
 # Use the built-in Catppuccin Frappe theme
-theme = "Catppuccin Frappe"
+theme = "Catppuccin Macchiato"
 
 # Window settings
 # window-padding-x = 20
@@ -18,17 +18,14 @@ window-save-state = always
 #background-opacity = 0.95
 
 # Font settings
+# font-family = "JetBrains Mono NF"
 font-family = "CommitMono"
-# , "JetBrains Mono NF", "JetBrains Mono"
-adjust-cell-height = 15%
+adjust-cell-height = 35%
 font-size = 16
-
-# Catppuccin Frappe Color Scheme (using built-in theme)
-# =====================================================
 
 # Background and foreground
 # Override with a darker background than default Frappe (#303446)
-background = #232634
+# background = #232634
 
 # Cursor and selection
 cursor-color = #ca9ee6

@@ -8,7 +8,7 @@ set background=dark
 " ===========================================
 " Catppuccin Theme
 " ===========================================
-colorscheme catppuccin_frappe
+colorscheme catppuccin_macchiato
 
 " ===========================================
 " Cursor Shape Configuration
