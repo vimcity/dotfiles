@@ -89,7 +89,6 @@ This configuration emphasizes:
 > Allows multiple terminal sessions in one window, with session persistence and detach/reattach capabilities
 
 - **Prefix**: `Ctrl+Space`
-- **Theme**: tmux-powerline
 - **Modular config** split into settings, plugins, and keybindings
 - **Vim-style navigation** between panes
 - **Plugins**:
@@ -99,6 +98,7 @@ This configuration emphasizes:
   - tmux-fzf-url (fuzzy find and open URLs from terminal output)
   - tmux-sessionist (enhanced session management shortcuts)
   - tmux-battery & cpu (system resource monitoring in status bar)
+  - tmux-pomodoro-plus (optional pomodoro timer - disabled by default)
 - Mouse support enabled
 - History limit: 1 million lines
 - Auto-save sessions every 15 minutes
@@ -108,7 +108,10 @@ This configuration emphasizes:
 > Highly extensible Vim-based editor with LSP, treesitter, and modern IDE features. LazyVim provides sensible defaults and plugin management
 
 - **Language Support**: TypeScript, Python, Java, JSON with full LSP (autocomplete, go-to-definition, refactoring)
-- **AI Integration**: GitHub Copilot (code suggestions) and Claude Code (chat-based assistance)
+- **AI Integration**: 
+  - GitHub Copilot (code suggestions)
+  - CodeCompanion with Ollama (local AI using gemma3:1b model - disabled by default)
+- **Testing**: Neotest (modern test runner with UI for Java, TypeScript, and more)
 - **Debugging**: DAP (Debug Adapter Protocol) for in-editor debugging
 - **Extras**: 
   - Editor: illuminate (highlight matching words), inc-rename (live preview renames), mini-move (move lines/blocks), mini-diff (inline git changes)
@@ -152,9 +155,11 @@ Custom functions for fuzzy finding:
 - `gcof` / `gbdf` - Fuzzy git branch checkout/delete
 
 ### AI Integration
-- **OpenCode** shortcuts for AI-assisted workflow
-- **Ollama** integration for local LLM usage
-- Custom functions to pipe command output to AI for analysis
+- **OpenCode** - AI-assisted command workflow (CLI agent tool)
+- **GitHub Copilot** - Code suggestions in Neovim
+- **CodeCompanion** - Local AI chat with Ollama integration (optional)
+- **Ollama** - Local LLM backend for CodeCompanion
+- Custom shell functions to pipe command output to AI for analysis
 
 ### Git Workflow
 - Extensive git aliases in zsh
@@ -174,12 +179,12 @@ dotfiles/
 ├── nvim/               # Neovim LazyVim configuration
 │   ├── lua/
 │   │   ├── config/     # Core settings (keymaps, options, autocmds)
-│   │   └── plugins/    # Custom plugin configs
+│   │   └── plugins/    # Custom plugin configs (codecompanion, neotest, etc.)
 │   └── init.lua        # Entry point
 ├── tmux/               # Tmux configuration (modular)
 │   ├── conf/
 │   │   ├── settings.conf     # Core settings
-│   │   ├── plugins.conf      # Plugin declarations
+│   │   ├── plugins.conf      # Plugin declarations (pomodoro, battery, etc.)
 │   │   └── keybindings.conf  # Key mappings
 │   └── tmux.conf       # Main config (sources modules)
 ├── zshrc               # Zsh configuration
@@ -189,6 +194,8 @@ dotfiles/
 ├── fdignore            # fd ignore patterns
 ├── rgignore            # ripgrep ignore patterns
 ├── glow-style.json     # Markdown renderer style
+├── AGENTS.md           # Guidance for AI agents working in this repo
+├── CLAUDE.md           # Architecture documentation
 └── install.sh          # Installation script
 ```
 
@@ -198,8 +205,10 @@ dotfiles/
 - **Vim keybindings** in shell (vi mode), tmux copy mode, and neovim
 - **Fuzzy finding** integrated throughout with fzf
 - **Shell history** synced across machines with Atuin
-- **Session persistence** with tmux-resurrect and continuum
-- **Performance optimized** with lazy-loading (pyenv, plugins)
+- **Session persistence** with tmux-resurrect, continuum, and pomodoro timer
+- **Testing support** with Neotest for Java, TypeScript, and other languages
+- **AI assistance** with GitHub Copilot, CodeCompanion (Ollama), and OpenCode integration
+- **Performance optimized** with lazy-loading (pyenv, plugins, LazyVim)
 - **Modern tools** replacing traditional Unix utilities
 - **AI integration** for command analysis and assistance
 
@@ -222,5 +231,7 @@ These tools should be installed via Homebrew or other package managers:
 - lazygit
 - fastfetch
 - pyenv (optional, for Python)
+- ollama (optional, for local LLM via CodeCompanion)
 - font - https://commitmono.com/
+
 The install script handles Oh My Zsh and plugin installation but assumes these tools are already present.
