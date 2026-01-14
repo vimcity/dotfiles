@@ -1,14 +1,20 @@
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    -- Disabled on macOS due to treesitter code signing issues
-    -- Enable on other systems (Linux, Windows) for better markdown rendering
-    enabled = vim.fn.has("mac") == 0,
+    enabled = true,
     opts = {},
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons"
     },
     ft = "markdown",
+  },
+  {
+    "tpope/vim-markdown",
+    ft = "markdown",
+    config = function()
+      vim.g.vim_markdown_follow_link = 1
+      vim.g.vim_markdown_edit_link_in = "current_window"
+    end,
   },
 }
