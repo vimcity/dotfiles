@@ -67,21 +67,19 @@ fi
 backup_if_exists "$HOME/.config/ghostty"
 backup_if_exists "$HOME/.config/atuin"
 backup_if_exists "$HOME/.config/starship.toml"
-backup_if_exists "$HOME/.config/neofetch"
-backup_if_exists "$HOME/.hammerspoon"
 backup_if_exists "$HOME/.vimrc"
 backup_if_exists "$HOME/.zshrc"
 backup_if_exists "$HOME/.tmux.conf"
 backup_if_exists "$HOME/.fdignore"
 
+# Create .config directory if it doesn't exist
+mkdir -p "$HOME/.config"
+
 # Create symlinks
 echo "🔗 Creating symlinks..."
 ln -sf "$HOME/dotfiles/ghostty" "$HOME/.config/ghostty"
 ln -sf "$HOME/dotfiles/atuin" "$HOME/.config/atuin"
-ln -sf "$HOME/dotfiles/bat" "$HOME/.config/bat"
 ln -sf "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
-ln -sf "$HOME/dotfiles/neofetch" "$HOME/.config/neofetch"
-ln -sf "$HOME/dotfiles/hammerspoon" "$HOME/.hammerspoon"
 ln -sf "$HOME/dotfiles/vimrc" "$HOME/.vimrc"
 ln -sf "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
 ln -sf "$HOME/dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
@@ -99,7 +97,7 @@ echo "   This file will be automatically sourced by .zshrc if it exists."
 echo ""
 echo "🔌 To install Tmux plugins:"
 echo "   1. Start tmux: tmux"
-echo "   2. Press: Ctrl+a then I (capital i)"
+echo "   2. Press: Ctrl+Space then Shift+I (capital i)"
 echo "   3. Wait for plugins to install"
 echo ""
 if [ -d "$backup_dir" ] && [ "$(ls -A $backup_dir)" ]; then
