@@ -49,4 +49,4 @@ fi
 
 # Output with TMUX color codes for pill box with padding
 # Format: [color code] space icon used_gb (percentage%) space [reset]
-printf "#[bg=%s,fg=%s] %s %sGB (%s%%) #[default]" "$bg_color" "$text_dark" "$icon" "$used_gb" "$percentage"
+printf "#[bg=%s,fg=%s,bold] %s %sGB (%s%%) #[default]" "$bg_color" "$text_dark" "$icon" "$used_gb" "$percentage"
