@@ -1,7 +1,9 @@
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    enabled = false, -- Disabled due to macOS code signing issues with treesitter parsers
+    -- Disabled on macOS due to treesitter code signing issues
+    -- Enable on other systems (Linux, Windows) for better markdown rendering
+    enabled = vim.fn.has("mac") == 0,
     opts = {},
     dependencies = {
       "nvim-treesitter/nvim-treesitter",

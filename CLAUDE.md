@@ -46,7 +46,7 @@ Create `~/.zshrc.local` for machine-specific settings (environment variables, AP
 - **nvim/lua/config/** - Core settings (keymaps, options, autocmds)
 - **nvim/lua/plugins/** - Custom plugin configurations
 
-Key features: LSP support for TypeScript/Python/Java/JSON, GitHub Copilot, Debug Adapter Protocol, Tree-sitter integration with plugins for code highlighting/navigation.
+Key features: LSP support for TypeScript/Python/Java/JSON, GitHub Copilot, CodeCompanion (local AI with Ollama), Debug Adapter Protocol, Tree-sitter integration. Includes Neotest for modern test running with UI.
 
 #### Tmux
 Configuration is modularly split:
@@ -55,6 +55,9 @@ Configuration is modularly split:
 - **tmux/conf/keybindings.conf** - Key mappings with Vim-style pane navigation
 
 Features: Session persistence across reboots, mouse support, status bar with system resource monitoring.
+
+#### Pomodoro Timer
+- **tmux-pomodoro-plus** - Optional pomodoro timer plugin (currently disabled, can be enabled in plugins.conf)
 
 #### Zsh Shell
 Configuration layers:
@@ -102,6 +105,7 @@ gcof/gbdf   # Fuzzy git branch checkout/delete
 
 **AI Integration**:
 - GitHub Copilot in Neovim
+- CodeCompanion with Ollama for local LLM usage (currently disabled, uses gemma3:1b model)
 - Ollama integration for local LLM usage
 
 ## Key Configuration Points
@@ -117,10 +121,11 @@ gcof/gbdf   # Fuzzy git branch checkout/delete
 - Zsh history optimization with deduplication enabled
 - Atuin provides fast fuzzy history search
 - Starship prompt is optimized for speed
+- Neovim LazyVim handles automatic plugin lazy-loading
 
 ### Session Management
 - **Tmux-resurrect & continuum**: Automatically saves sessions every 15 minutes and restores on terminal startup
-- **Atuin**: Syncs shell history across machines
+- **Atuin**: Syncs shell history across machines (cloud sync can be enabled)
 - Session key: `Ctrl+Space` (all Tmux commands prefixed with this)
 
 ## Dependencies
