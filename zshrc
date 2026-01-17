@@ -264,4 +264,5 @@ alias gwa='f(){ git worktree add "../$1" "$1" }; f'      # existing branch
 export PATH="$PATH:$HOME/.lmstudio/bin"
 # End of LM Studio CLI section
 alias vimlocal="nvim ~/.zshrc.local"
+alias fabric="fabric-ai"
 alias fab="fabric-ai"
