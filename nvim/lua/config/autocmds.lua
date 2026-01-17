@@ -22,3 +22,20 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.spell = false
   end,
 })
+
+-- Auto-save for files in ORG_PATH only
+vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
+  callback = function()
+    local org_path = os.getenv("ORG_PATH")
+    if not org_path then
+      return
+    end
+
+    local filepath = vim.fn.expand("%:p")
+    if filepath:find(vim.fn.expand(org_path), 1, true) == 1 then
+      if vim.bo.modified and not vim.bo.readonly and filepath ~= "" and vim.bo.buftype == "" then
+        vim.api.nvim_command("silent! write")
+      end
+    end
+  end,
+})
