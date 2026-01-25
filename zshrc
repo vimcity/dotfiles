@@ -27,7 +27,6 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-  # zsh-completions
   # docker
    docker-compose
   # macos
@@ -86,7 +85,6 @@ alias zz="z"
 alias vim="nvim"
 export EDITOR="nvim"
 export VISUAL="nvim"
-alias sourz="source ~/.zshrc"
 alias sdf="source ~/.zshrc"
 alias cl=clear
 alias vi=vim
@@ -109,7 +107,7 @@ alias vnva="source venv/bin/activate"
 eval "$(zoxide init zsh)"
 
 # Starship prompt
-# TEMPORARILY DISABLED for testing
+# DISABLED 
 # eval "$(starship init zsh)"
 
 # Add spacing between prompts (adds blank line before each prompt)
@@ -124,10 +122,9 @@ if [ -f ~/.fzf.zsh ]; then
 fi
 
 # ===========================================
-# FD Configuration Variables
+# FD Configuration
 # ===========================================
-FD_COMMON_ARGS="--hidden --exclude .git --ignore-file $HOME/.fdignore"
-FD_DEFAULT_SEARCH_PATH="~"
+# fd flags are inlined in each function to avoid variable expansion issues with sourcing
 
 # ===========================================
 # File Type Detection Functions
@@ -246,41 +243,37 @@ alias sif='search-in-files'
 # ===========================================
 # Keyboard Shortcuts for fzf Preview Navigation
 # ===========================================
-# Ctrl+U/D: Page up/down in preview
-# Ctrl+Y/E: Line up/down in preview
-# Alt+K/J: Alternative line navigation
 
-# Enhanced ff function with flexible path support
-# Usage: ff [path] - Interactively find files, default search path is ~
+# Interactive file finder with keyboard scrolling
+# Usage: ff [path] - Search from current directory by default, or specify path
 ff() {
-    local search_path="${1:-.}"
-    fd --type f $FD_COMMON_ARGS "$search_path" \
+    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
         | fzf --preview-window=right:60% \
-              --preview 'smart_preview {}' \
+              --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}' \
               --bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
               --bind 'ctrl-y:preview-up,ctrl-e:preview-down'
 }
 
-# Enhanced fdir function with flexible path support
-# Usage: fdir [path] - Interactively find directories, default search path is current dir
+# Interactive directory finder
+# Usage: fdir [path] - Search from current directory by default, or specify path
 fdir() {
-    local search_path="${1:-.}"
-    fd --type d $FD_COMMON_ARGS "$search_path" | fzf --preview "eza --tree --level=2 --icons {}"
+    fd --type d --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
+        | fzf --preview "eza --tree --level=2 --icons {}"
 }
 
-# Enhanced ffe function with flexible path support that opens in editor
-# Usage: ffe [path] - Interactively find files and open selection in editor, default search path is current dir
+# Find and open file in editor
+# Usage: ffe [path] - Search from current directory by default, or specify path
 ffe() {
-    local search_path="${1:-.}"
-    local file=$(fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}')
+    local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
+        | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
     [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
 }
 
-# Simple file opener with flexible path support
-# Usage: fo [path] - Interactively find files and open with system default app
+# Find and open file with system default app
+# Usage: fo [path] - Search from current directory by default, or specify path
 fo() {
-    local search_path="${1:-.}"
-    local file=$(fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}')
+    local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
+        | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
     [[ -n "$file" ]] && open_file "$file"
 }
 
@@ -295,57 +288,38 @@ alias lz='lazygit'
 # Enhanced fd Helper Functions
 # ===========================================
 
-# Find files by extension
-# Usage: fde <extension> [path] - Find files with specific extension
+# Find files by extension with preview
+# Usage: fde <extension> [path]
 fde() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: fde <extension> [path]"
-        return 1
-    fi
-
-    local ext="$1"
-    local path="${2:-.}"
-    fd --type f $FD_COMMON_ARGS --extension "$ext" "$path"
+    [[ $# -eq 0 ]] && { echo "Usage: fde <extension> [path]"; return 1; }
+    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --extension "$1" "${2:-.}" \
+        | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}'
 }
 
 # Find recently modified files
-# Usage: fdm <time> [path] - Find files modified within time period
+# Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)
 fdm() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)"
-        return 1
-    fi
-
-    local time="$1"
-    local path="${2:-.}"
-    fd --type f $FD_COMMON_ARGS --changed-within "$time" "$path"
+    [[ $# -eq 0 ]] && { echo "Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)"; return 1; }
+    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --changed-within "$1" "${2:-.}"
 }
 
 # Find files by pattern
-# Usage: fdf <pattern> [path] - Find files matching pattern
+# Usage: fdf <pattern> [path]
 fdf() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: fdf <pattern> [path]"
-        return 1
-    fi
-
-    local pattern="$1"
-    local path="${2:-.}"
-    fd --type f $FD_COMMON_ARGS "$pattern" "$path"
+    [[ $# -eq 0 ]] && { echo "Usage: fdf <pattern> [path]"; return 1; }
+    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "$1" "${2:-.}"
 }
 
 # Find empty files
-# Usage: fdempty [path] - Find empty files
+# Usage: fdempty [path]
 fdempty() {
-    local path="${1:-.}"
-    fd --type empty $FD_COMMON_ARGS "$path"
+    fd --type empty --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}"
 }
 
-# Find files with shallow search (depth 1)
-# Usage: fdc [path] - Find files at depth 1 only
+# Find files at depth 1 only
+# Usage: fdc [path]
 fdc() {
-    local path="${1:-.}"
-    fd --type f $FD_COMMON_ARGS --max-depth 1 "$path"
+    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --max-depth 1 "${1:-.}"
 }
 
 # Ripgrep configuration
