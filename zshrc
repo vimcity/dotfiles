@@ -30,19 +30,13 @@ plugins=(
   # zsh-completions
   # docker
    docker-compose
-  # brew
   # macos
   # python
   # node
   # npm
-  # yarn
   # vscode
-  # sublime
   # tmux
-  # colored-man-pages
-  # command-not-found
   # extract
-  # web-search
   # copyfile
   # copypath
   # dirhistory
@@ -132,9 +126,8 @@ fi
 # ===========================================
 # FD Configuration Variables
 # ===========================================
-FD_COMMON_ARGS="--hidden --exclude .git"
+FD_COMMON_ARGS="--hidden --exclude .git --ignore-file $HOME/.fdignore"
 FD_DEFAULT_SEARCH_PATH="~"
-FDIGNORE_FILE="$HOME/.fdignore"
 
 # ===========================================
 # File Type Detection Functions
@@ -250,36 +243,45 @@ search-in-files() {
 
 alias sif='search-in-files'
 
+# ===========================================
+# Keyboard Shortcuts for fzf Preview Navigation
+# ===========================================
+# Ctrl+U/D: Page up/down in preview
+# Ctrl+Y/E: Line up/down in preview
+# Alt+K/J: Alternative line navigation
+
 # Enhanced ff function with flexible path support
 # Usage: ff [path] - Interactively find files, default search path is ~
 ff() {
-    local search_path="${1:-$FD_DEFAULT_SEARCH_PATH}"
-    fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview-window=right:60% --preview 'smart_preview {}'
+    local search_path="${1:-.}"
+    fd --type f $FD_COMMON_ARGS "$search_path" \
+        | fzf --preview-window=right:60% \
+              --preview 'smart_preview {}' \
+              --bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
+              --bind 'ctrl-y:preview-up,ctrl-e:preview-down'
 }
 
 # Enhanced fdir function with flexible path support
-# Usage: fdir [path] - Interactively find directories, default search path is ~
+# Usage: fdir [path] - Interactively find directories, default search path is current dir
 fdir() {
-    local search_path="${1:-$FD_DEFAULT_SEARCH_PATH}"
+    local search_path="${1:-.}"
     fd --type d $FD_COMMON_ARGS "$search_path" | fzf --preview "eza --tree --level=2 --icons {}"
 }
 
 # Enhanced ffe function with flexible path support that opens in editor
-# Usage: ffe [path] - Interactively find files and open selection in editor, default search path is ~
+# Usage: ffe [path] - Interactively find files and open selection in editor, default search path is current dir
 ffe() {
-    local search_path="${1:-$FD_DEFAULT_SEARCH_PATH}"
-    fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}' | xargs ${EDITOR:-nvim}
+    local search_path="${1:-.}"
+    local file=$(fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}')
+    [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
 }
 
 # Simple file opener with flexible path support
-# Usage: fo [path] - Interactively find files and open with system default app, default search path is ~
+# Usage: fo [path] - Interactively find files and open with system default app
 fo() {
-    local search_path="${1:-$FD_DEFAULT_SEARCH_PATH}"
-    fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}' | while read -r file; do
-        if [[ -n "$file" && -e "$file" ]]; then
-            open_file "$file"
-        fi
-    done
+    local search_path="${1:-.}"
+    local file=$(fd --type f $FD_COMMON_ARGS "$search_path" | fzf --preview 'smart_preview {}')
+    [[ -n "$file" ]] && open_file "$file"
 }
 
 alias gcof='git checkout $(git branch | fzf | sed "s/^[ *]*//")'
@@ -289,126 +291,61 @@ alias gbdf='git branch -d $(git branch | fzf | sed "s/^[ *]*//")'
 alias glog='lazygit log'
 alias lz='lazygit'
 
-# fd helpers with ignore rules (deprecated - use functions below instead)
-# alias fdf='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH'
-# alias fde='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --extension'
-# alias fdn='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --name'
-# alias fdt='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --type'
-# alias fdi='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --ignore-case'
-# alias fdl='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --list-details'
-# alias fdex='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --exec'
-# alias fdc='fd --ignore-file $FDIGNORE_FILE --max-depth 1'
-# alias fdp='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --perm'
-# alias fdm='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --changed-within'
-# alias fds='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --size'
-# alias fdempty='fd --ignore-file $FDIGNORE_FILE --search-path $FD_DEFAULT_SEARCH_PATH --type empty'
-
-# Enhanced fd helper functions with flexible path support
+# ===========================================
+# Enhanced fd Helper Functions
+# ===========================================
 
 # Find files by extension
-# Usage: fde [path] <extension> - Find files with specific extension
+# Usage: fde <extension> [path] - Find files with specific extension
 fde() {
     if [ $# -eq 0 ]; then
-        echo "Usage: fde [path] <extension>"
-        echo "  path: Directory to search in (default: $FD_DEFAULT_SEARCH_PATH)"
-        echo "  extension: File extension to search for"
+        echo "Usage: fde <extension> [path]"
         return 1
     fi
 
-    local path_arg=""
-    local ext_arg=""
-
-    if [ $# -eq 2 ]; then
-        path_arg="$1"
-        ext_arg="$2"
-    elif [ $# -eq 1 ]; then
-        ext_arg="$1"
-        path_arg="$FD_DEFAULT_SEARCH_PATH"
-    else
-        echo "Invalid number of arguments"
-        return 1
-    fi
-
-    fd --ignore-file $FDIGNORE_FILE --extension "$ext_arg" "$path_arg"
+    local ext="$1"
+    local path="${2:-.}"
+    fd --type f $FD_COMMON_ARGS --extension "$ext" "$path"
 }
 
 # Find recently modified files
-# Usage: fdm [path] <time> - Find files modified within time period
+# Usage: fdm <time> [path] - Find files modified within time period
 fdm() {
     if [ $# -eq 0 ]; then
-        echo "Usage: fdm [path] <time>"
-        echo "  path: Directory to search in (default: $FD_DEFAULT_SEARCH_PATH)"
-        echo "  time: Time period (e.g., 1h, 1d, 1w for hour, day, week)"
+        echo "Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)"
         return 1
     fi
 
-    local path_arg=""
-    local time_arg=""
-
-    if [ $# -eq 2 ]; then
-        path_arg="$1"
-        time_arg="$2"
-    elif [ $# -eq 1 ]; then
-        time_arg="$1"
-        path_arg="$FD_DEFAULT_SEARCH_PATH"
-    else
-        echo "Invalid number of arguments"
-        return 1
-    fi
-
-    fd --ignore-file $FDIGNORE_FILE --changed-within "$time_arg" "$path_arg"
+    local time="$1"
+    local path="${2:-.}"
+    fd --type f $FD_COMMON_ARGS --changed-within "$time" "$path"
 }
 
 # Find files by pattern
-# Usage: fdf [path] <pattern> - Find files matching pattern
+# Usage: fdf <pattern> [path] - Find files matching pattern
 fdf() {
-    if [ $# -lt 1 ] || [ $# -gt 2 ]; then
-        echo "Usage: fdf [path] <pattern>"
-        echo "  path: Directory to search in (default: $FD_DEFAULT_SEARCH_PATH)"
-        echo "  pattern: Search pattern"
+    if [ $# -eq 0 ]; then
+        echo "Usage: fdf <pattern> [path]"
         return 1
     fi
 
-    local path_arg=""
-    local pattern_arg=""
-
-    if [ $# -eq 2 ]; then
-        path_arg="$1"
-        pattern_arg="$2"
-    elif [ $# -eq 1 ]; then
-        pattern_arg="$1"
-        path_arg="$FD_DEFAULT_SEARCH_PATH"
-    fi
-
-    fd --ignore-file $FDIGNORE_FILE "$pattern_arg" "$path_arg"
+    local pattern="$1"
+    local path="${2:-.}"
+    fd --type f $FD_COMMON_ARGS "$pattern" "$path"
 }
 
 # Find empty files
 # Usage: fdempty [path] - Find empty files
 fdempty() {
-    if [ $# -gt 1 ]; then
-        echo "Usage: fdempty [path]"
-        echo "  path: Directory to search in (default: $FD_DEFAULT_SEARCH_PATH)"
-        return 1
-    fi
-
-    local path_arg="${1:-$FD_DEFAULT_SEARCH_PATH}"
-
-    fd --ignore-file $FDIGNORE_FILE --type empty "$path_arg"
+    local path="${1:-.}"
+    fd --type empty $FD_COMMON_ARGS "$path"
 }
 
 # Find files with shallow search (depth 1)
-# Usage: fdc [path] - Find files with max depth 1
+# Usage: fdc [path] - Find files at depth 1 only
 fdc() {
-    if [ $# -gt 1 ]; then
-        echo "Usage: fdc [path]"
-        echo "  path: Directory to search in (default: $FD_DEFAULT_SEARCH_PATH)"
-        return 1
-    fi
-
-    local path_arg="${1:-$FD_DEFAULT_SEARCH_PATH}"
-
-    fd --ignore-file $FDIGNORE_FILE --max-depth 1 "$path_arg"
+    local path="${1:-.}"
+    fd --type f $FD_COMMON_ARGS --max-depth 1 "$path"
 }
 
 # Ripgrep configuration
@@ -477,9 +414,6 @@ alias ocl='olprompt'
 # git log | ocparse "github/gpt-4.1" "Summarize these commits"
 # cat error.log | ocparse "github/gpt-4.1" "Find the root cause of errors"
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:$HOME/.lmstudio/bin"
-
 # ===========================================
 # Machine-Specific Configuration
 # ===========================================
@@ -491,10 +425,11 @@ fi
 
 #fastfetch
 alias ffs='fastfetch'
-killer() { kill $(lsof -t -i:$1); }                                                                                                                                                                                       
+killer() { kill $(lsof -t -i:$1); }
 
-
+# ===========================================
 # Git Worktree Aliases
+# ===========================================
 alias gwl='git worktree list'
 alias gwr='git worktree remove'
 alias gwp='git worktree prune'
@@ -505,7 +440,7 @@ gwa() { git worktree add "../$1" "$1"; }      # existing branch
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.lmstudio/bin"
-# End of LM Studio CLI section
+
 alias vimlocal="nvim ~/.zshrc.local"
 alias fabric="fabric-ai"
 alias fab="fabric-ai"
