@@ -8,3 +8,10 @@ vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
 -- Project management
 vim.keymap.set("n", "<leader>fp", "<cmd>Telescope projects<cr>", { desc = "Find Projects" })
+
+-- Copy buffer path to clipboard
+vim.keymap.set("n", "<leader>yp", function()
+  local path = vim.fn.expand("%:p")
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path, vim.log.levels.INFO)
+end, { desc = "Copy buffer path" })

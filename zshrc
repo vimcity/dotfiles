@@ -27,19 +27,16 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-  # docker
-   docker-compose
-  # macos
-  # python
-  # node
-  # npm
-  # vscode
-  # tmux
-  # extract
-  # copyfile
-  # copypath
-  # dirhistory
-  # z
+  docker
+  docker-compose
+  macos
+  python
+  node
+  npm
+  tmux
+  extract
+  copyfile
+  copypath
 )
 
 # Load Oh My Zsh
@@ -107,7 +104,7 @@ alias vnva="source venv/bin/activate"
 eval "$(zoxide init zsh)"
 
 # Starship prompt
-# DISABLED 
+# DISABLED
 # eval "$(starship init zsh)"
 
 # Add spacing between prompts (adds blank line before each prompt)
@@ -234,7 +231,7 @@ ff() {
         | fzf --preview-window=right:60% \
               --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}' \
               --bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
-              --bind 'ctrl-y:preview-up,ctrl-e:preview-down'
+              --bind 'alt-k:preview-up,alt-j:preview-down'
 }
 
 # Interactive directory finder
