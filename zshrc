@@ -114,7 +114,7 @@ eval "$(zoxide init zsh)"
 precmd() { print "" }
 
 # fzf configuration (for file search only)
-export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border --inline-info'
+export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info'
 
 # Load fzf key bindings and completion
 if [ -f ~/.fzf.zsh ]; then
@@ -122,24 +122,34 @@ if [ -f ~/.fzf.zsh ]; then
 fi
 
 # ===========================================
-# FD Configuration
 # ===========================================
-# fd flags are inlined in each function to avoid variable expansion issues with sourcing
+# FD File Finding & Search
+# ===========================================
+# fd flags are inlined to avoid variable expansion issues with sourcing
+#
+# Available functions:
+#   ff          - Interactive file finder (ff [path])
+#   fdir        - Interactive directory finder (fdir [path])
+#   ffe         - Find file & open in editor (ffe [path])
+#   fo          - Find file & open with default app (fo [path])
+#   fde         - Find by extension (fde <ext> [path])
+#   fdm         - Find recently modified (fdm <time> [path])
+#   fdf         - Find by pattern (fdf <pattern> [path])
+#   fdc         - Find at depth 1 only (fdc [path])
+#
+# Keyboard shortcuts in previews:
+#   Ctrl+U/D    - Page up/down
+#   Ctrl+Y/E    - Line up/down
 
-# ===========================================
-# File Type Detection Functions
-# ===========================================
+# Helper: Detect if file is text or binary
 detect_file_type() {
     local file="$1"
     if [[ -z "$file" ]]; then
         echo "binary"
         return
     fi
-
-    # Check if file is text using mime type
     local mime_type=$(file --mime "$file" 2>/dev/null | cut -d: -f2 | tr -d ' ')
     local mime_primary=$(echo "$mime_type" | cut -d/ -f1)
-
     if [[ "$mime_primary" == "text" ]] || [[ "$mime_type" == *"charset=utf-8"* ]] || [[ "$mime_type" == *"charset=us-ascii"* ]]; then
         echo "text"
     else
@@ -147,20 +157,18 @@ detect_file_type() {
     fi
 }
 
+# Helper: Smart preview with file type detection
 smart_preview() {
     local file="$1"
     if [[ -z "$file" ]]; then
         echo "No file provided"
         return 1
     fi
-
     if [[ ! -e "$file" ]]; then
         echo "File does not exist: $file"
         return 1
     fi
-
     local file_type=$(detect_file_type "$file")
-
     case "$file_type" in
         "text")
             bat --color=always --style=header,grid --line-range :300 "$file" 2>/dev/null || cat "$file" 2>/dev/null || echo "Cannot preview file: $file"
@@ -181,27 +189,23 @@ smart_preview() {
     esac
 }
 
+# Helper: Open file with appropriate app (text=editor, binary=default app)
 open_file() {
     local file="$1"
     if [[ -z "$file" ]]; then
         echo "No file provided"
         return 1
     fi
-
     if [[ ! -e "$file" ]]; then
         echo "File does not exist: $file"
         return 1
     fi
-
     local file_type=$(detect_file_type "$file")
-
     case "$file_type" in
         "text")
-            # Open text files in the default editor
             ${EDITOR:-nvim} "$file"
             ;;
         "binary")
-            # For binary files, try to open with the system's default application
             case "$(uname -s)" in
                 Darwin*)
                     open "$file" 2>/dev/null || xdg-open "$file" 2>/dev/null || echo "Could not open binary file: $file"
@@ -212,7 +216,6 @@ open_file() {
             esac
             ;;
         *)
-            # Unknown file type - try to open with default application
             case "$(uname -s)" in
                 Darwin*)
                     open "$file" 2>/dev/null || xdg-open "$file" 2>/dev/null || echo "Could not open file: $file"
@@ -225,27 +228,7 @@ open_file() {
     esac
 }
 
-# ===========================================
-# Search & Navigation Shortcuts
-# ===========================================
-search-in-files() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: search-in-files <pattern> [directory]"
-        return 1
-    fi
-    local pattern="$1"
-    local dir="${2:-.}"
-    rg --smart-case --line-number --with-filename "$pattern" "$dir" | fzf --preview 'bat --color=always --style=header,grid --line-range {2}:{3} {1}'
-}
-
-alias sif='search-in-files'
-
-# ===========================================
-# Keyboard Shortcuts for fzf Preview Navigation
-# ===========================================
-
 # Interactive file finder with keyboard scrolling
-# Usage: ff [path] - Search from current directory by default, or specify path
 ff() {
     fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
         | fzf --preview-window=right:60% \
@@ -255,14 +238,12 @@ ff() {
 }
 
 # Interactive directory finder
-# Usage: fdir [path] - Search from current directory by default, or specify path
 fdir() {
     fd --type d --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
         | fzf --preview "eza --tree --level=2 --icons {}"
 }
 
 # Find and open file in editor
-# Usage: ffe [path] - Search from current directory by default, or specify path
 ffe() {
     local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
         | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
@@ -270,26 +251,13 @@ ffe() {
 }
 
 # Find and open file with system default app
-# Usage: fo [path] - Search from current directory by default, or specify path
 fo() {
     local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
         | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
     [[ -n "$file" ]] && open_file "$file"
 }
 
-alias gcof='git checkout $(git branch | fzf | sed "s/^[ *]*//")'
-alias gbdf='git branch -d $(git branch | fzf | sed "s/^[ *]*//")'
-
-# Open lazygit with commits panel focused
-alias glog='lazygit log'
-alias lz='lazygit'
-
-# ===========================================
-# Enhanced fd Helper Functions
-# ===========================================
-
-# Find files by extension with preview
-# Usage: fde <extension> [path]
+# Find files by extension
 fde() {
     [[ $# -eq 0 ]] && { echo "Usage: fde <extension> [path]"; return 1; }
     fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --extension "$1" "${2:-.}" \
@@ -297,30 +265,18 @@ fde() {
 }
 
 # Find recently modified files
-# Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)
 fdm() {
     [[ $# -eq 0 ]] && { echo "Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)"; return 1; }
     fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --changed-within "$1" "${2:-.}"
 }
 
 # Find files by pattern
-# Usage: fdf <pattern> [path]
 fdf() {
     [[ $# -eq 0 ]] && { echo "Usage: fdf <pattern> [path]"; return 1; }
     fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "$1" "${2:-.}"
 }
 
-# Find empty files
-# Usage: fdempty [path]
-fdempty() {
-    fd --type empty --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}"
-}
 
-# Find files at depth 1 only
-# Usage: fdc [path]
-fdc() {
-    fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --max-depth 1 "${1:-.}"
-}
 
 # Ripgrep configuration
 alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
