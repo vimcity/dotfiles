@@ -1,11 +1,27 @@
 return {
   "luckasRanarison/nvim-devdocs",
+  -- Lazy-load: only initialize when you actually use a command
+  lazy = true,
+  cmd = {
+    "DevdocsFetch",
+    "DevdocsInstall",
+    "DevdocsUninstall",
+    "DevdocsOpen",
+    "DevdocsOpenFloat",
+    "DevdocsOpenCurrent",
+    "DevdocsOpenCurrentFloat",
+    "DevdocsToggle",
+    "DevdocsUpdate",
+    "DevdocsUpdateAll",
+  },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-telescope/telescope.nvim",
     "nvim-treesitter/nvim-treesitter",
   },
   opts = {
+    -- Don't auto-install docs on startup (prevents notification spam)
+    ensure_installed = {},
     after_open = function(bufnr)
       local keymap_opts = { noremap = true, silent = true, buffer = bufnr }
       -- Scroll down with 'j' or 'd'
