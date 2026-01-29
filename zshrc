@@ -88,6 +88,7 @@ alias vi=vim
 alias ls=eza
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
+alias lz=lazygit
 export PYENV_ROOT=
 export PATH="$PYENV_ROOT/shims:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
