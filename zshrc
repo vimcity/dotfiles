@@ -1,4 +1,10 @@
 # ===========================================
+# Terminal & Color Support
+# ===========================================
+# Force true color support (24-bit RGB) for tmux and neovim
+export COLORTERM=truecolor
+
+# ===========================================
 # Oh My Zsh Configuration
 # ===========================================
 export ZSH="$HOME/.oh-my-zsh"
