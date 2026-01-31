@@ -2,7 +2,7 @@
 # ==================================================
 
 # Use the built-in Catppuccin Frappe theme
-theme = "Catppuccin Macchiato"
+theme = "Catppuccin Frappe"
 
 # Window settings
 # window-padding-x = 20
@@ -27,8 +27,8 @@ font-size = 16
 # Override with a darker background than default Frappe (#303446)
 # background = #232634
 
-# Cursor and selection
-cursor-color = #ca9ee6
+# Cursor and selection - Catppuccin Frappe Text color (bluish-grey white)
+cursor-color = #c6d0f5
 
 # Color palette (handled by built-in Catppuccin Frappe theme)
 
@@ -63,5 +63,4 @@ keybind = global:cmd+backquote=toggle_quick_terminal
 # keybind = "alt+j=resize_split:down,10"
 # keybind = "alt+e=equalize_splits"
 
-# Custom cursor shader
-custom-shader = shaders/cursor_blaze_no_trail.glsl
+
