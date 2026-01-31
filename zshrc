@@ -380,4 +380,4 @@ alias vimlocal="nvim ~/.zshrc.local"
 alias fabric="fabric-ai"
 alias fab="fabric-ai"
 alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
-
+export COLORTERM=truecolor
