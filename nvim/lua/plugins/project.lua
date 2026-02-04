@@ -2,7 +2,7 @@ return {
   "ahmedkhalf/project.nvim",
   config = function()
     require("project_nvim").setup({
-      manual_mode = false,
+      manual_mode = true,  -- Only track projects manually, don't auto-change directory
       detection_methods = { "lsp", "pattern" },
       patterns = { ".git", "package.json", "Makefile" },
     })
