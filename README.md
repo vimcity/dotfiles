@@ -89,8 +89,8 @@ This configuration emphasizes:
 > Allows multiple terminal sessions in one window, with session persistence and detach/reattach capabilities
 
 - **Prefix**: `Ctrl+Space`
-- **Modular config** split into settings, plugins, and keybindings
-- **Vim-style navigation** between panes
+- **Modular config** split into settings, plugins, keybindings, and theme
+- **Vim-style navigation** between panes with seamless Neovim integration
 - **Plugins**:
   - tmux-resurrect & continuum (session persistence - survive reboots)
   - tmux-yank (better clipboard integration)
@@ -98,10 +98,12 @@ This configuration emphasizes:
   - tmux-fzf-url (fuzzy find and open URLs from terminal output)
   - tmux-sessionist (enhanced session management shortcuts)
   - tmux-battery & cpu (system resource monitoring in status bar)
-  - tmux-pomodoro-plus (optional pomodoro timer - disabled by default)
+  - tmux-pomodoro-plus (integrated pomodoro timer with display script)
+- **Theme**: Catppuccin Frappe with custom zoom level controls
 - Mouse support enabled
 - History limit: 1 million lines
 - Auto-save sessions every 15 minutes
+- Path monitoring script for directory tracking
 
 ### Text Editor
 **Neovim (LazyVim)** - Modern modal text editor
@@ -111,13 +113,16 @@ This configuration emphasizes:
 - **AI Integration**: 
   - GitHub Copilot (code suggestions)
   - CodeCompanion with Ollama (local AI using gemma3:1b model - disabled by default)
+  - Fabric AI integration for command analysis
 - **Testing**: Neotest (modern test runner with UI for Java, TypeScript, and more)
 - **Debugging**: DAP (Debug Adapter Protocol) for in-editor debugging
+- **Documentation**: DevDocs integration for quick API reference
 - **Extras**: 
   - Editor: illuminate (highlight matching words), inc-rename (live preview renames), mini-move (move lines/blocks), mini-diff (inline git changes)
-  - Coding: mini-surround (edit surrounding quotes/brackets), yanky (yank history manager)
+  - Coding: mini-surround (edit surrounding quotes/brackets), yanky (yank history manager), conform (autoformatting)
   - UI: treesitter-context (show current function at top), indent-blankline (visual indent guides), mini-indentscope (highlight current scope)
-  - Project management (find/search across project)
+  - Project management and organization mode (org-agenda support)
+- **Cache Management**: Handles symlinked config with proper cache normalization (fixes treesitter crashes)
 
 ### Git Tools
 **Lazygit** - Terminal UI for git operations
@@ -141,6 +146,12 @@ This configuration emphasizes:
 
 **Zoxide** - Smart directory jumper
 > Replaces cd with an intelligent version that remembers your most-used directories
+
+**Yazi** - Terminal file manager
+> Fast TUI file explorer with preview support, similar to ranger
+
+**Karabiner-Elements** - Keyboard remapping
+> macOS keyboard customization for Corne mechanical keyboard and traditional layout support
 
 **pyenv** - Python version manager
 > Manage multiple Python versions and easily switch between them per-project
@@ -178,60 +189,58 @@ dotfiles/
 │   └── config          # Main Ghostty config
 ├── nvim/               # Neovim LazyVim configuration
 │   ├── lua/
-│   │   ├── config/     # Core settings (keymaps, options, autocmds)
-│   │   └── plugins/    # Custom plugin configs (codecompanion, neotest, etc.)
+│   │   ├── config/     # Core settings (keymaps, options, autocmds, lazy.lua)
+│   │   └── plugins/    # Custom plugin configs (codecompanion, neotest, devdocs, etc.)
 │   └── init.lua        # Entry point
 ├── tmux/               # Tmux configuration (modular)
 │   ├── conf/
 │   │   ├── settings.conf     # Core settings
-│   │   ├── plugins.conf      # Plugin declarations (pomodoro, battery, etc.)
-│   │   └── keybindings.conf  # Key mappings
+│   │   ├── plugins.conf      # Plugin declarations
+│   │   ├── keybindings.conf  # Key mappings
+│   │   └── theme.conf        # Theme and appearance
+│   ├── scripts/               # Helper scripts (pomodoro, memory monitoring, path tracking)
 │   └── tmux.conf       # Main config (sources modules)
-├── zshrc               # Zsh configuration
+├── zshrc               # Zsh configuration with extensive aliases
 ├── starship.toml       # Prompt configuration
 ├── lazygit-config.yml  # Git UI configuration
+├── karabiner.json      # Keyboard remapping (Corne, traditional layouts)
 ├── gitconfig.delta     # Delta git diff config
 ├── fdignore            # fd ignore patterns
 ├── rgignore            # ripgrep ignore patterns
 ├── glow-style.json     # Markdown renderer style
-├── AGENTS.md           # Guidance for AI agents working in this repo
+├── AGENTS.md           # Guidance for agents + cache management + recent changes
 ├── CLAUDE.md           # Architecture documentation
+├── SECURITY.md         # Security best practices
+├── PORTABILITY.md      # Cross-platform compatibility notes
 └── install.sh          # Installation script
 ```
 
 ## Notable Features
 
 - **Catppuccin Frappe** theme consistently applied across terminal, tmux, neovim, and bat
-- **Vim keybindings** in shell (vi mode), tmux copy mode, and neovim
-- **Fuzzy finding** integrated throughout with fzf
+- **Vim keybindings** in shell (vi mode), tmux copy mode, neovim, and file managers
+- **Fuzzy finding** integrated throughout with fzf (files, directories, git branches)
 - **Shell history** synced across machines with Atuin
-- **Session persistence** with tmux-resurrect, continuum, and pomodoro timer
-- **Testing support** with Neotest for Java, TypeScript, and other languages
-- **AI assistance** with GitHub Copilot, CodeCompanion (Ollama), and OpenCode integration
-- **Performance optimized** with lazy-loading (pyenv, plugins, LazyVim)
-- **Modern tools** replacing traditional Unix utilities
-- **AI integration** for command analysis and assistance
+- **Session persistence** with tmux-resurrect, continuum, and integrated pomodoro timer
+- **Testing & debugging** with Neotest (UI test runner) and DAP (step-through debugging)
+- **AI assistance** with GitHub Copilot, CodeCompanion (Ollama), Fabric, and OpenCode
+- **Performance optimized** with lazy-loading (pyenv, plugins, LazyVim cache handling)
+- **Modern tools** replacing traditional Unix utilities (eza, fd, ripgrep, bat, delta)
+- **Keyboard customization** with Karabiner for mechanical keyboards (Corne) and traditional layouts
+- **Symlink-safe config** with proper cache normalization for Neovim
+- **Documentation at hand** with DevDocs integration in Neovim
 
 ## Requirements
 
 These tools should be installed via Homebrew or other package managers:
-- ghostty
-- neovim
-- tmux
-- starship
-- atuin
-- zoxide
-- fzf
-- fd
-- ripgrep
-- bat
-- eza
-- delta
-- glow
-- lazygit
-- fastfetch
-- pyenv (optional, for Python)
-- ollama (optional, for local LLM via CodeCompanion)
-- font - https://commitmono.com/
+- **Core**: ghostty, neovim, tmux, zsh
+- **Utilities**: starship, atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, glow, lazygit, fastfetch, yazi
+- **Optional**: pyenv (Python), ollama (local LLM), Karabiner-Elements (keyboard remapping)
+- **Font**: JetBrains Mono Nerd Font or CommitMono (see https://commitmono.com/)
 
-The install script handles Oh My Zsh and plugin installation but assumes these tools are already present.
+The install script handles:
+- Oh My Zsh installation and plugin setup (git, autosuggestions, syntax-highlighting)
+- TPM (Tmux Plugin Manager) bootstrap
+- Config file symlinks to ~/.config/
+
+Note: The install script assumes the above tools are already installed via Homebrew.

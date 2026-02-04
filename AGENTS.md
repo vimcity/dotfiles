@@ -34,12 +34,15 @@ tmux -f tmux/tmux.conf new -d  # Test tmux config (creates detached session)
 - `zshrc` - Shell aliases, functions, environment, plugin setup
 - `starship.toml` - Prompt configuration
 - `nvim/init.lua` - Neovim entry point
-- `nvim/lua/config/` - Core settings (keymaps, options, autocmds)
-- `nvim/lua/plugins/` - Plugin configurations
+- `nvim/lua/config/` - Core settings (keymaps, options, autocmds, lazy.lua)
+- `nvim/lua/plugins/` - Plugin configurations (one file per plugin/feature)
+- `nvim/lua/config/keymaps.lua` - Neovim key mappings with which-key groups
 - `tmux/tmux.conf` - Main tmux config (sources modular configs)
-- `tmux/conf/settings.conf`, `keybindings.conf`, `plugins.conf` - Modular tmux
-- `ghostty/config` - Terminal emulator settings
+- `tmux/conf/settings.conf`, `keybindings.conf`, `plugins.conf`, `theme.conf` - Modular tmux
+- `tmux/scripts/` - Helper scripts (pomodoro-display, memory, path monitoring)
+- `ghostty/config` - Terminal emulator settings (colors, fonts, keybinds)
 - `atuin/config.toml` - Shell history configuration
+- `karabiner.json` - Keyboard remapping config (Corne, traditional layout support)
 
 ## Code Style Guidelines
 
@@ -172,8 +175,9 @@ When modifying themes, maintain consistency across all tools.
 **Shell Dependencies** (installed via Homebrew before install.sh):
 - Core: ghostty, neovim, tmux, zsh
 - Prompt: starship, zoxide, atuin
-- CLI tools: bat, eza, fd, ripgrep, fzf, delta, glow, lazygit, fastfetch
+- CLI tools: bat, eza, fd, ripgrep, fzf, delta, glow, lazygit, fastfetch, yazi
 - Optional: pyenv (Python), nvm/fnm (Node)
+- Keyboard: Karabiner-Elements (macOS keyboard remapping)
 
 **Neovim Plugin Manager**
 - LazyVim handles plugin loading automatically
@@ -220,12 +224,63 @@ When modifying themes, maintain consistency across all tools.
 - **Neovim → Tmux**: Seamless pane navigation with vim-tmux-navigator plugin
 - **All tools → Theme**: Catppuccin Frappe colors unified
 
+## Neovim Cache Management
+
+When experiencing crashes with treesitter or search plugins (especially markdown files):
+
+**Quick fixes** (use these aliases):
+```bash
+nvclear      # Clear all caches (~/.cache/nvim and ~/.local/share/nvim)
+nvrebuild    # Full rebuild: clear caches + sync plugins + update treesitter
+nvclean      # Start Neovim with factory defaults (no plugins/config)
+```
+
+**Why this matters**: Symlinked config (`~/.config/nvim -> dotfiles`) + corrupted lazy.nvim cache can cause crashes. The cache configuration in `nvim/lua/config/lazy.lua` helps, but clearing caches is sometimes necessary.
+
+## Recent Changes (Last 30 Commits)
+
+**Neovim plugins added/updated:**
+- Mini-surround keybind edits
+- Project scanner plugin (lazy-loaded)
+- Devdocs integration
+- Neotest testing framework
+- Fabric AI integration
+- Markdown rendering improvements
+- Org-mode formatting
+
+**Keyboard & Input:**
+- Karabiner.json for Corne and traditional keyboard layout support
+- Copy leader key in Neovim
+- Mini-surround keybind customization
+- Tmux keybind improvements
+
+**Shell/Zsh:**
+- Yazi file manager alias (yz)
+- Fabric AI aliases (fabric, fab)
+- MVN alias for Eclipse project setup
+- Consolidated fd aliases with inline flags
+- Removed duplicate gwa alias
+
+**Tmux:**
+- Thumbs plugin for copy/paste
+- Pomodoro timer display with scripts
+- Path monitoring script
+- Theme configuration refinements
+- Zoom level and pane level controls
+
+**Other:**
+- Termux color scheme configuration
+- Ghostty font and theme updates
+- Markdown link improvements
+- Conform autoformatting configuration
+
 ## Important Notes
 
 - **No tests or CI**: Changes don't require passing tests. Validate syntax and test manually.
 - **Installation idempotent**: install.sh can run multiple times safely (backs up existing configs)
 - **Symlink structure**: Repo files symlinked to ~/.config/ (XDG Base Directory Spec)
-- **Recent additions**: Codecompanion plugin (Jan 12), neotest, docker colima fixes
+- **Lazy-lock.json**: Now properly ignored via .gitignore (not committed to repo)
+- **Recent fixes**: Fixed lazy.nvim symlink cache issues, added Neovim cache management aliases
 - **Development**: Main branch is stable; create feature branches for experimental changes
 
 When in doubt, refer to CLAUDE.md for architectural details or specific tool documentation.
