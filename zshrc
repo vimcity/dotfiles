@@ -95,7 +95,6 @@ alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '
 alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
 
 alias sdf="source ~/.zshrc"
-alias cl=clear
 alias vi=vim
 alias ls=eza
 alias lsa="eza --icons=always -s=time -la"
