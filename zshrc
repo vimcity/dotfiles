@@ -88,6 +88,12 @@ alias zz="z"
 alias vim="nvim"
 export EDITOR="nvim"
 export VISUAL="nvim"
+
+# Neovim cache management (for symlink/treesitter issues)
+alias nvclear="rm -rf ~/.cache/nvim ~/.local/share/nvim && echo '✓ Neovim caches cleared'"
+alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '✓ Neovim rebuilt'"
+alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
+
 alias sdf="source ~/.zshrc"
 alias cl=clear
 alias vi=vim
