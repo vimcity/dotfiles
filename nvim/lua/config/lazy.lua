@@ -82,4 +82,9 @@ require("lazy").setup({
       },
     },
   },
+  -- Fix for symlinked config directories (like when ~/.config/nvim -> dotfiles)
+  -- This normalizes paths so lazy.nvim cache works correctly with symlinks
+  cache = {
+    enabled = true,
+  },
 })
