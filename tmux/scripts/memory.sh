@@ -34,7 +34,7 @@ icon="󰍛"
 
 # Catppuccin colors
 green="#a6e3a1"        # Green (healthy)
-yellow="#f9e2af"       # Yellow (warning)
+yellow="#fab387"        # Orange/Peach (warning)
 red="#f38ba8"          # Red (critical)
 text_dark="#000000"    # Dark text for contrast
 
