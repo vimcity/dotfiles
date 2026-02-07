@@ -4,24 +4,17 @@
 # Use the built-in Catppuccin Frappe theme
 theme = "Catppuccin Frappe"
 
-# Window settings
-# window-padding-x = 20
-# window-padding-y = 20
-
 # Launch maximized
-window-decoration = false 
-macos-titlebar-style = native 
+window-decoration = false
+macos-titlebar-style = hidden
 window-step-resize = true
 window-save-state = always
-
-# Translucency settings
-#background-opacity = 0.95
 
 # Font settings
 # font-family = "JetBrains Mono NF"
 font-family = "CommitMono"
 adjust-cell-height = 35%
-font-size = 18 
+font-size = 16
 
 # Background and foreground
 # Override with a darker background than default Frappe (#303446)
@@ -39,10 +32,6 @@ shell-integration = zsh
 copy-on-select = clipboard
 
 # Keybindings
-# Pass Alt+j/k to terminal apps (for nvim line movement)
-# keybind = alt+j=ignore
-# keybind = alt+k=ignore
-#
 keybind = shift+enter=text:\x1b\r
 
 # Disable Ctrl+Shift+P (conflicts with other tools)
@@ -50,17 +39,3 @@ keybind = ctrl+shift+p=unbind
 
 # Quick terminal toggle (Quake-style dropdown terminal)
 keybind = global:cmd+shift+backquote=toggle_quick_terminal
-# Navigate between splits
-# keybind = "alt+h=goto_split:left"
-# keybind = "alt+l=goto_split:right"
-# keybind = "alt+k=goto_split:up"
-# keybind = "alt+j=goto_split:down"
-
-# Resize splits
-# keybind = "alt+h=resize_split:left,10"
-# keybind = "alt+l=resize_split:right,10"
-# keybind = "alt+k=resize_split:up,10"
-# keybind = "alt+j=resize_split:down,10"
-# keybind = "alt+e=equalize_splits"
-
-

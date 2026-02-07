@@ -1,3 +1,4 @@
+# zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -14,6 +15,10 @@ export ZSH_COMPDUMP="$ZSH/cache/.zcompdump-$HOST"
 export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
 export ZSH_DISABLE_COMPFIX=true
+
+# Completion caching (huge speedup)
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-policy _omz_cache_policy
 
 # ===========================================
 # Shell Behavior Toggles
@@ -47,9 +52,6 @@ plugins=(
 
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
-
-# Load Oh My Zsh completions
-autoload -U compinit && compinit
 
 # ===========================================
 # Zsh History Configuration
@@ -366,6 +368,7 @@ fi
 #fastfetch
 alias ffs='fastfetch'
 killer() { kill $(lsof -t -i:$1); }
+ffs -c "$HOME/.config/fastfetch/config.jsonc" 
 
 # ===========================================
 # Git Worktree Aliases
@@ -386,3 +389,11 @@ alias fabric="fabric-ai"
 alias fab="fabric-ai"
 alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
+
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
+# End of LM Studio CLI section
+
+
+# zprof
