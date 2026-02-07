@@ -7,10 +7,6 @@ return {
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
 
-      -- Check if this is a personal machine (default to personal if not set or set to 1)
-      local personal_env = os.getenv("PERSONAL")
-      local is_personal = personal_env == nil or personal_env == "1"
-
       -- Setup org capture templates
       local capture_templates
       capture_templates = {
