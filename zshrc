@@ -98,7 +98,6 @@ alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
 
 alias sdf="source ~/.zshrc"
 alias vi=vim
-alias ls=eza
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
 alias lz=lazygit
@@ -294,8 +293,6 @@ fdf() {
 alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
 
 # Modern terminal tools
-alias cat='bat'
-# Pretty man pages with bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # bat will automatically use less as a pager for large files
 export BAT_PAGER="less -RF"
