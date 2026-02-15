@@ -63,6 +63,16 @@ else
     echo "✓ TPM already installed"
 fi
 
+# Install tools via brew
+for formula in lazydocker lazysql; do
+    if brew list "$formula" &> /dev/null; then
+        echo "✓ $formula already installed"
+    else
+        echo "📦 Installing $formula..."
+        brew install "$formula"
+    fi
+done
+
 # Backup existing files
 backup_if_exists "$HOME/.config/ghostty"
 backup_if_exists "$HOME/.config/atuin"
@@ -84,6 +94,9 @@ ln -sf "$HOME/dotfiles/vimrc" "$HOME/.vimrc"
 ln -sf "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
 ln -sf "$HOME/dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$HOME/dotfiles/fdignore" "$HOME/.fdignore"
+ln -sf "$HOME/dotfiles/bin" "$HOME/.local/scripts"
+ln -sf "$HOME/dotfiles/tmux-cht-languages" "$HOME/.tmux-cht-languages"
+ln -sf "$HOME/dotfiles/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 
 echo "✅ Dotfiles installed successfully!"
 echo ""
