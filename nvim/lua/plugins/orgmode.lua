@@ -64,9 +64,8 @@ return {
           -- Headline levels (8 levels with gradient of colors)
           vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = colors.blue, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.sapphire, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.teal, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.lavender, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level5", { fg = colors.pink, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = true })
           --
           -- -- Priority markers
           -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
@@ -83,8 +82,8 @@ return {
           vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red, bold = true })
           --
           -- -- Markup
-          -- vim.api.nvim_set_hl(0, "@org.bold", { bold = true })
-          -- vim.api.nvim_set_hl(0, "@org.italic", { italic = true })
+          vim.api.nvim_set_hl(0, "@org.bold", { fg = colors.maroon, bold = true })
+          vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.mauve, italic = true })
           -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
           -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
           --
