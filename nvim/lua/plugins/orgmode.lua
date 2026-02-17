@@ -32,10 +32,10 @@ return {
         org_agenda_files = org_path .. "/**/*",
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
-        org_agenda_span = 'day',
+        org_agenda_span = "day",
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
-          PROGRESS = ':foreground '.. colors.yellow .. ':weight bold', -- pink
+          PROGRESS = ":foreground " .. colors.yellow .. ":weight bold", -- pink
         },
         org_capture_templates = capture_templates,
         mappings = {
@@ -55,7 +55,7 @@ return {
         org_log_done_repeat_create_time = true,
       })
 
-        -- Set up proper highlights for org-mode after colorscheme loads
+      -- Set up proper highlights for org-mode after colorscheme loads
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
         callback = function()
@@ -70,7 +70,7 @@ return {
           --
           -- -- Priority markers
           -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
-          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.yellow, })
+          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.yellow })
           vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.base, bg = colors.blue })
           --
           -- -- Timestamps
@@ -79,7 +79,7 @@ return {
           --
           -- -- Agenda styling
           vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.blue })
-          vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue, bold = true })
+          -- vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red, bold = true })
           --
           -- -- Markup
