@@ -6,6 +6,7 @@ return {
     config = function()
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
+      local colors = require("catppuccin.palettes").get_palette()
 
       -- Setup org capture templates
       local capture_templates
@@ -29,13 +30,12 @@ return {
       -- Setup orgmode
       require("orgmode").setup({
         org_agenda_files = org_path .. "/**/*",
-        org_default_notes_file = org_path .. "/refile.org",
+        org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
+        org_agenda_span = 'day',
+        org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
-          TODO = ":foreground:#8CAAEE :weight:bold", -- blue
-          PROGRESS = ":foreground:#F1A7F1 :weight:bold", -- pink
-          WAITING = ":foreground:#CA9EE6 :weight:bold", -- mauve
-          DONE = ":foreground:#A6D854 :weight:bold", -- green
+          PROGRESS = ':foreground '.. colors.yellow .. ':weight bold', -- pink
         },
         org_capture_templates = capture_templates,
         mappings = {
@@ -55,55 +55,46 @@ return {
         org_log_done_repeat_create_time = true,
       })
 
-      -- Set up proper highlights for org-mode after colorscheme loads
+        -- Set up proper highlights for org-mode after colorscheme loads
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
         callback = function()
           -- Get Catppuccin colors
-          local colors = require("catppuccin.palettes").get_palette()
 
           -- Headline levels (8 levels with gradient of colors)
           vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = colors.blue, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.sapphire, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.sky, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.teal, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level5", { fg = colors.lavender, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level6", { fg = colors.mauve, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level7", { fg = colors.pink, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level8", { fg = colors.peach, bold = true })
-
-          -- Priority markers
-          vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
-          vim.api.nvim_set_hl(0, "@org.priority.high", { fg = colors.yellow, bold = true })
-          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.sapphire })
-          vim.api.nvim_set_hl(0, "@org.priority.low", { fg = colors.text })
-
-          -- Timestamps
-          vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.pink, italic = true })
-          vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.overlay0, italic = true })
-
-          -- Agenda styling
-          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.sapphire })
-          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red })
-
-          -- Markup
-          vim.api.nvim_set_hl(0, "@org.bold", { bold = true })
-          vim.api.nvim_set_hl(0, "@org.italic", { italic = true })
-          vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
-          vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
-
-          -- Blocks and dividers
-          vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })
-          vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.mantle })
-          vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay0 })
-
-          -- Tag-specific colors
-          vim.api.nvim_set_hl(0, "@org.tag.work", { fg = colors.red, bold = true })
-          vim.api.nvim_set_hl(0, "@org.tag.personal", { fg = colors.green, bold = true })
-          vim.api.nvim_set_hl(0, "@org.tag.study", { fg = colors.blue, bold = true })
-          vim.api.nvim_set_hl(0, "@org.tag.health", { fg = colors.peach, bold = true })
-          vim.api.nvim_set_hl(0, "@org.tag.family", { fg = colors.pink, bold = true })
-          vim.api.nvim_set_hl(0, "@org.tag.delimiter", { fg = colors.overlay0 })
+          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.teal, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.lavender, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level5", { fg = colors.pink, bold = true })
+          --
+          -- -- Priority markers
+          -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
+          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.yellow, })
+          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.base, bg = colors.blue })
+          --
+          -- -- Timestamps
+          -- vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.pink, italic = true })
+          -- vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.overlay0, italic = true })
+          --
+          -- -- Agenda styling
+          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.blue })
+          vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red, bold = true })
+          --
+          -- -- Markup
+          -- vim.api.nvim_set_hl(0, "@org.bold", { bold = true })
+          -- vim.api.nvim_set_hl(0, "@org.italic", { italic = true })
+          -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
+          -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
+          --
+          -- -- Blocks and dividers
+          -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })
+          -- vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.mantle })
+          -- vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay0 })
+          --
+          -- -- Tag-specific colors (all purple/mauve)
+          vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.teal, bold = true })
         end,
       })
 
@@ -128,13 +119,6 @@ return {
       require("org-bullets").setup()
     end,
   },
-  -- {
-  --   "lukas-reineke/headlines.nvim",
-  --   -- event = "VeryLazy",
-  --   ft = { "org" },
-  --   dependencies = "nvim-treesitter/nvim-treesitter",
-  --   config = true,
-  -- },
   {
     "hamidi-dev/org-super-agenda.nvim",
     -- event = "VeryLazy",
@@ -157,61 +141,33 @@ return {
           {
             name = "TODO",
             keymap = "ot",
-            color = "#8CAAEE",
+            color = "#E78284",
             strike_through = false,
-            fields = { "filename", "todo", "headline", "priority", "date", "tags" },
-          }, -- blue
+          }, -- red
           {
             name = "PROGRESS",
             keymap = "op",
             color = "#F1A7F1",
             strike_through = false,
-            fields = { "filename", "todo", "headline", "priority", "date", "tags" },
-          }, -- pink (active)
+          }, -- pink
           {
             name = "DONE",
             keymap = "od",
             color = "#A6D854",
             strike_through = true,
-            fields = { "filename", "todo", "headline", "priority", "date", "tags" },
           }, -- green
         },
         groups = {
           {
-            name = "⏳ Overdue",
+            name = "📋 Unscheduled",
             matcher = function(i)
-              return i.todo_state ~= "DONE"
-                and ((i.deadline and i.deadline:is_past()) or (i.scheduled and i.scheduled:is_past()))
+              return i.todo_state ~= "DONE" and not i.scheduled and not i.deadline
             end,
-            sort = { by = "date_nearest", order = "asc" },
-            header = { fg = colors.red, bold = true },
-          },
-          {
-            name = "✅ TODO",
-            matcher = function(i)
-              return i.todo_state == "TODO"
-            end,
-            header = { fg = colors.blue, bold = true },
-          },
-          {
-            name = "📆 Upcoming",
-            matcher = function(i)
-              local days = require("org-super-agenda.config").get().upcoming_days or 10
-              local d1 = i.deadline and i.deadline:days_from_today()
-              local d2 = i.scheduled and i.scheduled:days_from_today()
-              return (d1 and d1 >= 0 and d1 <= days) or (d2 and d2 >= 0 and d2 <= days)
-            end,
-            sort = { by = "date_nearest", order = "asc" },
-            header = { fg = colors.green, bold = true },
-          },
-          {
-            name = "💼 Work",
-            matcher = function(i)
-              return i:has_tag("work")
-            end,
-            header = { fg = colors.red, bold = true },
+            sort = { by = "headline", order = "asc" },
+            header = { fg = colors.yellow, bold = true },
           },
         },
+        view_mode = "compact",
       })
 
       -- Set up keybinding for org-super-agenda

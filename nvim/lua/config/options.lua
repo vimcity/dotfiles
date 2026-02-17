@@ -9,5 +9,8 @@ vim.opt.expandtab = true   -- Use spaces instead of tabs
 vim.opt.softtabstop = 4    -- Number of spaces that a <Tab> counts for while performing editing operations
 vim.opt.smartindent = true -- Do smart autoindenting when starting a new line
 vim.opt.autoindent = true  -- Copy indent from current line when starting a new line
--- Disable auto-formatting on save
-vim.g.autoformat = false
+-- Auto-formatting based on PERSONAL environment variable
+local personal = os.getenv("PERSONAL")
+local autoformat_enabled = personal == "1"
+
+vim.g.autoformat = autoformat_enabled
