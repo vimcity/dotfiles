@@ -47,7 +47,7 @@ require("lazy").setup({
     -- { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
 
     -- AI
-    { import = "lazyvim.plugins.extras.ai.copilot", cond = function() return (os.getenv("PERSONAL") or "0") == "0" end }, -- GitHub Copilot (disabled if PERSONAL=1)
+    { import = "lazyvim.plugins.extras.ai.copilot", cond = function() return (os.getenv("PERSONAL") == "0") end }, -- GitHub Copilot (disabled if PERSONAL=1)
     { import = "lazyvim.plugins.extras.ai.claudecode" }, -- Claude Code integration
 
     -- 3. Your custom plugins (must come last)
