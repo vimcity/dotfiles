@@ -1,27 +1,3 @@
 git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never --syntax-theme=none --minus-style='syntax #5a1f1f' --minus-emph-style='syntax #7a2626' --plus-style='syntax #1a472a' --plus-emph-style='syntax #2d5a3d' --line-numbers --line-numbers-left-format='' --line-numbers-right-format=''
-
-  # Use GitHub-style diff colors
-  diffConfig:
-    colorMoved: default
-
-gui:
-  # Show file tree by default
-  showFileTree: true
-
-  # Theme colors to match GitHub style
-  theme:
-    activeBorderColor:
-      - '#7ee787'
-      - bold
-    inactiveBorderColor:
-      - '#484f58'
-    selectedLineBgColor:
-      - '#1c3d5a'
-    selectedRangeBgColor:
-      - '#1c3d5a'
-
-# Show icons
-showIcons: true
+  pagers:
+    - pager: delta --dark --paging=never
