@@ -42,6 +42,7 @@ tmux -f tmux/tmux.conf new -d  # Test tmux config (creates detached session)
 - `tmux/scripts/` - Helper scripts (pomodoro-display, memory, path monitoring)
 - `ghostty/config` - Terminal emulator settings (colors, fonts, keybinds)
 - `atuin/config.toml` - Shell history configuration
+- `lazygit-config.yml` - Shared lazygit settings (theme, pager, GUI)
 - `karabiner.json` - Keyboard remapping config (Corne, traditional layout support)
 
 ## Code Style Guidelines
@@ -166,9 +167,17 @@ When modifying themes, maintain consistency across all tools.
 - Goal: Fast shell startup (sub-500ms ideally)
 
 ### Cross-Machine Configuration
-- Machine-specific settings: `~/.zshrc.local` (sourced if exists, ignored by git)
-- Secrets/API keys: ONLY in `.zshrc.local`, never in repo
-- Portable configs: Keep most settings in dotfiles, override selectively
+- **Zsh**: `~/.zshrc.local` (sourced if exists, ignored by git)
+  - Machine-specific environment variables and paths
+  - API keys and authentication tokens
+  - Company-specific tooling and aliases
+- **Lazygit**: `~/.lazygit-local.yml` (merged via `LG_CONFIG_FILE`, ignored by git)
+  - Git service configurations (GitHub Enterprise, GitLab, etc.)
+  - Machine-specific pager or editor settings
+  - See `.lazygit-local.yml.example` for template
+  - Setup: `export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml,$HOME/.lazygit-local.yml"` in `~/.zshrc.local`
+- **Rule**: Secrets/work-specific configs ONLY in local files, never in repo
+- **Strategy**: Keep most settings in dotfiles, override selectively per machine
 
 ## Imports & Dependencies
 

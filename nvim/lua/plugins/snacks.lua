@@ -42,6 +42,21 @@ return {
           hidden = true, -- Show hidden files (dotfiles)
           ignored = true, -- Show gitignored files
         },
+        -- Exclude TS-compiled JS artifacts from file and grep pickers.
+        -- Only targets application/ where TS compilation outputs live;
+        -- intentional JS files (webpack configs, assets/lib, etc.) are unaffected.
+        files = {
+          exclude = {
+            "application/**/*.js",
+            "application/**/*.js.map",
+          },
+        },
+        grep = {
+          exclude = {
+            "application/**/*.js",
+            "application/**/*.js.map",
+          },
+        },
       },
     })
 
