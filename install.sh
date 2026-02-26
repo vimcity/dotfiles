@@ -81,15 +81,18 @@ backup_if_exists "$HOME/.vimrc"
 backup_if_exists "$HOME/.zshrc"
 backup_if_exists "$HOME/.tmux.conf"
 backup_if_exists "$HOME/.fdignore"
+backup_if_exists "$HOME/.config/lazygit/config.yml"
 
 # Create .config directory if it doesn't exist
 mkdir -p "$HOME/.config"
+mkdir -p "$HOME/.config/lazygit"
 
 # Create symlinks
 echo "🔗 Creating symlinks..."
 ln -sf "$HOME/dotfiles/ghostty" "$HOME/.config/ghostty"
 ln -sf "$HOME/dotfiles/atuin" "$HOME/.config/atuin"
 ln -sf "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
+ln -sf "$HOME/dotfiles/lazygit-config.yml" "$HOME/.config/lazygit/config.yml"
 ln -sf "$HOME/dotfiles/vimrc" "$HOME/.vimrc"
 ln -sf "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
 ln -sf "$HOME/dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"

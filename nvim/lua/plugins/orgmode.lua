@@ -66,7 +66,6 @@ return {
           vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.sapphire, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = true })
-
           --
           -- -- Priority markers
           -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
@@ -87,9 +86,6 @@ return {
           vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.mauve, italic = true })
           -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
           -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
-          -- Org buffer default text color
-          -- vim.api.nvim_set_hl(0, "OrgNormal", { fg = , bg = colors.base })
-          vim.api.nvim_set_hl(0, "OrgQuoteText", { fg = colors.subtext1, italic = true })
           --
           -- -- Blocks and dividers
           -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })

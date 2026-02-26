@@ -1,0 +1,64 @@
+# Machine-specific lazygit configuration
+# Copy this file to ~/.lazygit-local.yml and customize for your machine
+#
+# This file provides machine-specific overrides for lazygit, particularly
+# for Git service configurations (GitHub, GitLab, Bitbucket, etc.)
+#
+# Setup instructions:
+# 1. Copy this file: cp ~/dotfiles/.lazygit-local.yml.example ~/.lazygit-local.yml
+# 2. Edit ~/.lazygit-local.yml with your machine-specific settings
+# 3. Add to ~/.zshrc.local:
+#    export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml,$HOME/.lazygit-local.yml"
+# 4. Restart your shell or run: source ~/.zshrc
+
+# Git service configuration for PR/MR support
+# Uncomment and configure based on your machine type:
+#
+# Format: '<git-domain>': '<provider>' or '<provider>:<web-domain>'
+# When git domain and web domain are the same, use: '<domain>': '<provider>:<domain>'
+# When they differ, use: '<git-domain>': '<provider>:<web-domain>'
+
+# --- For personal machine (GitHub.com) ---
+# services:
+#   github.com: github
+
+# --- For work machine (GitHub Enterprise, same domain for git & web) ---
+# services:
+#   github.enterprise.com: 'github:github.enterprise.com'
+
+# --- For work machine (GitHub Enterprise, different domains) ---
+# services:
+#   git.company.com: 'github:github.company.com'
+
+# --- For GitLab ---
+# services:
+#   gitlab.com: gitlab
+
+# --- For Bitbucket ---
+# services:
+#   bitbucket.org: bitbucket
+
+# --- Multiple services (if you work with both) ---
+# services:
+#   github.com: github
+#   github.enterprise.com: 'github:github.enterprise.com'
+#   gitlab.company.com: gitlab
+
+# Other machine-specific settings can go here:
+# - Custom pager settings
+# - Machine-specific editor preferences
+# - Custom commands with machine-specific paths
+#
+# Theme Note:
+# The base config (lazygit-config.yml) uses Catppuccin Frappe Mauve theme
+# to match your other dotfiles (Neovim, starship, terminal, etc.)
+# If you want to override with a different theme, uncomment and customize below:
+#
+# gui:
+#   theme:
+#     # Catppuccin Frappe with different accent (e.g., Blue):
+#     activeBorderColor:
+#       - '#8caaee'
+#       - bold
+#     inactiveBorderColor:
+#       - '#a5adce'

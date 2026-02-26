@@ -19,6 +19,7 @@ atuin/key
 # Machine-specific configs
 .zshrc.local
 .claude
+.lazygit-local.yml
 
 # Neovim package manager lock file
 nvim/lazy-lock.json
