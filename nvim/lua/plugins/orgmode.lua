@@ -23,7 +23,7 @@ return {
         },
         j = {
           description = "Journal",
-          template = "*** [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n** Dreams",
+          template = "* [%<%Y-%m-%d>] %<%A>\n** Reflections\n%?\n\n** Feelings\n\n** Events\n\n",
           target = org_path .. "/journal/journal.org",
         },
       }
@@ -66,6 +66,7 @@ return {
           vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.sapphire, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = true })
           vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = true })
+
           --
           -- -- Priority markers
           -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
@@ -86,6 +87,9 @@ return {
           vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.mauve, italic = true })
           -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
           -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
+          -- Org buffer default text color
+          -- vim.api.nvim_set_hl(0, "OrgNormal", { fg = , bg = colors.base })
+          vim.api.nvim_set_hl(0, "OrgQuoteText", { fg = colors.subtext1, italic = true })
           --
           -- -- Blocks and dividers
           -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })
@@ -99,6 +103,14 @@ return {
 
       -- Apply highlights immediately
       vim.cmd("doautocmd ColorScheme")
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "org",
+        callback = function()
+          -- vim.opt_local.winhighlight:append("Normal:OrgNormal")
+          vim.cmd([[syntax match OrgQuoteText /"[^"\r\n]\+"/]])
+        end,
+      })
     end,
   },
   {
