@@ -41,6 +41,7 @@ plugins=(
   docker
   docker-compose
   macos
+  brew
   python
   node
   npm
@@ -88,6 +89,7 @@ alias vimz="nvim ~/.zshrc"
 alias cat=bat
 alias neo="z ~/Projects && nvim"
 alias vim="nvim"
+alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -333,7 +335,7 @@ ocprompt() {
   # local model="${1:-github-copilot/gpt-4.1}"
   local prompt="${1:-Analyze and summarize this output.}"
   local input=$(cat)
-  local model="anthropic/claude-haiku-4-5"
+  local model="pss-anthropic/claude-haiku-4-5-20251001"
   if [ -z "$PERSONAL" is 0 ]; then
       model="github-copilot/gpt-4.1-personal"
   fi
