@@ -20,7 +20,7 @@ font-size = 16
 # Override Catppuccin Frappe background with custom color
 background = #303446
 # Terminal window transparency (0.97 = 97% opaque, 3% transparent)
-background-opacity = 0.97
+background-opacity = 0.95
 
 # Cursor and selection - Catppuccin Frappe Text color (bluish-grey white)
 cursor-color = #c6d0f5

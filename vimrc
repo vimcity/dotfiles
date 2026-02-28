@@ -26,4 +26,5 @@ autocmd VimLeave * silent !echo -ne "\e[2 q"
 set clipboard=unnamed     " Use system clipboard on macOS
 " Alternative: set clipboard=unnamedplus  " Use this on Linux 
                           
-
+nnoremap d "_d
+vnoremap d "_d
