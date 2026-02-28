@@ -64,7 +64,7 @@ else
 fi
 
 # Install tools via brew
-for formula in lazydocker lazysql; do
+for formula in lazydocker; do
     if brew list "$formula" &> /dev/null; then
         echo "✓ $formula already installed"
     else
@@ -72,6 +72,35 @@ for formula in lazydocker lazysql; do
         brew install "$formula"
     fi
 done
+
+# Install tools from custom taps
+echo "📦 Installing tools from custom taps..."
+
+# taproom from gromgit/brewtils
+if brew list "taproom" &> /dev/null; then
+    echo "✓ taproom already installed"
+else
+    echo "  - Installing taproom..."
+    brew install gromgit/brewtils/taproom
+fi
+
+# llmfit from AlexsJones/llmfit
+if brew list "llmfit" &> /dev/null; then
+    echo "✓ llmfit already installed"
+else
+    echo "  - Installing llmfit..."
+    brew tap AlexsJones/llmfit
+    brew install llmfit
+fi
+
+# models from arimxyer/tap
+if brew list "models" &> /dev/null; then
+    echo "✓ models already installed"
+else
+    echo "  - Installing models..."
+    brew tap arimxyer/tap
+    brew install models
+fi
 
 # Backup existing files
 backup_if_exists "$HOME/.config/ghostty"
