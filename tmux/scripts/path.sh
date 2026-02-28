@@ -24,10 +24,10 @@ fi
 # Folder nerd icon
 icon=""
 
-# Omarchy blue color for directory (matching tabs) - lighter blue with hint of purple
-bg_color="#8CA0E8"  # Omarchy Blue
+# Green color for directory (fresh, vibrant look)
+bg_color="#a6e3a1"  # Catppuccin green
 text_dark="#000000" # Dark text for contrast
 
-# Output with TMUX color codes for pill box styling
-# Format: [color code] space icon path space [reset]
-printf "#[bg=%s,fg=%s,bold] %s %s #[default]" "$bg_color" "$text_dark" "$icon" "$display_path"
+# Output with colored text without pill box
+# Format: [color code] icon path [reset]
+printf "#[fg=%s,bold]%s %s#[default]" "$bg_color" "$icon" "$display_path"
