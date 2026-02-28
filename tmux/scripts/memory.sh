@@ -33,20 +33,20 @@ percentage=$((used_bytes * 100 / total_bytes))
 icon="󰍛"
 
 # Color scheme
-green="#a6e3a1"        # Green (healthy)
-yellow="#fba95c"       # More orangy yellow (warning)
-red="#e25a8a"          # Red (matches prefix color, critical)
-text_dark="#000000"    # Dark text for contrast
+green="#a6e3a1"     # Green (healthy)
+yellow="#ef9f76"    # More orangy yellow (warning)
+red="#e25a8a"       # Red (matches prefix color, critical)
+text_dark="#000000" # Dark text for contrast
 
 # Determine color based on percentage (thirds: 0-33% green, 33-67% yellow, 67%+ red)
 if [ "$percentage" -lt 33 ]; then
-  bg_color="$green"
+    bg_color="$green"
 elif [ "$percentage" -lt 67 ]; then
-  bg_color="$yellow"
+    bg_color="$yellow"
 else
-  bg_color="$red"
+    bg_color="$red"
 fi
 
-# Output with TMUX color codes for pill box with padding
-# Format: [color code] space icon used_gb (percentage%) space [reset]
-printf "#[bg=%s,fg=%s,bold] %s %sGB (%s%%) #[default]" "$bg_color" "$text_dark" "$icon" "$used_gb" "$percentage"
+# Output colored text without pill box
+# Format: [color code] icon used_gb (percentage%) [reset]
+printf "#[fg=%s,bold]%s %sGB (%s%%)#[default]" "$bg_color" "$icon" "$used_gb" "$percentage"
