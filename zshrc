@@ -332,7 +332,6 @@ cheat() {
 
 # OpenCode pipe function - analyze command output with AI
 ocprompt() {
-  # local model="${1:-github-copilot/gpt-4.1}"
   local prompt="${1:-Analyze and summarize this output.}"
   local input=$(cat)
   local model="pss-anthropic/claude-haiku-4-5-20251001"
@@ -343,17 +342,7 @@ ocprompt() {
   echo "$input" | opencode run -m "$model" "Be concise. $prompt"
 }
 
-olparse() {
-  local model="${1:-llama3.2:latest}"
-  local prompt="${2:-Analyze and summarize this output.}"
-  local input=$(cat)
-  
-  # Run ollama and render markdown output with glow (using global config style)
-  echo "$input" | ollama run $model "Be concise. $prompt" | glow -p
-}
-
 alias ocp='ocprompt'
-alias ocl='olprompt'
 
 # Usage examples:
 # docker ps | ocparse
