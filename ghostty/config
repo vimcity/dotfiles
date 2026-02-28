@@ -17,8 +17,10 @@ adjust-cell-height = 35%
 font-size = 16
 
 # Background and foreground
-# Override with a darker background than default Frappe (#303446)
-# background = #232634
+# Override Catppuccin Frappe background with custom color
+background = #303446
+# Terminal window transparency (0.97 = 97% opaque, 3% transparent)
+background-opacity = 0.97
 
 # Cursor and selection - Catppuccin Frappe Text color (bluish-grey white)
 cursor-color = #c6d0f5

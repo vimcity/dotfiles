@@ -6,7 +6,7 @@ return {
     priority = 1000,
     opts = {
       flavour = "frappe", -- latte, frappe, macchiato, mocha
-      transparent_background = false,
+      transparent_background = true,
       show_end_of_buffer = false,
       term_colors = true,
       dim_inactive = {
