@@ -89,7 +89,7 @@ alias vimz="nvim ~/.zshrc"
 alias cat=bat
 alias neo="z ~/Projects && nvim"
 alias vim="nvim"
-alias post="posting --env ~/.local/share/posting/default/posting.env"
+alias posting="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -104,6 +104,7 @@ alias vi=vim
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
 alias lz=lazygit
+alias lzz=lazygit
 alias lzd=lazydocker
 export PYENV_ROOT=
 export PATH="$PYENV_ROOT/shims:$PATH"
