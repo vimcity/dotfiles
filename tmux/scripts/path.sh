@@ -24,8 +24,8 @@ fi
 # Folder nerd icon
 icon=""
 
-# Catppuccin colors - using purple/pink for directory
-bg_color="#c6a0f6"  # Catppuccin Frappe Lavender (purple/pink)
+# Omarchy blue color for directory (matching tabs) - lighter blue with hint of purple
+bg_color="#8CA0E8"  # Omarchy Blue
 text_dark="#000000" # Dark text for contrast
 
 # Output with TMUX color codes for pill box styling
