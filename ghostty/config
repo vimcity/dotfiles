@@ -1,7 +1,6 @@
-# Ghostty Configuration with Catppuccin Frappe Theme
+# Ghostty Configuration 
 # ==================================================
 
-# Use the built-in Catppuccin Frappe theme
 theme = "Catppuccin Frappe"
 
 # Launch maximized
@@ -23,10 +22,8 @@ background-image-fit = cover
 background-image-position = center
 background-image-opacity = 0.05
 
-# Cursor and selection - Catppuccin Frappe Text color (bluish-grey white)
+# Cursor and selection (bluish-grey white)
 cursor-color = #c6d0f5
-
-# Color palette (handled by built-in Catppuccin Frappe theme)
 
 # Shell integration
 shell-integration = zsh
