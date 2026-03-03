@@ -5,6 +5,11 @@
 # Force true color support (24-bit RGB) for tmux and neovim
 export COLORTERM=truecolor
 
+# Homebrew - must be before OMZ so fpath is consistent across login and non-login shells
+# (tmux panes are non-login; without this, fpath differs and zcompdump rebuilds every pane)
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+
 # ===========================================
 # Oh My Zsh Configuration
 # ===========================================
@@ -16,9 +21,25 @@ export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
 export ZSH_DISABLE_COMPFIX=true
 
-# Completion caching (huge speedup)
+# Completion caching
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-policy _omz_cache_policy
+
+# Shadow compinit so OMZ uses -C (skip dump rewrite) when the dump is still valid.
+# If OMZ's metadata check deleted the dump, fall back to a full rebuild.
+autoload -Uz compinit
+compinit() {
+  unfunction compinit
+  autoload -Uz compinit
+  if [[ -f "$ZSH_COMPDUMP" ]]; then
+    compinit -C -d "$ZSH_COMPDUMP"
+  else
+    compinit -d "$ZSH_COMPDUMP"
+  fi
+}
+
+# Stub zrecompile - .zwc from last full build is still valid, no need to recompile every start
+zrecompile() { : }
 
 # ===========================================
 # Shell Behavior Toggles
@@ -27,25 +48,25 @@ export CASE_SENSITIVE="false"
 export ENABLE_CORRECTION="true"
 export HYPHEN_INSENSITIVE="true"
 export DISABLE_MAGIC_FUNCTIONS="true"
-export DISABLE_LS_COLORS="false"
+# eza handles colors, skip OMZ's ls detection
+export DISABLE_LS_COLORS="true"  
 export INSIDE_EMACS=""
 
 # Theme
 ZSH_THEME="robbyrussell"
 
-# Plugins
 plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
   docker
   docker-compose
-  macos
+  # macos
   brew
-  python
-  node
-  npm
-  tmux
+  # python
+  # node
+  # npm
+  # tmux
   extract
   copyfile
   copypath
@@ -124,7 +145,6 @@ alias vnva="source venv/bin/activate"
 eval "$(zoxide init zsh)"
 
 # Starship prompt
-# DISABLED
 # eval "$(starship init zsh)"
 
 # Add spacing between prompts (adds blank line before each prompt)
@@ -138,7 +158,6 @@ if [ -f ~/.fzf.zsh ]; then
     source ~/.fzf.zsh
 fi
 
-# ===========================================
 # ===========================================
 # FD File Finding & Search
 # ===========================================
@@ -157,6 +176,7 @@ fi
 # Keyboard shortcuts in previews:
 #   Ctrl+U/D    - Page up/down
 #   Ctrl+Y/E    - Line up/down
+# ===========================================
 
 # Helper: Detect if file is text or binary
 detect_file_type() {
@@ -346,12 +366,6 @@ ocprompt() {
 
 alias ocp='ocprompt'
 
-# Usage examples:
-# docker ps | ocparse
-# npm test | ocparse
-# git log | ocparse "github/gpt-4.1" "Summarize these commits"
-# cat error.log | ocparse "github/gpt-4.1" "Find the root cause of errors"
-
 # ===========================================
 # Machine-Specific Configuration
 # ===========================================
@@ -386,10 +400,8 @@ alias fab="fabric-ai"
 alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
 
-
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
 # End of LM Studio CLI section
-
 
 # zprof
