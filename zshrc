@@ -86,6 +86,7 @@ alias ahl="atuin history list"
 
 # Python environment
 alias vimz="nvim ~/.zshrc"
+alias vimzz="vimz"
 alias cat=bat
 alias neo="z ~/Projects && nvim"
 alias vim="nvim"
