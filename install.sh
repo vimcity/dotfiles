@@ -105,6 +105,7 @@ fi
 # Backup existing files
 backup_if_exists "$HOME/.config/ghostty"
 backup_if_exists "$HOME/.config/atuin"
+backup_if_exists "$HOME/.config/btop/themes/catppuccin-frappe.theme"
 backup_if_exists "$HOME/.config/starship.toml"
 backup_if_exists "$HOME/.vimrc"
 backup_if_exists "$HOME/.zshrc"
@@ -115,6 +116,7 @@ backup_if_exists "$HOME/.config/lazygit/config.yml"
 # Create .config directory if it doesn't exist
 mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/lazygit"
+mkdir -p "$HOME/.config/btop/themes"
 
 # Create symlinks
 echo "🔗 Creating symlinks..."
@@ -129,6 +131,7 @@ ln -sf "$HOME/dotfiles/fdignore" "$HOME/.fdignore"
 ln -sf "$HOME/dotfiles/bin" "$HOME/.local/scripts"
 ln -sf "$HOME/dotfiles/tmux-cht-languages" "$HOME/.tmux-cht-languages"
 ln -sf "$HOME/dotfiles/tmux-cht-commands" "$HOME/.tmux-cht-commands"
+ln -sf "$HOME/dotfiles/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
 
 echo "✅ Dotfiles installed successfully!"
 echo ""
