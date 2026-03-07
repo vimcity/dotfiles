@@ -381,6 +381,11 @@ killer() { kill $(lsof -t -i:$1); }
 ffs -c "$HOME/.config/fastfetch/config.jsonc" 
 
 # ===========================================
+# JJ (Jujutsu) - Git-compatible VCS
+# ===========================================
+alias ljj='lazyjj'
+
+# ===========================================
 # Git Worktree Aliases
 # ===========================================
 alias gwl='git worktree list'
@@ -399,9 +404,5 @@ alias fabric="fabric-ai"
 alias fab="fabric-ai"
 alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/ritvik/.lmstudio/bin"
-# End of LM Studio CLI section
 
 # zprof
