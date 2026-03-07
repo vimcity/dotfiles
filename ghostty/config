@@ -20,7 +20,8 @@ font-size = 16
 # background-image-fit = cover
 # background-image-fit = contain
 # background-image-position = center
-#Actually background-image-opacity = 0.05
+# background-image-opacity = 0.05
+# background-blur=true
 # background-opacity = 0.85
 
 # Cursor and selection (bluish-grey white)
