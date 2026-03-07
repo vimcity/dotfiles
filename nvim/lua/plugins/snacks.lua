@@ -62,7 +62,7 @@ return {
 
     -- Image rendering
     opts.image = vim.tbl_deep_extend("force", opts.image or {}, {
-      enabled = true,
+      enabled = false,
     })
 
     return opts

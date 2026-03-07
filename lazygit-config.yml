@@ -1,3 +1,4 @@
 git:
   pagers:
-    - pager: delta --dark --paging=never
+    - colorArg: always
+      pager: 'delta --dark --paging=never --syntax-theme "Catppuccin Frappe" --plus-style "syntax #2d3f2f" --plus-emph-style "syntax #3a5440" --minus-style "syntax #4a2d34" --minus-emph-style ""'
