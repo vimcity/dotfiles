@@ -100,7 +100,7 @@ export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
 # Initialize atuin with up arrow disabled (use standard zsh history for up/down)
-eval "$(atuin init zsh --disable-up-arrow)"
+eval "$(atuin init zsh)"
 alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (already set by atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
@@ -128,6 +128,14 @@ alias yz=yazi
 alias lz=lazygit
 alias lzz=lazygit
 alias lzd=lazydocker
+
+# Ensure lazygit loads dotfiles-managed config on macOS
+if [ -f "$HOME/.lazygit-local.yml" ]; then
+    export LG_CONFIG_FILE="$HOME/dotfiles/lazygit-config.yml,$HOME/.lazygit-local.yml"
+else
+    export LG_CONFIG_FILE="$HOME/dotfiles/lazygit-config.yml"
+fi
+
 export PYENV_ROOT=
 export PATH="$PYENV_ROOT/shims:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
@@ -154,9 +162,9 @@ precmd() { print "" }
 export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info'
 
 # Load fzf key bindings and completion
-if [ -f ~/.fzf.zsh ]; then
-    source ~/.fzf.zsh
-fi
+# if [ -f ~/.fzf.zsh ]; then
+#     source ~/.fzf.zsh
+# fi
 
 # ===========================================
 # FD File Finding & Search
@@ -344,8 +352,6 @@ alias down='cd ~/Downloads'
 alias clont='claude --continue'  # Resume latest chat
 export USE_BUILTIN_RIPGREP=0
 
-# OpenCode shortcuts
-export OPENCODE_CONFIG="$HOME/opencode.json"  # Point to OpenCode config
 alias oc='opencode'  # Quick access to OpenCode
 
 cheat() {
@@ -356,9 +362,10 @@ cheat() {
 ocprompt() {
   local prompt="${1:-Analyze and summarize this output.}"
   local input=$(cat)
-  local model="pss-anthropic/claude-haiku-4-5-20251001"
-  if [ -z "$PERSONAL" is 0 ]; then
-      model="github-copilot/gpt-4.1-personal"
+  local model="${WORK_SMALL_MODEL:-pss-anthropic/claude-haiku-4-5-20251001}"
+
+  if [[ "${PERSONAL:-0}" == "1" ]]; then
+      model="${PERSONAL_SMALL_MODEL:-github-copilot/gpt-4.1-personal}"
   fi
   # Run opencode and render markdown output with glow (using global config style)
   echo "$input" | opencode run -m "$model" "Be concise. $prompt"

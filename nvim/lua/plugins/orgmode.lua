@@ -61,11 +61,13 @@ return {
         callback = function()
           -- Get Catppuccin colors
 
+          local omarchy_blue = "#8CA0E8"
+          local dark_omarchy_blue = "#7287fd"
           -- Headline levels (8 levels with gradient of colors)
-          vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = colors.blue, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.sapphire, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = omarchy_blue, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.mauve, bold = false })
+          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = false })
+          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = false })
           --
           -- -- Priority markers
           -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })

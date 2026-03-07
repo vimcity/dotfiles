@@ -102,7 +102,7 @@ show_preview = true
 
 ## default history list format - can also be specified with the --format arg
 #history_format = "{time} - {relativetime} - [{duration}] - {directory}$\t{command}"
-history_format = "{relativetime} | {directory} | {command}"
+# history_format = "{relativetime} | {directory} | {command}"
 ## prevent commands matching any of these regexes from being written to history.
 ## Note that these regular expressions are unanchored, i.e. if they don't start
 ## with ^ or end with $, they'll match anywhere in the command.
@@ -257,21 +257,12 @@ records = true
 ## The port that should be used for TCP on non unix systems
 # tcp_port = 8889
 
-# [theme]
-## Color theme to use for rendering in the terminal.
-## There are some built-in themes, including the base theme ("default"),
-## "autumn" and "marine". You can add your own themes to the "./themes" subdirectory of your
-## Atuin config (or ATUIN_THEME_DIR, if provided) as TOML files whose keys should be one or
-## more of AlertInfo, AlertWarn, AlertError, Annotation, Base, Guidance, Important, and
-## the string values as lowercase entries from this list:
-##    https://ogeon.github.io/docs/palette/master/palette/named/index.html
-## If you provide a custom theme file, it should be  called "NAME.toml" and the theme below
-## should be the stem, i.e. `theme = "NAME"` for your chosen NAME.
-# name = "autumn"
+[theme]
+name = "catppuccin-frappe-blue"
 
 ## Whether the theme manager should output normal or extra information to help fix themes.
 ## Boolean, true or false. If unset, left up to the theme manager.
-# debug = true
+debug = true
 
 [search]
 ## The list of enabled filter modes, in order of priority.

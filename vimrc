@@ -8,7 +8,7 @@ set background=dark
 " ===========================================
 " Catppuccin Theme
 " ===========================================
-colorscheme catppuccin_macchiato
+" colorscheme catppuccin_macchiato
 
 " ===========================================
 " Cursor Shape Configuration
@@ -28,3 +28,8 @@ set clipboard=unnamed     " Use system clipboard on macOS
                           
 nnoremap d "_d
 vnoremap d "_d
+nnoremap D "_D                                                                                                                                                                                                                           █
+nnoremap x "_x                                                                                                                                                                                                                           █
+xnoremap x "_x                                                                                                                                                                                                                           █
+nnoremap c "_c                                                                                                                                                                                                                           █
+xnoremap c "_c

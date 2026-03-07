@@ -16,11 +16,12 @@ adjust-cell-height = 35%
 font-size = 16
 
 # Background
-background-image = ~/dotfiles/ghostty/ghostty-bg.png  
-background-image-fit = cover
+# background-image = ~/dotfiles/ghostty/ghostty-bg.png  
+# background-image-fit = cover
 # background-image-fit = contain
-background-image-position = center
-background-image-opacity = 0.05
+# background-image-position = center
+#Actually background-image-opacity = 0.05
+# background-opacity = 0.85
 
 # Cursor and selection (bluish-grey white)
 cursor-color = #c6d0f5
