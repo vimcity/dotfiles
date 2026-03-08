@@ -100,7 +100,7 @@ export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
 # Initialize atuin with up arrow disabled (use standard zsh history for up/down)
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
 alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (already set by atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
