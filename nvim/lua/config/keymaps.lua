@@ -21,4 +21,8 @@ vim.keymap.set("n", "<C-Up>", "<cmd>resize +10<cr>", { desc = "Increase window h
 vim.keymap.set("n", "<C-Down>", "<cmd>resize -10<cr>", { desc = "Decrease window height" })
 vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -10<cr>", { desc = "Decrease window width" })
 vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +10<cr>", { desc = "Increase window width" })
-vim.keymap.set("n", ":", "q:i", { noremap = true, silent = true, desc = "Cmdwin in insert mode" })
+-- vim.keymap.set("n", ":", "q:i", { noremap = true, silent = true, desc = "Cmdwin in insert mode" })
+-- vim.keymap.set("x", ":", "q:a", { noremap = true, silent = true, desc = "Vidual Cmdwin in insert mode" })
+-- Better command-line editing
+vim.keymap.set("c", "<M-Left>", "<S-Left>", { noremap = true }) -- back a word
+vim.keymap.set("c", "<M-Right>", "<S-Right>", { noremap = true }) -- forward a word
