@@ -3,12 +3,30 @@
 -- Add any additional options here
 
 -- Tab and indentation settings
-vim.opt.tabstop = 4        -- Number of spaces that a <Tab> in the file counts for
-vim.opt.shiftwidth = 4     -- Number of spaces to use for each step of (auto)indent
-vim.opt.expandtab = true   -- Use spaces instead of tabs
-vim.opt.softtabstop = 4    -- Number of spaces that a <Tab> counts for while performing editing operations
+vim.opt.tabstop = 4 -- Number of spaces that a <Tab> in the file counts for
+vim.opt.shiftwidth = 4 -- Number of spaces to use for each step of (auto)indent
+vim.opt.expandtab = true -- Use spaces instead of tabs
+vim.opt.softtabstop = 4 -- Number of spaces that a <Tab> counts for while performing editing operations
 vim.opt.smartindent = true -- Do smart autoindenting when starting a new line
-vim.opt.autoindent = true  -- Copy indent from current line when starting a new line
+vim.opt.autoindent = true -- Copy indent from current line when starting a new line
+
+-- Use system clipboard by default so plain y/yank also writes to + register
+vim.opt.clipboard = "unnamedplus"
+
+-- Clipboard provider overrides for remote/terminal environments.
+if vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-clipboard-get") == 1 then
+  vim.g.clipboard = {
+    name = "termux",
+    copy = {
+      ["+"] = "termux-clipboard-set",
+    },
+    paste = {
+      ["+"] = "termux-clipboard-get",
+    },
+    cache_enabled = 0,
+  }
+end
+
 -- Auto-formatting based on PERSONAL environment variable
 local personal = os.getenv("PERSONAL")
 local autoformat_enabled = personal == "1"
