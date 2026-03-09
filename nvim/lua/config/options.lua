@@ -25,6 +25,21 @@ if vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-
     },
     cache_enabled = 0,
   }
+elseif vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX then
+  local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+  if ok then
+    vim.g.clipboard = {
+      name = "OSC52",
+      copy = {
+        ["+"] = osc52.copy("+"),
+        ["*"] = osc52.copy("*"),
+      },
+      paste = {
+        ["+"] = osc52.paste("+"),
+        ["*"] = osc52.paste("*"),
+      },
+    }
+  end
 end
 
 -- Auto-formatting based on PERSONAL environment variable
