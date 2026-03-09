@@ -1,5 +1,20 @@
 {
     "$schema": "https://fastfetch.org/schema.json",
+    // "logo": {
+    //     "type": "file",
+    //     "source": "~/.config/fastfetch/logo.txt",
+    //     "color": {
+    //         "1": "#d7263d",
+    //         "2": "#f5c542"
+    //     }
+    // },
+    "display": {
+        "color": {
+            "keys": "#ca9ee7",
+            "output": "#8CA0E8",
+            "separator": "#8839ef",
+        }
+    },
     "modules": [
         "Title",
         "Break",
