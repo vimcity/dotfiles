@@ -48,7 +48,6 @@ require("lazy").setup({
 
     -- AI
     { import = "lazyvim.plugins.extras.ai.copilot", cond = function() return (os.getenv("PERSONAL") == "0") end }, -- GitHub Copilot (disabled if PERSONAL=1)
-    { import = "lazyvim.plugins.extras.ai.claudecode" }, -- Claude Code integration
 
     -- 3. Your custom plugins (must come last)
     { import = "plugins" },
@@ -62,7 +61,6 @@ require("lazy").setup({
     version = false, -- always use the latest git commit
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update
