@@ -13,8 +13,11 @@ vim.opt.autoindent = true -- Copy indent from current line when starting a new l
 -- Use system clipboard by default so plain y/yank also writes to + register
 vim.opt.clipboard = "unnamedplus"
 
+-- Auto-formatting based on PERSONAL environment variable
+local personal = os.getenv("PERSONAL")
+local is_personal = personal == "1"
 -- Clipboard provider overrides for remote/terminal environments.
-if vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-clipboard-get") == 1 then
+if is_personal and vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-clipboard-get") == 1 then
   vim.g.clipboard = {
     name = "termux",
     copy = {
@@ -25,7 +28,7 @@ if vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-
     },
     cache_enabled = 0,
   }
-elseif vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX then
+elseif is_personal and (vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX) then
   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
   if ok then
     vim.g.clipboard = {
@@ -42,8 +45,5 @@ elseif vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX then
   end
 end
 
--- Auto-formatting based on PERSONAL environment variable
-local personal = os.getenv("PERSONAL")
-local autoformat_enabled = personal == "1"
 
-vim.g.autoformat = autoformat_enabled
+vim.g.autoformat = is_personal 
