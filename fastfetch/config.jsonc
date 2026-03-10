@@ -12,7 +12,7 @@
         "color": {
             "keys": "#ca9ee7",
             "output": "#8CA0E8",
-            "separator": "#8839ef",
+            "separator": "#ca9ee7",
         }
     },
     "modules": [
