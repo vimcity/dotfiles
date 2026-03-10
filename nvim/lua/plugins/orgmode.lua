@@ -112,15 +112,6 @@ return {
     end,
   },
   {
-    "nvim-treesitter/nvim-treesitter",
-    opts = function(_, opts)
-      -- Add org to the list of installed parsers
-      if type(opts.ensure_installed) == "table" then
-        vim.list_extend(opts.ensure_installed, { "org" })
-      end
-    end,
-  },
-  {
     "akinsho/org-bullets.nvim",
     -- event = "VeryLazy",
     ft = { "org" },
