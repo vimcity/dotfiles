@@ -17,33 +17,33 @@ vim.opt.clipboard = "unnamedplus"
 local personal = os.getenv("PERSONAL")
 local is_personal = personal == "1"
 -- Clipboard provider overrides for remote/terminal environments.
-if is_personal and vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-clipboard-get") == 1 then
-  vim.g.clipboard = {
-    name = "termux",
-    copy = {
-      ["+"] = "termux-clipboard-set",
-    },
-    paste = {
-      ["+"] = "termux-clipboard-get",
-    },
-    cache_enabled = 0,
-  }
-elseif is_personal and (vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX) then
-  local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
-  if ok then
-    vim.g.clipboard = {
-      name = "OSC52",
-      copy = {
-        ["+"] = osc52.copy("+"),
-        ["*"] = osc52.copy("*"),
-      },
-      paste = {
-        ["+"] = osc52.paste("+"),
-        ["*"] = osc52.paste("*"),
-      },
-    }
-  end
-end
+-- if is_personal and vim.fn.executable("termux-clipboard-set") == 1 and vim.fn.executable("termux-clipboard-get") == 1 then
+--   vim.g.clipboard = {
+--     name = "termux",
+--     copy = {
+--       ["+"] = "termux-clipboard-set",
+--     },
+--     paste = {
+--       ["+"] = "termux-clipboard-get",
+--     },
+--     cache_enabled = 0,
+--   }
+-- elseif is_personal and (vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMUX) then
+--   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+--   if ok then
+--     vim.g.clipboard = {
+--       name = "OSC52",
+--       copy = {
+--         ["+"] = osc52.copy("+"),
+--         ["*"] = osc52.copy("*"),
+--       },
+--       paste = {
+--         ["+"] = osc52.paste("+"),
+--         ["*"] = osc52.paste("*"),
+--       },
+--     }
+--   end
+-- end
 
 
 vim.g.autoformat = is_personal 
