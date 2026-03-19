@@ -376,7 +376,23 @@ alias ocp='ocprompt'
 # ===========================================
 # Machine-Specific Configuration
 # ===========================================
+# OpenCode Tmux Status Plugin
+# ===========================================
+# Auto-reset Tmux window color to blue when you switch to a Tmux window
+# (allows permission prompts and task completion indicators to auto-clear on focus)
+if [[ -n "$TMUX_PANE" ]]; then
+    # Run once on shell startup to reset any stale status colors
+    tmux set-window-option -t current status-style bg=blue 2>/dev/null
+    
+    # Hook into Tmux window focus event (fires when pane gains focus)
+    # This resets the status color to blue when you switch to the window
+    trap "tmux set-window-option -t current status-style bg=blue 2>/dev/null" USR1
+fi
+
+# ===========================================
 # Source local configuration if it exists
+# ========================================== 
+
 # Use this file for machine-specific overrides, work configs, API keys, etc.
 if [ -f ~/.zshrc.local ]; then
     source ~/.zshrc.local

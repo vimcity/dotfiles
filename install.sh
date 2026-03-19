@@ -119,6 +119,7 @@ mkdir -p "$HOME/.config"
 mkdir -p "$HOME/.config/lazygit"
 mkdir -p "$HOME/Library/Application Support/lazygit"
 mkdir -p "$HOME/.config/btop/themes"
+mkdir -p "$HOME/.config/opencode"
 
 # Create symlinks
 echo "🔗 Creating symlinks..."
@@ -135,6 +136,7 @@ ln -sf "$HOME/dotfiles/bin" "$HOME/.local/scripts"
 ln -sf "$HOME/dotfiles/tmux-cht-languages" "$HOME/.tmux-cht-languages"
 ln -sf "$HOME/dotfiles/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 ln -sf "$HOME/dotfiles/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+ln -sf "$HOME/dotfiles/opencode/plugins" "$HOME/.config/opencode/plugins"
 
 echo "✅ Dotfiles installed successfully!"
 echo ""
