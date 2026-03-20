@@ -19,9 +19,11 @@ font-size = 16
 # Background
 # background-image = ~/dotfiles/ghostty/ghostty-bg.png
 background-image = ~/dotfiles/ghostty/bag.jpg
+# background-image = ~/dotfiles/ghostty/5.jpg
 background-image-fit = cover
 background-image-position = center
-background-image-opacity = 0.10
+background-image-opacity = 0.13
+# background-image-opacity = 0.05
 # background-blur=true
 # background-opacity = 0.93
 
