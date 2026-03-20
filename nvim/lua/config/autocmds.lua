@@ -39,3 +39,11 @@ vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
     end
   end,
 })
+
+-- Auto-format Java files on save using jdtls (LSP)
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.java",
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+  end,
+})
