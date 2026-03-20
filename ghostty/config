@@ -13,16 +13,16 @@ window-save-state = always
 font-family = "CommitMono"
 adjust-cell-height = 35%
 # font-family = "JetBrains Mono NF"
-# adjust-cell-height = 25%
+# adjust-cell-height = 15%
 font-size = 16
 
 # Background
-background-image = ~/dotfiles/ghostty/ghostty-bg.png  
-background-image-fit = cover
-background-image-position = center
-background-image-opacity = 0.05
-# background-blur=true
-# background-opacity = 0.85
+# background-image = ~/dotfiles/ghostty/ghostty-bg.png
+# background-image-fit = cover
+# background-image-position = center
+# background-image-opacity = 0.05
+background-blur=true
+background-opacity = 0.95
 
 # Cursor and selection (bluish-grey white)
 cursor-color = #c6d0f5
