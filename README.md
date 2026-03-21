@@ -98,7 +98,6 @@ This configuration emphasizes:
   - tmux-fzf-url (fuzzy find and open URLs from terminal output)
   - tmux-sessionist (enhanced session management shortcuts)
   - tmux-battery & cpu (system resource monitoring in status bar)
-  - tmux-pomodoro-plus (integrated pomodoro timer with display script)
 - **Theme**: Catppuccin Frappe with custom zoom level controls
 - Mouse support enabled
 - History limit: 1 million lines
