@@ -39,7 +39,7 @@ tmux -f tmux/tmux.conf new -d  # Test tmux config (creates detached session)
 - `nvim/lua/config/keymaps.lua` - Neovim key mappings with which-key groups
 - `tmux/tmux.conf` - Main tmux config (sources modular configs)
 - `tmux/conf/settings.conf`, `keybindings.conf`, `plugins.conf`, `theme.conf` - Modular tmux
-- `tmux/scripts/` - Helper scripts (pomodoro-display, memory, path monitoring)
+- `tmux/scripts/` - Helper scripts (memory, path monitoring)
 - `ghostty/config` - Terminal emulator settings (colors, fonts, keybinds)
 - `atuin/config.toml` - Shell history configuration
 - `lazygit-config.yml` - Shared lazygit settings (theme, pager, GUI)
