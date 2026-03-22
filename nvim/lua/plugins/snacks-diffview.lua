@@ -2,7 +2,7 @@
 -- Bridge plugin combining Snacks.gh PR workflow with DiffView.nvim layout
 
 return {
-  dir = "~/dotfiles/snacks-diffview",
+  dir = "~/Projects/snacks-diffview",
   name = "snacks-diffview",
   dependencies = {
     "folke/snacks.nvim",
