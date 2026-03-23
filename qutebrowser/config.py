@@ -110,11 +110,11 @@ config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
 config.bind("x", "tab-close")
-# config.unbind("d")
 config.bind("d", "cmd-run-with-count 10 scroll down")
-config.bind("D", "cmd-run-with-count 10 scroll up")
+config.bind("u", "cmd-run-with-count 10 scroll up")
+config.bind("X", "undo")
 config.bind(",r", "config-source")
-config.bind("X", "tab-close -o")
+# config.bind("X", "tab-close -o")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
