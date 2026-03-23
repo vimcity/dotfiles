@@ -1,3 +1,5 @@
+# ruff: noqa: F821, F822
+# pyright: reportUndefinedVariable=false, reportGeneralTypeIssues=false
 config.load_autoconfig()
 
 # Minimal session-first workflow
@@ -92,6 +94,7 @@ c.hints.selectors["all"].append("input[type='radio']")
 c.hints.selectors["all"].append("label")
 c.hints.selectors["all"].append("[role='checkbox']")
 c.hints.selectors["all"].append("[role='radio']")
+c.hints.uppercase = True
 
 # Command aliases for faster command-line usage.
 c.aliases["qm"] = "quickmark-load"
@@ -106,6 +109,7 @@ config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
 config.bind("x", "tab-close")
+config.unbind("d")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
