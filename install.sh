@@ -3,6 +3,16 @@
 
 set -e
 
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [ "$(uname -s)" = "Darwin" ]; then
+    QUTE_CONFIG_DIR="$HOME/.qutebrowser"
+    QUTE_DATA_DIR="$HOME/Library/Application Support/qutebrowser"
+else
+    QUTE_CONFIG_DIR="$HOME/.config/qutebrowser"
+    QUTE_DATA_DIR="$HOME/.local/share/qutebrowser"
+fi
+
 echo "🔧 Installing dotfiles..."
 
 # Backup existing configs
@@ -113,6 +123,10 @@ backup_if_exists "$HOME/.tmux.conf"
 backup_if_exists "$HOME/.fdignore"
 backup_if_exists "$HOME/.config/lazygit/config.yml"
 backup_if_exists "$HOME/Library/Application Support/lazygit/config.yml"
+backup_if_exists "$QUTE_CONFIG_DIR/config.py"
+backup_if_exists "$QUTE_CONFIG_DIR/greasemonkey"
+backup_if_exists "$QUTE_CONFIG_DIR/quickmarks"
+backup_if_exists "$QUTE_DATA_DIR/userscripts/bw-copy"
 
 # Create .config directory if it doesn't exist
 mkdir -p "$HOME/.config"
@@ -120,23 +134,31 @@ mkdir -p "$HOME/.config/lazygit"
 mkdir -p "$HOME/Library/Application Support/lazygit"
 mkdir -p "$HOME/.config/btop/themes"
 mkdir -p "$HOME/.config/opencode"
+mkdir -p "$QUTE_CONFIG_DIR"
+mkdir -p "$QUTE_DATA_DIR/userscripts"
 
 # Create symlinks
 echo "🔗 Creating symlinks..."
-ln -sf "$HOME/dotfiles/ghostty" "$HOME/.config/ghostty"
-ln -sf "$HOME/dotfiles/atuin" "$HOME/.config/atuin"
-ln -sf "$HOME/dotfiles/starship.toml" "$HOME/.config/starship.toml"
-ln -sf "$HOME/dotfiles/lazygit-config.yml" "$HOME/.config/lazygit/config.yml"
-ln -sf "$HOME/dotfiles/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
-ln -sf "$HOME/dotfiles/vimrc" "$HOME/.vimrc"
-ln -sf "$HOME/dotfiles/zshrc" "$HOME/.zshrc"
-ln -sf "$HOME/dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
-ln -sf "$HOME/dotfiles/fdignore" "$HOME/.fdignore"
-ln -sf "$HOME/dotfiles/bin" "$HOME/.local/scripts"
-ln -sf "$HOME/dotfiles/tmux-cht-languages" "$HOME/.tmux-cht-languages"
-ln -sf "$HOME/dotfiles/tmux-cht-commands" "$HOME/.tmux-cht-commands"
-ln -sf "$HOME/dotfiles/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
-ln -sf "$HOME/dotfiles/opencode/plugins" "$HOME/.config/opencode/plugins"
+ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
+ln -sf "$DOTFILES_DIR/atuin" "$HOME/.config/atuin"
+ln -sf "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+ln -sf "$DOTFILES_DIR/lazygit-config.yml" "$HOME/.config/lazygit/config.yml"
+ln -sf "$DOTFILES_DIR/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
+ln -sf "$DOTFILES_DIR/vimrc" "$HOME/.vimrc"
+ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+ln -sf "$DOTFILES_DIR/tmux/tmux.conf" "$HOME/.tmux.conf"
+ln -sf "$DOTFILES_DIR/fdignore" "$HOME/.fdignore"
+ln -sf "$DOTFILES_DIR/bin" "$HOME/.local/scripts"
+ln -sf "$DOTFILES_DIR/tmux-cht-languages" "$HOME/.tmux-cht-languages"
+ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
+ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
+
+# qutebrowser (config + userscripts + greasemonkey + quickmarks)
+ln -sf "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
+ln -sf "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
+ln -sf "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
+ln -sf "$DOTFILES_DIR/qutebrowser/userscripts/bw-copy" "$QUTE_DATA_DIR/userscripts/bw-copy"
 
 echo "✅ Dotfiles installed successfully!"
 echo ""
