@@ -2,6 +2,7 @@
 # pyright: reportUndefinedVariable=false, reportGeneralTypeIssues=false
 config.load_autoconfig()
 
+c.scrolling.smooth = True
 # Minimal session-first workflow
 c.auto_save.session = True
 c.session.default_name = "main"
@@ -109,7 +110,11 @@ config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
 config.bind("x", "tab-close")
-config.unbind("d")
+# config.unbind("d")
+config.bind("d", "cmd-run-with-count 10 scroll down")
+config.bind("D", "cmd-run-with-count 10 scroll up")
+config.bind(",r", "config-source")
+config.bind("X", "tab-close -o")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
