@@ -122,6 +122,8 @@ alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '
 alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
 
 alias sdf="source ~/.zshrc"
+
+
 alias vi=vim
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
@@ -429,4 +431,5 @@ alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
+alias qt='qutebrowser >/dev/null 2>&1 &'
 # zprof

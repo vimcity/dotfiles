@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+MODE="${1:-password}"  # password|username
+HOST="$(python3 -c 'from urllib.parse import urlparse; import os; print(urlparse(os.environ.get("QUTE_URL","")).hostname or "")')"
+SESSION="${BW_SESSION:-}"
+if [[ -z "$SESSION" ]]; then
+  SESSION="$(launchctl getenv BW_SESSION 2>/dev/null || true)"
+fi
+
+if [[ -z "$SESSION" ]]; then
+  echo "message-error 'BW_SESSION not set. Run: bwup'" >> "$QUTE_FIFO"
+  exit 1
+fi
+ITEM_JSON="$(bw list items --search "$HOST" --session "$SESSION" \
+  | jq -c 'map(select(.login and .login.password != null)) | .[0]')"
+if [[ "$ITEM_JSON" == "null" || -z "$ITEM_JSON" ]]; then
+  echo "message-error 'No Bitwarden login found for $HOST'" >> "$QUTE_FIFO"
+  exit 1
+fi
+if [[ "$MODE" == "username" ]]; then
+  VALUE="$(printf '%s' "$ITEM_JSON" | jq -r '.login.username // empty')"
+else
+  VALUE="$(printf '%s' "$ITEM_JSON" | jq -r '.login.password // empty')"
+fi
+if [[ -z "$VALUE" ]]; then
+  echo "message-error 'Requested field empty for $HOST'" >> "$QUTE_FIFO"
+  exit 1
+fi
+printf '%s' "$VALUE" | pbcopy
+echo "message-info 'Bitwarden ${MODE} copied for $HOST'" >> "$QUTE_FIFO"
