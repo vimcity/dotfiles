@@ -10,6 +10,12 @@ c.session.lazy_restore = True
 c.window.hide_decoration = True
 c.tabs.last_close = "close"
 
+# Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
+c.content.blocking.enabled = True
+c.content.blocking.adblock.lists = [
+    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+]
+
 # Prevent videos from auto-playing when loading many tabs.
 c.content.autoplay = False
 
@@ -119,3 +125,14 @@ config.bind(",r", "config-source")
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
 config.bind(",M", "cmd-set-text -s :quickmark-load -t ")
+
+# Launch YouTube in mpv (yt-dlp backend) instead of in-browser playback
+config.bind(
+    ",ym",
+    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {url}",
+)
+config.bind(
+    ",yM",
+    "hint links spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {hint-url}",
+)
+config.bind(",h", "config-cycle tabs.show never multiple")
