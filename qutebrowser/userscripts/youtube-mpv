@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Play the active qutebrowser tab in mpv using yt-dlp support.
+set -euo pipefail
+
+URL="${QUTE_URL:-${1:-}}"
+
+if [[ -z "$URL" ]]; then
+  echo "youtube-mpv: no URL provided" >&2
+  exit 1
+fi
+
+MPV_BIN="$(command -v mpv || true)"
+if [[ -z "$MPV_BIN" ]]; then
+  MPV_BIN="/opt/homebrew/bin/mpv"
+fi
+
+YTDLP_BIN="$(command -v yt-dlp || true)"
+if [[ -z "$YTDLP_BIN" ]]; then
+  YTDLP_BIN="/opt/homebrew/bin/yt-dlp"
+fi
+
+if [[ ! -x "$MPV_BIN" ]]; then
+  echo "youtube-mpv: mpv binary not found (looked for '$MPV_BIN')" >&2
+  exit 1
+fi
+
+if [[ ! -x "$YTDLP_BIN" ]]; then
+  echo "youtube-mpv: yt-dlp binary not found (looked for '$YTDLP_BIN')" >&2
+  exit 1
+fi
+
+LOG_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/qutebrowser/userscripts"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/youtube-mpv.log"
+
+echo "youtube-mpv: launching $MPV_BIN (log=$LOG_FILE)" >&2
+
+exec "$MPV_BIN" \
+  --ytdl-format="bestvideo[height<=?1080]+bestaudio/best" \
+  --ytdl=yes \
+  --ytdl-path="$YTDLP_BIN" \
+  --really-quiet \
+  "$URL" >>"$LOG_FILE" 2>&1
