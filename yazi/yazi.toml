@@ -1,0 +1,9 @@
+[manager]
+# Adjust panel width ratio: left_preview : main : right_preview
+# Default is roughly [1, 2, 1], increase first number for wider left panel
+ratio = [2, 3, 2]
+
+[preview]
+# Whether to display preview pane
+tab_size = 2
+max_width = 600
