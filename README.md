@@ -103,6 +103,8 @@ This configuration emphasizes:
 - History limit: 1 million lines
 - Auto-save sessions every 15 minutes
 - Path monitoring script for directory tracking
+- **Prompt cleanup shortcut**: `Prefix + p` reads macOS clipboard, runs `fabric -p voice_to_clean_prompt`, and writes the improved prompt back to clipboard
+  - Requires `fabric` in `PATH` and `~/.config/fabric/patterns/voice_to_clean_prompt/system.md`
 
 ### Text Editor
 **Neovim (LazyVim)** - Modern modal text editor
@@ -166,6 +168,7 @@ Custom functions for fuzzy finding:
 
 ### AI Integration
 - **OpenCode** - AI-assisted command workflow (CLI agent tool)
+- **Fabric voice prompt cleanup** - `voice_to_clean_prompt` pattern for fixing spoken/transcribed prompts
 - **GitHub Copilot** - Code suggestions in Neovim
 - **CodeCompanion** - Local AI chat with Ollama integration (optional)
 - **Ollama** - Local LLM backend for CodeCompanion
@@ -197,7 +200,7 @@ dotfiles/
 │   │   ├── plugins.conf      # Plugin declarations
 │   │   ├── keybindings.conf  # Key mappings
 │   │   └── theme.conf        # Theme and appearance
-│   ├── scripts/               # Helper scripts (pomodoro, memory monitoring, path tracking)
+│   ├── scripts/               # Helper scripts (pomodoro, memory monitoring, path tracking, clipboard prompt cleanup)
 │   └── tmux.conf       # Main config (sources modules)
 ├── zshrc               # Zsh configuration with extensive aliases
 ├── starship.toml       # Prompt configuration
