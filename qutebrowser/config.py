@@ -18,7 +18,7 @@ c.content.blocking.adblock.lists = [
 
 # Prevent videos from auto-playing when loading many tabs.
 c.content.autoplay = False
-
+c.content.headers.do_not_track = True
 # Open PDF files inside qutebrowser (PDF.js) instead of download prompt when possible.
 c.content.pdfjs = True
 
@@ -101,7 +101,10 @@ c.hints.selectors["all"].append("input[type='radio']")
 c.hints.selectors["all"].append("label")
 c.hints.selectors["all"].append("[role='checkbox']")
 c.hints.selectors["all"].append("[role='radio']")
+# Make hint labels easier to type and more predictable.
 c.hints.uppercase = True
+c.hints.scatter = False
+c.hints.chars = "fbcvodsauiert"
 
 # Command aliases for faster command-line usage.
 c.aliases["qm"] = "quickmark-load"
@@ -132,7 +135,15 @@ config.bind(
     "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {url}",
 )
 config.bind(
+    ",yl",
+    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes --loop-file=inf --keep-open=yes {url}",
+)
+config.bind(
     ",yM",
     "hint links spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {hint-url}",
+)
+config.bind(
+    ",yl",
+    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes --loop-file=inf {url}",
 )
 config.bind(",h", "config-cycle tabs.show never multiple")
