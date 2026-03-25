@@ -62,4 +62,4 @@ elseif is_personal and (vim.env.SSH_TTY or vim.env.SSH_CONNECTION or vim.env.TMU
   end
 end
 
-vim.g.autoformat = is_personal
+vim.g.autoformat = true 
