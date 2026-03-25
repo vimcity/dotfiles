@@ -15,17 +15,14 @@ fi
 
 echo "🔧 Installing dotfiles..."
 
-# Backup existing configs
-backup_dir="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$backup_dir"
-
-backup_if_exists() {
-    if [ -e "$1" ] && [ ! -L "$1" ]; then
-        echo "📦 Backing up $1 to $backup_dir"
-        mv "$1" "$backup_dir/"
-    elif [ -L "$1" ]; then
+# Remove existing configs before relinking
+remove_if_exists() {
+    if [ -L "$1" ]; then
         echo "🔗 Removing existing symlink $1"
         rm "$1"
+    elif [ -e "$1" ]; then
+        echo "🗑️ Removing existing $1"
+        rm -rf "$1"
     fi
 }
 
@@ -112,21 +109,25 @@ else
     brew install models
 fi
 
-# Backup existing files
-backup_if_exists "$HOME/.config/ghostty"
-backup_if_exists "$HOME/.config/atuin"
-backup_if_exists "$HOME/.config/btop/themes/catppuccin-frappe.theme"
-backup_if_exists "$HOME/.config/starship.toml"
-backup_if_exists "$HOME/.vimrc"
-backup_if_exists "$HOME/.zshrc"
-backup_if_exists "$HOME/.tmux.conf"
-backup_if_exists "$HOME/.fdignore"
-backup_if_exists "$HOME/.config/lazygit/config.yml"
-backup_if_exists "$HOME/Library/Application Support/lazygit/config.yml"
-backup_if_exists "$QUTE_CONFIG_DIR/config.py"
-backup_if_exists "$QUTE_CONFIG_DIR/greasemonkey"
-backup_if_exists "$QUTE_CONFIG_DIR/quickmarks"
-backup_if_exists "$QUTE_DATA_DIR/userscripts/bw-copy"
+# Remove existing files
+remove_if_exists "$HOME/.config/ghostty"
+remove_if_exists "$HOME/.config/atuin"
+remove_if_exists "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+remove_if_exists "$HOME/.config/starship.toml"
+remove_if_exists "$HOME/.vimrc"
+remove_if_exists "$HOME/.zshrc"
+remove_if_exists "$HOME/.tmux.conf"
+remove_if_exists "$HOME/.fdignore"
+remove_if_exists "$HOME/.config/lazygit/config.yml"
+remove_if_exists "$HOME/Library/Application Support/lazygit/config.yml"
+remove_if_exists "$QUTE_CONFIG_DIR/config.py"
+remove_if_exists "$QUTE_CONFIG_DIR/greasemonkey"
+remove_if_exists "$QUTE_CONFIG_DIR/quickmarks"
+remove_if_exists "$QUTE_DATA_DIR/userscripts/bw-copy"
+
+if [ -d "$DOTFILES_DIR/yazi" ]; then
+    remove_if_exists "$HOME/.config/yazi"
+fi
 
 # Create .config directory if it doesn't exist
 mkdir -p "$HOME/.config"
@@ -154,6 +155,11 @@ ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
 ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
 
+if [ -d "$DOTFILES_DIR/yazi" ]; then
+    echo "📁 Found yazi config in dotfiles, linking..."
+    ln -sf "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
+fi
+
 # qutebrowser (config + userscripts + greasemonkey + quickmarks)
 ln -sf "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
 ln -sf "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
@@ -175,6 +181,3 @@ echo "   1. Start tmux: tmux"
 echo "   2. Press: Ctrl+Space then Shift+I (capital i)"
 echo "   3. Wait for plugins to install"
 echo ""
-if [ -d "$backup_dir" ] && [ "$(ls -A $backup_dir)" ]; then
-    echo "💾 Original configs backed up to: $backup_dir"
-fi
