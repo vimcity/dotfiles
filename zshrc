@@ -1,4 +1,4 @@
-# zmodload zsh/zprof
+ # zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -25,14 +25,15 @@ export ZSH_DISABLE_COMPFIX=true
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-policy _omz_cache_policy
 
-# Shadow compinit so OMZ uses -C (skip dump rewrite) when the dump is still valid.
-# If OMZ's metadata check deleted the dump, fall back to a full rebuild.
+# Shadow compinit so OMZ reuses the cached dump on normal startups.
+# `-C` skips the expensive rebuild/security checks and `-D` avoids rewriting
+# the dump file every shell. If the dump is missing, fall back to a full build.
 autoload -Uz compinit
 compinit() {
   unfunction compinit
   autoload -Uz compinit
   if [[ -f "$ZSH_COMPDUMP" ]]; then
-    compinit -C -d "$ZSH_COMPDUMP"
+    compinit -C -D -d "$ZSH_COMPDUMP"
   else
     compinit -d "$ZSH_COMPDUMP"
   fi
@@ -59,7 +60,7 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-  docker
+  # docker
   docker-compose
   # macos
   brew
@@ -67,8 +68,8 @@ plugins=(
   # node
   # npm
   # tmux
-  extract
-  copyfile
+  # extract
+  # copyfile
   copypath
 )
 
@@ -140,7 +141,7 @@ prompt_git_segment() {
         branch="detached"
     fi
 
-    segment="%F{#8CA0E8} %f${branch}"
+    segment="%F{#a6d189} %F{#7287fd}%B${branch}%b%f"
 
     if [[ "$branch_line" =~ 'ahead ([0-9]+)' ]]; then
         segment+=" %F{#8CA0E8}⇡${match[1]}%f"
@@ -181,11 +182,11 @@ prompt_git_segment() {
     (( has_untracked )) && segment+=" %F{#ef9f76}%f"
     (( has_conflicts )) && segment+=" %F{#e78284}%f"
 
-    prompt_segment '#5a5a7a' '#ffffff' "$segment"
+    prompt_segment '#2A2C3B' '#7287fd' "$segment"
 }
 
 prompt_dir_segment() {
-    prompt_segment '#7287fd' '#303446' '%B%1~%b'
+    prompt_segment '#7287fd' '#202131' '%B%1~%b'
 }
 
 prompt_build_left() {
@@ -243,7 +244,7 @@ add-zsh-hook precmd prompt_precmd
 add-zsh-hook preexec prompt_preexec
 
 PROMPT='$(prompt_build_left)'
-PROMPT+=$'\n''%(?.%F{#a6d189}.%F{#e78284})$%f '
+PROMPT+=$'\n''%F{#ef9f76}$%f '
 
 # ===========================================
 # Zsh History Configuration
@@ -569,8 +570,8 @@ fi
 
 #fastfetch
 alias ffs='fastfetch'
-killer() { kill $(lsof -t -i:$1); }
-ffs -c "$HOME/.config/fastfetch/config.jsonc" 
+# killer() { kill $(lsof -t -i:$1); }
+# ffs -c "$HOME/.config/fastfetch/config.jsonc" 
 
 # ===========================================
 # JJ (Jujutsu) - Git-compatible VCS
@@ -599,7 +600,6 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
-# zprof
 prompt_format_duration() {
     local elapsed_ms="$1"
 
@@ -609,3 +609,4 @@ prompt_format_duration() {
         printf '%d.%01ds' $(( elapsed_ms / 1000 )) $(( ( elapsed_ms % 1000 ) / 100 ))
     fi
 }
+# zprof
