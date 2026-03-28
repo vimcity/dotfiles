@@ -91,6 +91,8 @@ c.colors.messages.error.fg = "#e78284"
 c.colors.prompts.bg = "#232634"
 c.colors.prompts.fg = "#c6d0f5"
 
+c.colors.statusbar.progress.bg = "#8caaee"
+
 c.colors.hints.bg = "#e5c890"
 c.colors.hints.fg = "#232634"
 c.colors.hints.match.fg = "#e78284"
@@ -104,7 +106,7 @@ c.hints.selectors["all"].append("[role='radio']")
 # Make hint labels easier to type and more predictable.
 c.hints.uppercase = True
 c.hints.scatter = False
-c.hints.chars = "fbcvodsauiert"
+# c.hints.chars = "fbcvodsauiert"
 
 # Command aliases for faster command-line usage.
 c.aliases["qm"] = "quickmark-load"
@@ -147,3 +149,17 @@ config.bind(
     "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes --loop-file=inf {url}",
 )
 config.bind(",h", "config-cycle tabs.show never multiple")
+
+# Allow clicking links with custom URI schemes (e.g. slack://) to open in macOS default app
+c.content.unknown_url_scheme_policy = "allow-all"
+
+# Spoof Chrome user agent for Microsoft Teams so it allows launching the desktop app
+config.set(
+    "content.headers.user_agent",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "https://teams.microsoft.com/*",
+)
+
+# Pass Shift-Tab through to the page in both normal and insert mode
+config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="normal")
+config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="insert")
