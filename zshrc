@@ -99,7 +99,7 @@ ZSH_THEME_GIT_COMMITS_AHEAD_SUFFIX=""
 ZSH_THEME_GIT_COMMITS_BEHIND_PREFIX=" %F{#6c76c2}⇣%f"
 ZSH_THEME_GIT_COMMITS_BEHIND_SUFFIX=""
 
-typeset -g PROMPT_CMD_START=0
+typeset -gF PROMPT_CMD_START=0
 typeset -g PROMPT_LAST_DURATION=''
 
 prompt_segment() {
@@ -221,12 +221,13 @@ prompt_precmd() {
     local last_status="$?"
 
     if (( PROMPT_CMD_START > 0 )); then
-        local elapsed_ms=$(( ( EPOCHREALTIME * 1000 ) - PROMPT_CMD_START ))
+        local elapsed_ms=$(( ( EPOCHREALTIME - PROMPT_CMD_START) * 1000 ))
         if (( elapsed_ms >= 1200 )); then
             PROMPT_LAST_DURATION="$(prompt_format_duration "$elapsed_ms")"
         else
             PROMPT_LAST_DURATION=''
         fi
+        PROMPT_CMD_START=0
     else
         PROMPT_LAST_DURATION=''
     fi
@@ -236,7 +237,7 @@ prompt_precmd() {
 }
 
 prompt_preexec() {
-    PROMPT_CMD_START=$(( EPOCHREALTIME * 1000 ))
+    PROMPT_CMD_START=$EPOCHREALTIME
 }
 
 autoload -Uz add-zsh-hook
