@@ -111,9 +111,36 @@ prompt_segment() {
 
 prompt_context_segment() {
     if [[ -n "$SSH_CONNECTION" || "$EUID" -eq 0 ]]; then
-        prompt_segment '#414559' '#c6d0f5' '%n@%m'
-        print -n ' '
+        prompt_segment '#414559' '#c6d0f5' '%n'
     fi
+}
+
+prompt_dir_display() {
+    local path="$PWD"
+
+    if [[ "$path" == "$HOME" ]]; then
+        print -r -- "~"
+        return
+    fi
+
+    if [[ "$path" != "$HOME"/* ]]; then
+        print -r -- "$path"
+        return
+    fi
+
+    local rel_path="${path#$HOME/}"
+    local -a path_parts
+    path_parts=("${(@s:/:)rel_path}")
+
+    local part
+    for part in "${path_parts[@]}"; do
+        if [[ "$part" == .* ]]; then
+            print -r -- "~/${rel_path}"
+            return
+        fi
+    done
+
+    print -r -- "${path_parts[-1]}"
 }
 
 prompt_venv_segment() {
@@ -186,7 +213,7 @@ prompt_git_segment() {
 }
 
 prompt_dir_segment() {
-    prompt_segment '#7287fd' '#202131' '%B%1~%b'
+    prompt_segment '#7287fd' '#202131' "%B$(prompt_dir_display)%b"
 }
 
 prompt_build_left() {
