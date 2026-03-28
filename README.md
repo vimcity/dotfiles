@@ -203,7 +203,6 @@ dotfiles/
 │   ├── scripts/               # Helper scripts (pomodoro, memory monitoring, path tracking, clipboard prompt cleanup)
 │   └── tmux.conf       # Main config (sources modules)
 ├── zshrc               # Zsh configuration with extensive aliases
-├── starship.toml       # Prompt configuration
 ├── lazygit-config.yml  # Git UI configuration
 ├── karabiner.json      # Keyboard remapping (Corne, traditional layouts)
 ├── gitconfig.delta     # Delta git diff config
@@ -236,7 +235,7 @@ dotfiles/
 
 These tools should be installed via Homebrew or other package managers:
 - **Core**: ghostty, neovim, tmux, zsh
-- **Utilities**: starship, atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, glow, lazygit, fastfetch, yazi
+- **Utilities**: atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, glow, lazygit, fastfetch, yazi
 - **Optional**: pyenv (Python), ollama (local LLM), Karabiner-Elements (keyboard remapping)
 - **Font**: JetBrains Mono Nerd Font or CommitMono (see https://commitmono.com/)
 
