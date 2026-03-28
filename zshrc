@@ -53,7 +53,7 @@ export DISABLE_LS_COLORS="true"
 export INSIDE_EMACS=""
 
 # Theme
-ZSH_THEME="robbyrussell"
+ZSH_THEME=""
 
 plugins=(
   git
@@ -74,6 +74,176 @@ plugins=(
 
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
+
+# ===========================================
+# Prompt
+# ===========================================
+setopt PROMPT_SUBST
+zmodload zsh/datetime
+
+ZSH_THEME_GIT_PROMPT_PREFIX=" %F{#7287fd} "
+ZSH_THEME_GIT_PROMPT_SUFFIX="%f"
+ZSH_THEME_GIT_PROMPT_DIRTY=""
+ZSH_THEME_GIT_PROMPT_CLEAN=""
+
+ZSH_THEME_GIT_PROMPT_ADDED=" %F{#a6d189}●%f"
+ZSH_THEME_GIT_PROMPT_MODIFIED=" %F{#e5c890}✚%f"
+ZSH_THEME_GIT_PROMPT_DELETED=" %F{#e78284}✖%f"
+ZSH_THEME_GIT_PROMPT_RENAMED=" %F{#8caaee}➜%f"
+ZSH_THEME_GIT_PROMPT_UNMERGED=" %F{#e78284}═%f"
+ZSH_THEME_GIT_PROMPT_UNTRACKED=" %F{#ef9f76}◌%f"
+
+ZSH_THEME_GIT_COMMITS_AHEAD_PREFIX=" %F{#8CA0E8}⇡%f"
+ZSH_THEME_GIT_COMMITS_AHEAD_SUFFIX=""
+ZSH_THEME_GIT_COMMITS_BEHIND_PREFIX=" %F{#6c76c2}⇣%f"
+ZSH_THEME_GIT_COMMITS_BEHIND_SUFFIX=""
+
+typeset -g PROMPT_CMD_START=0
+typeset -g PROMPT_LAST_DURATION=''
+
+prompt_segment() {
+    local bg="$1"
+    local fg="$2"
+    local text="$3"
+    print -n "%K{$bg}%F{$fg} ${text} %f%k"
+}
+
+prompt_context_segment() {
+    if [[ -n "$SSH_CONNECTION" || "$EUID" -eq 0 ]]; then
+        prompt_segment '#414559' '#c6d0f5' '%n@%m'
+        print -n ' '
+    fi
+}
+
+prompt_venv_segment() {
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        prompt_segment '#414559' '#babbf1' "venv ${VIRTUAL_ENV:t}"
+    elif [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
+        prompt_segment '#414559' '#babbf1' "conda ${CONDA_DEFAULT_ENV}"
+    fi
+}
+
+prompt_git_segment() {
+    local git_output
+    git_output="$(__git_prompt_git status --porcelain -b 2>/dev/null)" || return
+
+    local -a lines
+    lines=("${(@f)git_output}")
+    [[ ${#lines[@]} -eq 0 ]] && return
+
+    local branch_line branch segment
+    branch_line="${lines[1]#\#\# }"
+    branch="${branch_line%%...*}"
+    branch="${branch%% *}"
+
+    if [[ "$branch" == "HEAD" || "$branch" == "" ]]; then
+        branch="detached"
+    fi
+
+    segment="%F{#8CA0E8} %f${branch}"
+
+    if [[ "$branch_line" =~ 'ahead ([0-9]+)' ]]; then
+        segment+=" %F{#8CA0E8}⇡${match[1]}%f"
+    fi
+
+    if [[ "$branch_line" =~ 'behind ([0-9]+)' ]]; then
+        segment+=" %F{#6c76c2}⇣${match[1]}%f"
+    fi
+
+    local has_staged=0
+    local has_unstaged=0
+    local has_untracked=0
+    local has_conflicts=0
+    local line xy
+
+    for line in "${lines[@]:1}"; do
+        [[ -z "$line" ]] && continue
+
+        xy="${line[1,2]}"
+
+        if [[ "$xy" == '??' ]]; then
+            has_untracked=1
+            continue
+        fi
+
+        case "$xy" in
+            UU|AA|DD|AU|UA|UD|DU)
+                has_conflicts=1
+                ;;
+        esac
+
+        [[ "${xy[1]}" != ' ' ]] && has_staged=1
+        [[ "${xy[2]}" != ' ' ]] && has_unstaged=1
+    done
+
+    (( has_staged )) && segment+=" %F{#a6d189}%f"
+    (( has_unstaged )) && segment+=" %F{#e5c890}%f"
+    (( has_untracked )) && segment+=" %F{#ef9f76}%f"
+    (( has_conflicts )) && segment+=" %F{#e78284}%f"
+
+    prompt_segment '#5a5a7a' '#ffffff' "$segment"
+}
+
+prompt_dir_segment() {
+    prompt_segment '#7287fd' '#303446' '%B%1~%b'
+}
+
+prompt_build_left() {
+    prompt_context_segment
+    prompt_dir_segment
+    prompt_venv_segment
+    prompt_git_segment
+}
+
+prompt_build_right() {
+    local last_status="$1"
+    local out=''
+
+    if [[ -n "$PROMPT_LAST_DURATION" ]]; then
+        out+="%K{#414559}%F{#e5c890}  ${PROMPT_LAST_DURATION} %f%k "
+    fi
+
+    local count
+    count=$(jobs -p 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$count" != "0" ]]; then
+        out+="%K{#414559}%F{#e5c890}  ${count} %f%k "
+    fi
+
+    if [[ "$last_status" -ne 0 ]]; then
+        out+="%K{#414559}%F{#e78284} ✘ ${last_status} %f%k"
+    fi
+
+    print -n "$out"
+}
+
+prompt_precmd() {
+    local last_status="$?"
+
+    if (( PROMPT_CMD_START > 0 )); then
+        local elapsed_ms=$(( ( EPOCHREALTIME * 1000 ) - PROMPT_CMD_START ))
+        if (( elapsed_ms >= 1200 )); then
+            PROMPT_LAST_DURATION="$(prompt_format_duration "$elapsed_ms")"
+        else
+            PROMPT_LAST_DURATION=''
+        fi
+    else
+        PROMPT_LAST_DURATION=''
+    fi
+
+    RPROMPT="$(prompt_build_right "$last_status")"
+    print ""
+}
+
+prompt_preexec() {
+    PROMPT_CMD_START=$(( EPOCHREALTIME * 1000 ))
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd prompt_precmd
+add-zsh-hook preexec prompt_preexec
+
+PROMPT='$(prompt_build_left)'
+PROMPT+=$'\n''%(?.%F{#a6d189}.%F{#e78284})$%f '
 
 # ===========================================
 # Zsh History Configuration
@@ -156,9 +326,6 @@ eval "$(zoxide init zsh)"
 
 # Starship prompt
 # eval "$(starship init zsh)"
-
-# Add spacing between prompts (adds blank line before each prompt)
-precmd() { print "" }
 
 # fzf configuration (for file search only)
 export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info'
@@ -433,3 +600,12 @@ alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
 # zprof
+prompt_format_duration() {
+    local elapsed_ms="$1"
+
+    if (( elapsed_ms >= 60000 )); then
+        printf '%dm%02ds' $(( elapsed_ms / 60000 )) $(( ( elapsed_ms % 60000 ) / 1000 ))
+    else
+        printf '%d.%01ds' $(( elapsed_ms / 1000 )) $(( ( elapsed_ms % 1000 ) / 100 ))
+    fi
+}
