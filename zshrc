@@ -143,6 +143,16 @@ prompt_dir_display() {
     print -r -- "${path_parts[-1]}"
 }
 
+prompt_format_duration() {
+    local elapsed_ms="$1"
+
+    if (( elapsed_ms >= 60000 )); then
+        printf '%dm%02ds' $(( elapsed_ms / 60000 )) $(( ( elapsed_ms % 60000 ) / 1000 ))
+    else
+        printf '%d.%01ds' $(( elapsed_ms / 1000 )) $(( ( elapsed_ms % 1000 ) / 100 ))
+    fi
+}
+
 prompt_venv_segment() {
     if [[ -n "$VIRTUAL_ENV" ]]; then
         prompt_segment '#414559' '#babbf1' "venv ${VIRTUAL_ENV:t}"
@@ -391,8 +401,10 @@ detect_file_type() {
         echo "binary"
         return
     fi
-    local mime_type=$(file --mime "$file" 2>/dev/null | cut -d: -f2 | tr -d ' ')
-    local mime_primary=$(echo "$mime_type" | cut -d/ -f1)
+    local mime_type
+    mime_type="$(file --mime "$file" 2>/dev/null)"
+    mime_type="${mime_type#*: }"
+    local mime_primary="${mime_type%%/*}"
     if [[ "$mime_primary" == "text" ]] || [[ "$mime_type" == *"charset=utf-8"* ]] || [[ "$mime_type" == *"charset=us-ascii"* ]]; then
         echo "text"
     else
@@ -553,7 +565,7 @@ export USE_BUILTIN_RIPGREP=0
 alias oc='opencode'  # Quick access to OpenCode
 
 cheat() {
-    curl cheat.sh/$1
+    curl "https://cheat.sh/$1"
 }
 
 # OpenCode pipe function - analyze command output with AI
@@ -592,8 +604,8 @@ fi
 # ========================================== 
 
 # Use this file for machine-specific overrides, work configs, API keys, etc.
-if [ -f ~/.zshrc.local ]; then
-    source ~/.zshrc.local
+if [[ -f "$HOME/.zshrc.local" ]]; then
+    source "$HOME/.zshrc.local"
 fi
 
 #fastfetch
@@ -628,13 +640,4 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
-prompt_format_duration() {
-    local elapsed_ms="$1"
-
-    if (( elapsed_ms >= 60000 )); then
-        printf '%dm%02ds' $(( elapsed_ms / 60000 )) $(( ( elapsed_ms % 60000 ) / 1000 ))
-    else
-        printf '%d.%01ds' $(( elapsed_ms / 1000 )) $(( ( elapsed_ms % 1000 ) / 100 ))
-    fi
-}
 # zprof
