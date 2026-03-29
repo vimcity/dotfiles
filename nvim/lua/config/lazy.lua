@@ -45,7 +45,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.ui.mini-indentscope" }, -- Highlight current indentation scope
 
     -- Utilities
-    { import = "lazyvim.plugins.extras.util.project" }, -- Project management
+    -- Project management is handled by snacks.picker.projects() in keymaps.lua
     -- { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
 
     -- AI

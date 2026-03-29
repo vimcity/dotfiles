@@ -7,7 +7,35 @@ vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
 -- Project management
-vim.keymap.set("n", "<leader>fp", "<cmd>Telescope projects<cr>", { desc = "Find Projects" })
+vim.keymap.set("n", "<leader>fp", function()
+  -- Expand the path before passing to the async finder
+  local projects_dir = vim.fn.expand("~/Projects")
+  
+  Snacks.picker.projects({
+    dev = { projects_dir },
+    recent = false, -- Show all projects, not just recently visited
+    -- Simple finder: just list all directories in Projects
+    finder = function(opts, ctx)
+      local dev_dirs = type(opts.dev) == "string" and { opts.dev } or opts.dev or {}
+      
+      return function(cb)
+        for _, dev_dir in ipairs(dev_dirs) do
+          local handle = vim.loop.fs_scandir(dev_dir)
+          if handle then
+            while true do
+              local name, type_name = vim.loop.fs_scandir_next(handle)
+              if not name then break end
+              if type_name == "directory" then
+                local project_path = dev_dir .. "/" .. name
+                cb({ file = project_path, text = name, dir = true })
+              end
+            end
+          end
+        end
+      end
+    end,
+  })
+end, { desc = "Find Projects" })
 
 -- Copy buffer path to clipboard
 vim.keymap.set("n", "<leader>yp", function()
@@ -31,12 +59,12 @@ vim.keymap.set("c", "<M-Right>", "<S-Right>", { noremap = true }) -- forward a w
 vim.api.nvim_create_user_command("FormatProject", function()
   local cwd = vim.fn.getcwd()
   local java_files = vim.fn.systemlist("find " .. cwd .. " -type f -name '*.java'")
-  
+
   if #java_files == 0 then
     vim.notify("No Java files found in " .. cwd, vim.log.levels.WARN)
     return
   end
-  
+
   local formatted = 0
   for _, file in ipairs(java_files) do
     vim.cmd("edit " .. file)
@@ -44,6 +72,6 @@ vim.api.nvim_create_user_command("FormatProject", function()
     vim.cmd("write")
     formatted = formatted + 1
   end
-  
+
   vim.notify("Formatted " .. formatted .. " Java files in " .. cwd, vim.log.levels.INFO)
 end, { desc = "Format all Java files in project directory" })
