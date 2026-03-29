@@ -1,0 +1,7 @@
+#!/bin/bash
+# Shell Master CLI wrapper
+# Run the Lua application from any directory
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+lua shell-master.lua "$@"
