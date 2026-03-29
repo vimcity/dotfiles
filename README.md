@@ -77,12 +77,8 @@ This configuration emphasizes:
   - Integrated for file search, command history, git branch selection
   
 - **delta** - Enhanced git diff viewer
-  > Syntax-highlighting pager for git diffs with side-by-side view support
-  - Used in lazygit for better diff visualization
-  
-- **glow** - Markdown renderer
-  > Command-line markdown reader with styled formatting
-  - For viewing documentation in terminal
+   > Syntax-highlighting pager for git diffs with side-by-side view support
+   - Used in lazygit for better diff visualization
 
 ### Terminal Multiplexer
 **Tmux** - Terminal session and window manager
@@ -208,7 +204,6 @@ dotfiles/
 ├── gitconfig.delta     # Delta git diff config
 ├── fdignore            # fd ignore patterns
 ├── rgignore            # ripgrep ignore patterns
-├── glow-style.json     # Markdown renderer style
 ├── AGENTS.md           # Guidance for agents + cache management + recent changes
 ├── CLAUDE.md           # Architecture documentation
 ├── SECURITY.md         # Security best practices
@@ -235,7 +230,7 @@ dotfiles/
 
 These tools should be installed via Homebrew or other package managers:
 - **Core**: ghostty, neovim, tmux, zsh
-- **Utilities**: atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, glow, lazygit, fastfetch, yazi
+- **Utilities**: atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, lazygit, fastfetch, yazi
 - **Optional**: pyenv (Python), ollama (local LLM), Karabiner-Elements (keyboard remapping)
 - **Font**: JetBrains Mono Nerd Font or CommitMono (see https://commitmono.com/)
 
