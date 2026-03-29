@@ -25,7 +25,8 @@ fi
 icon=""
 
 # Green color for directory (fresh, vibrant look)
-bg_color='#8CA0E8'
+# bg_color='#8CA0E8'
+bg_color='#7287fd'
 text_dark="#000000" # Dark text for contrast
 
 # Output with colored text without pill box
