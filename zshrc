@@ -67,6 +67,7 @@ ZSH_THEME=""
 
 plugins=(
   git
+  brew
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
@@ -327,9 +328,8 @@ setopt HIST_VERIFY
 export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
-# DEFER atuin init to background (saves 19ms on startup)
-# It will be ready by the time user presses Ctrl+R
-( { eval "$(atuin init zsh --disable-up-arrow)" 2>/dev/null; } &>/dev/null & )
+# Initialize atuin (loads atuin-search widget for Ctrl+R)
+eval "$(atuin init zsh --disable-up-arrow)" 2>/dev/null
 
 alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (will be set by deferred atuin init)
@@ -358,8 +358,8 @@ bwrm() {
         echo "bw CLI not installed or not on PATH" >&2
         return 1
     fi
-    if ! command -v jq >/dev/null 2>&1; then
-        echo "jq is required for bwrm" >&2
+    if ! command -v jaq >/dev/null 2>&1; then
+        echo "jaq is required for bwrm" >&2
         return 1
     fi
     if [[ -z "$BW_SESSION" ]]; then
@@ -367,37 +367,72 @@ bwrm() {
         return 1
     fi
 
-    local selection name url id confirm
+    local selection name id
     
-    # List items in format: name | url | id, pipe to fzf for selection
+    # Fast initial load: only name and id (lazy load username/password later)
     selection=$(bw list items \
-        | jq -r '.[] | "\(.name) | \(.login?.uris[0]?.uri // "no url") | \(.id)"' \
+        | jaq -r '.[] | "\(.name) | \(.id)"' \
         | sort \
         | fzf --height=50% --layout=reverse --border \
               --prompt='bwrm> ' \
-              --header='select entry to delete')
+              --header='select an entry' < /dev/tty)
 
     if [[ -z "$selection" ]]; then
         return 0
     fi
 
-    # Parse the selection: everything before first | is name, second field is url, third is id
+    # Parse the selection: name | id
     name=$(echo "$selection" | cut -d'|' -f1 | xargs)
-    url=$(echo "$selection" | cut -d'|' -f2 | xargs)
-    id=$(echo "$selection" | cut -d'|' -f3 | xargs)
+    id=$(echo "$selection" | cut -d'|' -f2 | xargs)
     
-    read -r -p "Delete '$name' ($url)? (y/N) " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        echo 'canceled'
-        return 0
-    fi
-
-    if bw delete item "$id"; then
-        echo "Deleted '$name' (moved to trash)."
-    else
-        echo "Failed to delete '$name'" >&2
-        return 1
-    fi
+    # NOW fetch full details for the selected item
+    local item_details username password url
+    item_details=$(bw get item "$id")
+    username=$(echo "$item_details" | jaq -r '.login?.username // "n/a"')
+    password=$(echo "$item_details" | jaq -r '.login?.password // "n/a"')
+    url=$(echo "$item_details" | jaq -r '.login?.uris[0]?.uri // "no url"')
+    
+    # Show details and menu
+    while true; do
+        echo ""
+        echo "═══════════════════════════════════════"
+        echo "  $name"
+        echo "═══════════════════════════════════════"
+        echo "  URL:      $url"
+        echo "  Username: $username"
+        echo "  Password: $password"
+        echo "═══════════════════════════════════════"
+        echo ""
+        echo "  (d)elete  |  (c)ancel"
+        echo -n "Choice: "
+        read -r choice < /dev/tty
+        
+        case "$choice" in
+            [Dd])
+                echo -n "Really delete '$name'? (y/n) "
+                read -r confirm < /dev/tty
+                if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                    if bw delete item "$id"; then
+                        echo "✓ Deleted '$name' (moved to trash)."
+                        return 0
+                    else
+                        echo "✗ Failed to delete '$name'" >&2
+                        return 1
+                    fi
+                else
+                    echo "canceled"
+                    return 0
+                fi
+                ;;
+            [Cc])
+                echo "canceled"
+                return 0
+                ;;
+            *)
+                echo "Invalid choice. Try again."
+                ;;
+        esac
+    done
 }
 
 
