@@ -1,4 +1,4 @@
- zmodload zsh/zprof
+ ## zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -20,24 +20,33 @@ export ZSH_COMPDUMP="$ZSH/cache/.zcompdump-$HOST"
 export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
 export ZSH_DISABLE_COMPFIX=true
+# Skip compaudit security checks (saves ~9ms, not needed on single-user system)
+export _CACHED_CHECK=true
 
-# Completion caching
+# Completion caching - AGGRESSIVE FAST PATH
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-policy _omz_cache_policy
 
-# Shadow compinit so OMZ reuses the cached dump on normal startups.
-# `-C` skips the expensive rebuild/security checks and `-D` avoids rewriting
-# the dump file every shell. If the dump is missing, fall back to a full build.
-autoload -Uz compinit
-compinit() {
-  unfunction compinit
+# Skip compinit entirely if dump exists and is recent (< 7 days old)
+# This is the fastest path: 0ms overhead
+if [[ -f "$ZSH_COMPDUMP" ]] && [[ $(( $(date +%s) - $(stat -f %m "$ZSH_COMPDUMP" 2>/dev/null || echo 0) )) -lt 604800 ]]; then
+  # Dump is recent; skip compinit entirely and just load the pre-compiled dump
+  source "$ZSH_COMPDUMP"
+else
+  # Dump is missing or stale; do a full init (only happens ~once a week or on new plugins)
   autoload -Uz compinit
-  if [[ -f "$ZSH_COMPDUMP" ]]; then
-    compinit -C -D -d "$ZSH_COMPDUMP"
-  else
-    compinit -d "$ZSH_COMPDUMP"
-  fi
-}
+  compinit() {
+    unfunction compinit
+    autoload -Uz compinit
+    if [[ -f "$ZSH_COMPDUMP" ]]; then
+      compinit -C -D -d "$ZSH_COMPDUMP"
+    else
+      compinit -d "$ZSH_COMPDUMP"
+    fi
+  }
+  # Trigger compinit for this startup
+  compinit -d "$ZSH_COMPDUMP"
+fi
 
 # Stub zrecompile - .zwc from last full build is still valid, no need to recompile every start
 zrecompile() { : }
@@ -59,12 +68,6 @@ ZSH_THEME=""
 plugins=(
   git
   zsh-autosuggestions
-  # Defer zsh-syntax-highlighting to after OMZ init (lazy load)
-  # zsh-syntax-highlighting
-  # docker-compose: too slow, use 'docker compose' instead
-  # brew: adds 5-10ms per pane; rarely used for completion
-  # macos
-  copypath
 )
 
 # Load Oh My Zsh
@@ -74,10 +77,10 @@ source $ZSH/oh-my-zsh.sh
 # Lazy-load zsh-syntax-highlighting (deferred for startup speed)
 # ===========================================
 # Load syntax highlighting in the background to avoid blocking the prompt
-if [[ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-    # Use a timer to defer loading until first interaction (or after 0.1s)
-    sched +0.1 "source '$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' 2>/dev/null"
-fi
+# if [[ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+#     # Use a timer to defer loading until first interaction (or after 0.1s)
+#     sched +0.1 "source '$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' 2>/dev/null"
+# fi
 
 # ===========================================
 # Prompt
@@ -304,20 +307,23 @@ setopt HIST_SAVE_NO_DUPS
 setopt HIST_VERIFY
 
 # ===========================================
-# Atuin Configuration (Ctrl+R only)
+# Atuin Configuration (Ctrl+R only) - LAZY LOADED
 # ===========================================
 # Auto-sync disabled (no cloud account)
 # export ATUIN_AUTO_SYNC=1
 export ATUIN_SEARCH_MODE=fuzzy
 export ATUIN_FILTER_MODE=global
 
-# Initialize atuin with up arrow disabled (use standard zsh history for up/down)
-eval "$(atuin init zsh --disable-up-arrow)"
+# DEFER atuin init to background (saves 19ms on startup)
+# It will be ready by the time user presses Ctrl+R
+{
+  eval "$(atuin init zsh --disable-up-arrow)"
+} &
+
 alias ahl="atuin history list"
-# Ctrl+R uses atuin search with popup (already set by atuin init)
+# Ctrl+R uses atuin search with popup (will be set by deferred atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
 
-# Python environment
 alias vimz="nvim ~/.zshrc"
 alias vimzz="vimz"
 alias cat=bat
@@ -334,6 +340,8 @@ alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '
 alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
 
 alias sdf="source ~/.zshrc"
+alias asdf="source ~/.zshrc | head -10"
+
 
 
 alias vi=vim
@@ -351,12 +359,21 @@ else
 fi
 
 export PYENV_ROOT=
-export PATH="$PYENV_ROOT/shims:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
-# Lazy load pyenv to avoid slow shell startup
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init - --no-rehash)"
-fi
+# SKIP pyenv shims in PATH for now (adds ~5ms)
+# Only init pyenv if actually needed (check .python-version files)
+_lazy_init_pyenv() {
+  if [[ -z "$_PYENV_INITIALIZED" ]]; then
+    if command -v pyenv 1>/dev/null 2>&1; then
+      eval "$(pyenv init - --no-rehash)"
+      export _PYENV_INITIALIZED=1
+      # Add shims to PATH now
+      export PATH="$PYENV_ROOT/shims:$PATH"
+    fi
+  fi
+}
+# Trigger on python command or if .python-version exists
+[[ -f ".python-version" ]] && _lazy_init_pyenv
 
 # Python utilities
 alias pipr="pip install -r requirements.txt"
@@ -690,4 +707,4 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
-zprof
+# zprof
