@@ -34,7 +34,7 @@ icon="󰍛"
 
 # Color scheme
 green="#a6e3a1"     # Green (healthy)
-yellow="#f5a97f"    # More orangy yellow (warning)
+yellow="#E5C890"    # More orangy yellow (warning)
 red="#e25a8a"       # Red (matches prefix color, critical)
 text_dark="#000000" # Dark text for contrast
 
