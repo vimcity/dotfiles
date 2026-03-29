@@ -683,48 +683,6 @@ cheat() {
     curl "https://cheat.sh/$1"
 }
 
-# TLDR - Smart explanation: tries --help, man pages, then LLM explanation (with fzf preview)
-tldr() {
-    local command="$1"
-    local query="$*"
-    
-    if [[ -z "$command" ]]; then
-        echo "Usage: tldr <command or topic>"
-        return 1
-    fi
-    
-    local doc_content=""
-    
-    # Try 1: Get --help output first (fastest)
-    if command -v "$command" &>/dev/null; then
-        doc_content=$("$command" --help 2>&1 | head -60)
-        if [[ -n "$doc_content" ]]; then
-            echo "📖 Using --help for '$command'"
-        fi
-    fi
-    
-    # Try 2: Fall back to man page if --help didn't work
-    if [[ -z "$doc_content" ]] && man "$command" &>/dev/null; then
-        echo "📖 Using man page for '$command'"
-        doc_content=$(man "$command" 2>/dev/null | head -100)
-    fi
-    
-    # Try 3: If still nothing, just use the query as-is
-    if [[ -z "$doc_content" ]]; then
-        echo "ℹ️ No docs found, using query directly"
-        doc_content="$query"
-    fi
-    
-    # Send to LLM via ollama directly (using Gemma for structured bullet format)
-    echo ""
-    echo "🤖 Explaining..."
-    echo "$doc_content" | ollama run gemma3:270m "Generate 4 bullets only:
-- What: Searches for text patterns in files
-- Flags: -i ignore case, -n show line numbers, -r recursive directories
-- Example: grep -n 'error' logfile.txt
-- Use: Finding text in logs, code searching, filtering files" 2>/dev/null
-}
-
 # OpenCode pipe function - analyze command output with AI
 ocprompt() {
   local prompt="${1:-Analyze and summarize this output.}"
