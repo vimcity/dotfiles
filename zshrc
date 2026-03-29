@@ -367,15 +367,18 @@ bwrm() {
         return 1
     fi
 
-    local selection name id
+    local search_term="$1"
+    local items_json selection name id
     
-    # Fast initial load: only name and id (lazy load username/password later)
-    selection=$(bw list items \
-        | jaq -r '.[] | "\(.name) | \(.id)"' \
-        | sort \
-        | fzf --height=50% --layout=reverse --border \
-              --prompt='bwrm> ' \
-              --header='select an entry' < /dev/tty)
+    # Get raw JSON once
+    items_json=$(bw list items)
+    
+    # Filter by search term if provided, otherwise show all
+    if [[ -n "$search_term" ]]; then
+        selection=$(echo "$items_json" | jaq -r ".[] | select(.name | contains(\"$search_term\")) | \"\(.name) | \(.id)\"" | sort | fzf --height=50% --layout=reverse --border --prompt='bwrm> ' --header='select an entry' < /dev/tty)
+    else
+        selection=$(echo "$items_json" | jaq -r '.[] | "\(.name) | \(.id)"' | sort | fzf --height=50% --layout=reverse --border --prompt='bwrm> ' --header='select an entry' < /dev/tty)
+    fi
 
     if [[ -z "$selection" ]]; then
         return 0
@@ -385,12 +388,11 @@ bwrm() {
     name=$(echo "$selection" | cut -d'|' -f1 | xargs)
     id=$(echo "$selection" | cut -d'|' -f2 | xargs)
     
-    # NOW fetch full details for the selected item
-    local item_details username password url
-    item_details=$(bw get item "$id")
-    username=$(echo "$item_details" | jaq -r '.login?.username // "n/a"')
-    password=$(echo "$item_details" | jaq -r '.login?.password // "n/a"')
-    url=$(echo "$item_details" | jaq -r '.login?.uris[0]?.uri // "no url"')
+    # Extract details from already-loaded JSON
+    local username password url
+    username=$(echo "$items_json" | jaq -r ".[] | select(.id == \"$id\") | .login?.username // \"n/a\"" | head -1)
+    password=$(echo "$items_json" | jaq -r ".[] | select(.id == \"$id\") | .login?.password // \"n/a\"" | head -1)
+    url=$(echo "$items_json" | jaq -r ".[] | select(.id == \"$id\") | .login?.uris[0]?.uri // \"no url\"" | head -1)
     
     # Show details and menu
     while true; do
