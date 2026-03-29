@@ -46,12 +46,12 @@ else
     echo "  ✓ zsh-autosuggestions already installed"
 fi
 
-# zsh-syntax-highlighting
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    echo "  - Installing zsh-syntax-highlighting..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+# fast-syntax-highlighting (replaces zsh-syntax-highlighting for faster typing)
+if [ ! -d "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" ]; then
+    echo "  - Installing fast-syntax-highlighting..."
+    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
 else
-    echo "  ✓ zsh-syntax-highlighting already installed"
+    echo "  ✓ fast-syntax-highlighting already installed"
 fi
 
 # zsh-completions

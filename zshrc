@@ -1,4 +1,4 @@
- ## zmodload zsh/zprof
+ # zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -68,19 +68,32 @@ ZSH_THEME=""
 plugins=(
   git
   zsh-autosuggestions
+  zsh-syntax-highlighting
 )
 
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
 # ===========================================
-# Lazy-load zsh-syntax-highlighting (deferred for startup speed)
+# zsh-syntax-highlighting - Outrun/Vice City theme (blue/pink/purple)
 # ===========================================
-# Load syntax highlighting in the background to avoid blocking the prompt
-# if [[ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-#     # Use a timer to defer loading until first interaction (or after 0.1s)
-#     sched +0.1 "source '$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' 2>/dev/null"
-# fi
+ZSH_HIGHLIGHT_STYLES[comment]='fg=8'                          # dark gray
+ZSH_HIGHLIGHT_STYLES[alias]='fg=13'                           # purple
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=13'                         # purple
+ZSH_HIGHLIGHT_STYLES[function]='fg=12'                        # blue
+ZSH_HIGHLIGHT_STYLES[command]='fg=12'                         # blue
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=5'                       # magenta/pink
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=13'                   # purple
+ZSH_HIGHLIGHT_STYLES[string]='fg=5'                           # magenta/pink
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=5'           # magenta/pink
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=5'           # magenta/pink
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=5'           # magenta/pink
+ZSH_HIGHLIGHT_STYLES[variable]='fg=13'                        # purple
+ZSH_HIGHLIGHT_STYLES[path]='fg=14'                            # cyan
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=5'                         # magenta/pink
+ZSH_HIGHLIGHT_STYLES[option-flag]='fg=12'                     # blue
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=9,bold'               # light red, bold
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=14'                     # cyan
 
 # ===========================================
 # Prompt
@@ -316,9 +329,7 @@ export ATUIN_FILTER_MODE=global
 
 # DEFER atuin init to background (saves 19ms on startup)
 # It will be ready by the time user presses Ctrl+R
-{
-  eval "$(atuin init zsh --disable-up-arrow)"
-} &
+( { eval "$(atuin init zsh --disable-up-arrow)" 2>/dev/null; } &>/dev/null & )
 
 alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (will be set by deferred atuin init)
@@ -341,6 +352,53 @@ alias nvclean="nvim --clean"  # Start with factory defaults (no plugins)
 
 alias sdf="source ~/.zshrc"
 alias asdf="source ~/.zshrc | head -10"
+
+bwrm() {
+    if ! command -v bw >/dev/null 2>&1; then
+        echo "bw CLI not installed or not on PATH" >&2
+        return 1
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "jq is required for bwrm" >&2
+        return 1
+    fi
+    if [[ -z "$BW_SESSION" ]]; then
+        echo "Please unlock Bitwarden first (e.g. 'bw unlock')" >&2
+        return 1
+    fi
+
+    local selection name url id confirm
+    
+    # List items in format: name | url | id, pipe to fzf for selection
+    selection=$(bw list items \
+        | jq -r '.[] | "\(.name) | \(.login?.uris[0]?.uri // "no url") | \(.id)"' \
+        | sort \
+        | fzf --height=50% --layout=reverse --border \
+              --prompt='bwrm> ' \
+              --header='select entry to delete')
+
+    if [[ -z "$selection" ]]; then
+        return 0
+    fi
+
+    # Parse the selection: everything before first | is name, second field is url, third is id
+    name=$(echo "$selection" | cut -d'|' -f1 | xargs)
+    url=$(echo "$selection" | cut -d'|' -f2 | xargs)
+    id=$(echo "$selection" | cut -d'|' -f3 | xargs)
+    
+    read -r -p "Delete '$name' ($url)? (y/N) " confirm
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo 'canceled'
+        return 0
+    fi
+
+    if bw delete item "$id"; then
+        echo "Deleted '$name' (moved to trash)."
+    else
+        echo "Failed to delete '$name'" >&2
+        return 1
+    fi
+}
 
 
 
@@ -599,24 +657,19 @@ tldr() {
     fi
     
     local doc_content=""
-    local selected_content=""
     
     # Try 1: Get --help output first (fastest)
     if command -v "$command" &>/dev/null; then
-        doc_content=$("$command" --help 2>&1 | head -80)
+        doc_content=$("$command" --help 2>&1 | head -60)
         if [[ -n "$doc_content" ]]; then
-            echo "📖 Found --help for '$command' (press q to use all, or select with fzf)"
-            selected_content=$(echo "$doc_content" | fzf --preview-window=right:50% --preview 'cat' --bind 'q:abort+accept' 2>/dev/null)
-            [[ -n "$selected_content" ]] && doc_content="$selected_content"
+            echo "📖 Using --help for '$command'"
         fi
     fi
     
     # Try 2: Fall back to man page if --help didn't work
     if [[ -z "$doc_content" ]] && man "$command" &>/dev/null; then
-        echo "📖 Found man page for '$command' (press q to use all, or select with fzf)"
-        doc_content=$(man "$command" 2>/dev/null | head -120)
-        selected_content=$(echo "$doc_content" | fzf --preview-window=right:50% --preview 'cat' --bind 'q:abort+accept' 2>/dev/null)
-        [[ -n "$selected_content" ]] && doc_content="$selected_content"
+        echo "📖 Using man page for '$command'"
+        doc_content=$(man "$command" 2>/dev/null | head -100)
     fi
     
     # Try 3: If still nothing, just use the query as-is
