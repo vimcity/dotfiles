@@ -755,4 +755,8 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
+
+# Shell Master - Interactive CLI Learning Tool
+alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
+
 # zprof
