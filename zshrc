@@ -1,4 +1,4 @@
- # zmodload zsh/zprof
+ zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -59,22 +59,25 @@ ZSH_THEME=""
 plugins=(
   git
   zsh-autosuggestions
-  zsh-syntax-highlighting
-  # docker
-  docker-compose
+  # Defer zsh-syntax-highlighting to after OMZ init (lazy load)
+  # zsh-syntax-highlighting
+  # docker-compose: too slow, use 'docker compose' instead
+  # brew: adds 5-10ms per pane; rarely used for completion
   # macos
-  brew
-  # python
-  # node
-  # npm
-  # tmux
-  # extract
-  # copyfile
   copypath
 )
 
 # Load Oh My Zsh
 source $ZSH/oh-my-zsh.sh
+
+# ===========================================
+# Lazy-load zsh-syntax-highlighting (deferred for startup speed)
+# ===========================================
+# Load syntax highlighting in the background to avoid blocking the prompt
+if [[ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    # Use a timer to defer loading until first interaction (or after 0.1s)
+    sched +0.1 "source '$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' 2>/dev/null"
+fi
 
 # ===========================================
 # Prompt
@@ -568,6 +571,53 @@ cheat() {
     curl "https://cheat.sh/$1"
 }
 
+# TLDR - Smart explanation: tries --help, man pages, then LLM explanation (with fzf preview)
+tldr() {
+    local command="$1"
+    local query="$*"
+    
+    if [[ -z "$command" ]]; then
+        echo "Usage: tldr <command or topic>"
+        return 1
+    fi
+    
+    local doc_content=""
+    local selected_content=""
+    
+    # Try 1: Get --help output first (fastest)
+    if command -v "$command" &>/dev/null; then
+        doc_content=$("$command" --help 2>&1 | head -80)
+        if [[ -n "$doc_content" ]]; then
+            echo "📖 Found --help for '$command' (press q to use all, or select with fzf)"
+            selected_content=$(echo "$doc_content" | fzf --preview-window=right:50% --preview 'cat' --bind 'q:abort+accept' 2>/dev/null)
+            [[ -n "$selected_content" ]] && doc_content="$selected_content"
+        fi
+    fi
+    
+    # Try 2: Fall back to man page if --help didn't work
+    if [[ -z "$doc_content" ]] && man "$command" &>/dev/null; then
+        echo "📖 Found man page for '$command' (press q to use all, or select with fzf)"
+        doc_content=$(man "$command" 2>/dev/null | head -120)
+        selected_content=$(echo "$doc_content" | fzf --preview-window=right:50% --preview 'cat' --bind 'q:abort+accept' 2>/dev/null)
+        [[ -n "$selected_content" ]] && doc_content="$selected_content"
+    fi
+    
+    # Try 3: If still nothing, just use the query as-is
+    if [[ -z "$doc_content" ]]; then
+        echo "ℹ️ No docs found, using query directly"
+        doc_content="$query"
+    fi
+    
+    # Send to LLM via ollama directly (using Gemma for structured bullet format)
+    echo ""
+    echo "🤖 Explaining..."
+    echo "$doc_content" | ollama run gemma3:270m "Generate 4 bullets only:
+- What: Searches for text patterns in files
+- Flags: -i ignore case, -n show line numbers, -r recursive directories
+- Example: grep -n 'error' logfile.txt
+- Use: Finding text in logs, code searching, filtering files" 2>/dev/null
+}
+
 # OpenCode pipe function - analyze command output with AI
 ocprompt() {
   local prompt="${1:-Analyze and summarize this output.}"
@@ -640,4 +690,4 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 alias qt='qutebrowser >/dev/null 2>&1 &'
-# zprof
+zprof
