@@ -7,10 +7,7 @@ local curriculum = require("data.curriculum")
 
 -- Helper to clear screen
 local function clear()
-    local result = os.execute("clear")
-    if result ~= 0 then
-        os.execute("cls")
-    end
+    os.execute("clear")
 end
 
 -- Helper to read user input
@@ -49,17 +46,28 @@ end
 
 -- Show lesson with practice
 local function practice_lesson(lesson_data)
-    local lesson = Lesson.new(
-        lesson_data.title,
-        lesson_data.description,
-        lesson_data.category,
-        lesson_data.difficulty,
-        lesson_data.task,
-        lesson_data.expected_output,
-        lesson_data.hints
-    )
+    -- Create lesson object
+    local lesson = {
+        title = lesson_data.title,
+        description = lesson_data.description,
+        category = lesson_data.category,
+        difficulty = lesson_data.difficulty,
+        task = lesson_data.task,
+        expected_output = lesson_data.expected_output,
+        hints = lesson_data.hints,
+        completed = false,
+        attempts = 0,
+        max_attempts = 3,
+    }
     
-    lesson:display()
+    -- Display lesson
+    print("\n" .. string.rep("=", 60))
+    print("📚 " .. lesson.title .. " [" .. string.upper(lesson.difficulty) .. "]")
+    print(string.rep("=", 60))
+    print("\n" .. lesson.description)
+    print("\n" .. "Task:")
+    print("  " .. lesson.task)
+    print("\n" .. "Try it:")
     
     -- Practice loop
     for attempt = 1, lesson.max_attempts do
@@ -75,7 +83,19 @@ local function practice_lesson(lesson_data)
         local output = run_command(user_input)
         
         -- Validate
-        if lesson:validate(output) then
+        local is_correct = false
+        if type(lesson_data.expected_output) == "table" then
+            for _, expected_str in ipairs(lesson_data.expected_output) do
+                if output:find(expected_str, 1, true) then
+                    is_correct = true
+                    break
+                end
+            end
+        else
+            is_correct = output:find(lesson_data.expected_output, 1, true) ~= nil
+        end
+        
+        if is_correct then
             print("\n✅ Correct! Well done!\n")
             print("Output:")
             print(output:sub(1, 200))  -- Show first 200 chars
@@ -84,7 +104,9 @@ local function practice_lesson(lesson_data)
             print("\n❌ Not quite right.")
             if attempt < lesson.max_attempts then
                 print("You have " .. (lesson.max_attempts - attempt) .. " attempt(s) left.")
-                lesson:show_hint(attempt)
+                if lesson_data.hints and lesson_data.hints[attempt] then
+                    print("\n💡 Hint " .. attempt .. ": " .. lesson_data.hints[attempt])
+                end
             else
                 print("\n💡 Expected output to contain: " .. tostring(lesson_data.expected_output))
             end
