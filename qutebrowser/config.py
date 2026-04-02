@@ -13,7 +13,14 @@ c.tabs.last_close = "close"
 # Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
+    # uBlock Origin core filters
     "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+    # uBlock Origin badware filters (malware/phishing)
+    "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+    # EasyList (widely-used ad filter list)
+    "https://easylist.to/easylist/easylist.txt",
+    # EasyList Privacy (tracker blocking)
+    "https://easylist.to/easylist/easyprivacy.txt",
 ]
 
 # Prevent videos from auto-playing when loading many tabs.
@@ -111,29 +118,8 @@ c.hints.scatter = False
 # Search engine bang commands for quick site searches
 c.url.searchengines = {
     "DEFAULT": "https://www.google.com/search?q={}",
-    # Programming communities & knowledge
     "gh": "https://github.com/search?q={}",
-    "hn": "https://hn.algolia.com/?query={}",
-    "so": "https://stackoverflow.com/search?q={}",
-    "npm": "https://www.npmjs.com/search?q={}",
-    "crates": "https://crates.io/search?q={}",
-    "pypi": "https://pypi.org/search/?q={}",
-    "pkg": "https://pkg.go.dev/search?q={}",
-    # Dev blogs & founders
-    "mf": "https://martinfowler.com/?s={}",
-    "gwern": "https://gwern.net/?search={}",
     "blog": "https://www.indiehackers.com/search?q={}",
-    "peter": "https://www.google.com/search?q=site:levels.io+{}",
-    "teej": "https://www.google.com/search?q=site:teej.tv+{}",
-    "primeagen": "https://www.google.com/search?q=site:theprimeagen.com+{}",
-    "dhh": "https://www.google.com/search?q=site:37signals.com+{}",
-    "paulgraham": "https://paulgraham.com/?s={}",
-    "simonw": "https://www.google.com/search?q=site:simonwillison.net+{}",
-    # Design & UX
-    "nngroup": "https://www.nngroup.com/search/?q={}",
-    # Dev tools & resources
-    "mdn": "https://developer.mozilla.org/en-US/search?q={}",
-    "yt": "https://www.youtube.com/results?search_query={}",
     "wiki": "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}",
     "reddit": "https://www.reddit.com/search/?q={}",
 }
