@@ -112,8 +112,9 @@ c.hints.selectors["all"].append("[role='checkbox']")
 c.hints.selectors["all"].append("[role='radio']")
 # Make hint labels easier to type and more predictable.
 c.hints.uppercase = True
-c.hints.scatter = False
-# c.hints.chars = "fbcvodsauiert"
+c.hints.scatter = True
+# Full alphabet for hints: 26 letters = 676 two-letter combinations (26×26)
+c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 
 # Search engine bang commands for quick site searches
 c.url.searchengines = {
