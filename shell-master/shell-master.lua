@@ -15,11 +15,33 @@ local function read_line()
     return io.read("*l")
 end
 
--- Helper to validate command output
+-- Helper to validate command output (with timeout)
 local function run_command(cmd)
-    local handle = io.popen(cmd .. " 2>&1", "r")
+    if not cmd or cmd == "" then
+        return "(no command)"
+    end
+    
+    -- Add timeout using 'timeout' command if available, or run normally on macOS
+    local safe_cmd = cmd .. " 2>&1"
+    
+    -- Try to use gtimeout (from brew install coreutils) if available
+    local has_timeout = os.execute("command -v gtimeout >/dev/null 2>&1") == 0
+    if has_timeout then
+        safe_cmd = "gtimeout 5 " .. safe_cmd
+    end
+    
+    local handle = io.popen(safe_cmd, "r")
+    if not handle then
+        return "Error: Failed to execute command"
+    end
+    
     local output = handle:read("*a")
-    handle:close()
+    local status = handle:close()
+    
+    if not output or output == "" then
+        return "(no output)"
+    end
+    
     return output
 end
 
@@ -65,22 +87,38 @@ local function practice_lesson(lesson_data)
     print("📚 " .. lesson.title .. " [" .. string.upper(lesson.difficulty) .. "]")
     print(string.rep("=", 60))
     print("\n" .. lesson.description)
-    print("\n" .. "Task:")
+    print("\nTask:")
     print("  " .. lesson.task)
-    print("\n" .. "Try it:")
+    
+    -- Show input data if available
+    if lesson_data.input_data then
+        print("\nInput data available:")
+        print("  " .. lesson_data.input_data:sub(1, 60))
+        if #lesson_data.input_data > 60 then
+            print("  ...")
+        end
+    end
+    
+    print("\nTry it (type your command):")
     
     -- Practice loop
     for attempt = 1, lesson.max_attempts do
-        io.write("\nYour command: ")
+        io.write("\n> ")
         local user_input = read_line()
         
         if user_input == "" then
-            print("\n❌ Empty input. Try again.")
+            print("❌ Empty input. Try again.")
             goto next_attempt
         end
         
-        -- Run the command
-        local output = run_command(user_input)
+        -- Run the command with input data if available
+        local full_command = user_input
+        if lesson_data.input_data then
+            -- If input_data exists, pipe it to the command
+            full_command = "echo '" .. lesson_data.input_data:gsub("'", "'\\''") .. "' | " .. user_input
+        end
+        
+        local output = run_command(full_command)
         
         -- Validate
         local is_correct = false
