@@ -5,20 +5,32 @@
 Already done! The tool is installed in your dotfiles and aliased in zshrc.
 
 ```bash
-shellmaster    # Type this anywhere to start
+shellmaster          # Interactive TUI (best in a real terminal)
+./shell-master/test-lesson.sh    # Quick test of a lesson
 ```
+
+**Note:** The TUI works best when run directly in a terminal, not through pipes or non-interactive input.
 
 ## First Time Using It
 
+### Quick Test First
+```bash
+cd ~/dotfiles/shell-master
+./test-lesson.sh
+```
+This shows you how a lesson works end-to-end.
+
 ### Option 1: Browse by Category (Recommended for beginners)
-```
+Open a terminal and type:
+```bash
 shellmaster
-  → Choose "2) Browse by Category"
-  → Choose "jq" 
-  → Pick a beginner lesson
-  → Type your command
-  → Hit Enter to see if you're correct
 ```
+Then:
+- Choose "2) Browse by Category"
+- Choose "jq" 
+- Pick a beginner lesson
+- Type your command when prompted
+- Press Enter to see if you're correct
 
 ### Option 2: Tutorial Mode (Sequential learning)
 ```
