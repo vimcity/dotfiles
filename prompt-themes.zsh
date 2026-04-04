@@ -14,35 +14,35 @@ declare -A THEME_COLORS
 # Colors: soft purples, pinks, and earth tones
 define_rose_pine_theme() {
     THEME_COLORS=(
-        # Main segments
-        [user_bg]="#414559"
-        [user_fg]="#c6d0f5"
-        [dir_bg]="#7287fd"
-        [dir_fg]="#202131"
-        [git_bg]="#2A2C3B"
-        [git_fg]="#7287fd"
-        [venv_bg]="#414559"
-        [venv_fg]="#babbf1"
+        # Main segments - Rose Pine Moon (darker variant)
+        [user_bg]="#323238"
+        [user_fg]="#ebbcba"
+        [dir_bg]="#403d52"
+        [dir_fg]="#e0def4"
+        [git_bg]="#2a283e"
+        [git_fg]="#ebbcba"
+        [venv_bg]="#323238"
+        [venv_fg]="#c4a7e7"
         
-        # Git status colors
-        [git_added]="#a6d189"
-        [git_modified]="#e5c890"
-        [git_deleted]="#e78284"
-        [git_renamed]="#8caaee"
-        [git_unmerged]="#e78284"
-        [git_untracked]="#ef9f76"
-        [git_ahead]="#8CA0E8"
-        [git_behind]="#6c76c2"
+        # Git status colors - Rose Pine Moon palette
+        [git_added]="#a6da95"
+        [git_modified]="#f5e0ac"
+        [git_deleted]="#eb6f92"
+        [git_renamed]="#9ccfd8"
+        [git_unmerged]="#eb6f92"
+        [git_untracked]="#f6a192"
+        [git_ahead]="#c4a7e7"
+        [git_behind]="#ab9dc9"
         
         # Right prompt
-        [right_bg]="#414559"
-        [right_fg]="#e5c890"
-        [error_fg]="#e78284"
-        [prompt_char]="#ef9f76"
+        [right_bg]="#323238"
+        [right_fg]="#f5e0ac"
+        [error_fg]="#eb6f92"
+        [prompt_char]="#ebbcba"
         
         # Metadata
         [name]="rose-pine"
-        [description]="Warm, cozy Rose Pine theme with soft colors"
+        [description]="Rose Pine Moon - darker with pink/rose accents"
     )
 }
 
