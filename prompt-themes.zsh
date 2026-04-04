@@ -17,7 +17,7 @@ define_rose_pine_theme() {
         # Main segments - Rose Pine Moon (darker variant)
         [user_bg]="#323238"
         [user_fg]="#ebbcba"
-        [dir_bg]="#d08cbe"
+        [dir_bg]="#c47fa0"
         [dir_fg]="#191724"
         [git_bg]="#2a283e"
         [git_fg]="#ebbcba"
