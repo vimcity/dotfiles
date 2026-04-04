@@ -33,3 +33,19 @@ nnoremap x "_x                                                                  
 xnoremap x "_x                                                                                                                                                                                                                           █
 nnoremap c "_c                                                                                                                                                                                                                           █
 xnoremap c "_c
+nnoremap C "_C
+nnoremap X "_X
+vnoremap d "_d
+vnoremap D "_D
+vnoremap c "_c
+vnoremap C "_C
+vnoremap x "_x
+vnoremap X "_X
+" Also need operator-pending (for dw, d$, etc.)
+onoremap d "_d
+onoremap D "_D
+onoremap c "_c
+onoremap C "_C
+onoremap x "_x
+onoremap X "_X
+
