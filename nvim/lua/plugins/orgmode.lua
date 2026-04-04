@@ -4,9 +4,23 @@ return {
     event = "VeryLazy",
     ft = { "org" },
     config = function()
+      local colors = {
+        base = "#191724",
+        surface = "#1f1d2e",
+        overlay = "#6e6a86",
+        muted = "#908caa",
+        subtle = "#e0def4",
+        love = "#eb6f92",
+        gold = "#f6c177",
+        leaf = "#a6d189",
+        rose = "#ebbcba",
+        pine = "#31748f",
+        foam = "#9ccfd8",
+        iris = "#c4a7e7",
+      }
+
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
-      local colors = require("catppuccin.palettes").get_palette()
 
       -- Setup org capture templates
       local capture_templates
@@ -35,7 +49,8 @@ return {
         org_agenda_span = "day",
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
-          PROGRESS = ":foreground " .. colors.yellow .. ":weight bold", -- pink
+          PROGRESS = ":foreground " .. colors.gold .. ":weight bold",
+          DONE = ":foreground " .. colors.leaf .. ":weight bold",
         },
         org_capture_templates = capture_templates,
         mappings = {
@@ -59,43 +74,40 @@ return {
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
         callback = function()
-          -- Get Catppuccin colors
-
           local omarchy_blue = "#8CA0E8"
-          local dark_omarchy_blue = "#7287fd"
           -- Headline levels (8 levels with gradient of colors)
           vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = omarchy_blue, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.mauve, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.lavender, bold = false })
-          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.pink, bold = false })
+          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.iris, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.foam, bold = false })
+          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.rose, bold = false })
           --
           -- -- Priority markers
-          -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.red, bold = true })
-          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.yellow })
-          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.base, bg = colors.blue })
+          -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.love, bold = true })
+          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.gold })
+          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.base, bg = colors.pine })
           --
           -- -- Timestamps
-          vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.green, italic = true })
-          vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.overlay0, italic = true })
+          vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.foam, italic = true })
+          vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.overlay, italic = true })
           --
           -- -- Agenda styling
-          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.blue })
-          -- vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue, bold = true })
-          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.rose })
+          -- vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.rose, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.love, bold = true })
           --
           -- -- Markup
-          vim.api.nvim_set_hl(0, "@org.bold", { fg = colors.maroon, bold = true })
-          vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.mauve, italic = true })
+          vim.api.nvim_set_hl(0, "@org.bold", { fg = colors.rose, bold = true })
+          vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.iris, italic = true })
           -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
-          -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.peach, bg = colors.mantle })
+          -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.gold, bg = colors.surface })
           --
           -- -- Blocks and dividers
-          -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface0 })
-          -- vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.mantle })
-          -- vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay0 })
+          -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface })
+          -- vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.surface })
+          -- vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay })
           --
-          -- -- Tag-specific colors (all purple/mauve)
-          vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.teal, bold = true })
+          -- -- Tag-specific colors
+          vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.foam, bold = true })
         end,
       })
 
@@ -126,9 +138,10 @@ return {
     config = function()
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
-
-      -- Get Catppuccin colors
-      local colors = require("catppuccin.palettes").get_palette()
+      local colors = {
+        gold = "#f6c177",
+        leaf = "#a6d189",
+      }
 
       require("org-super-agenda").setup({
         org_directories = { org_path },
@@ -141,21 +154,21 @@ return {
           {
             name = "TODO",
             keymap = "ot",
-            color = "#E78284",
+            color = "#eb6f92",
             strike_through = false,
-          }, -- red
+          },
           {
             name = "PROGRESS",
             keymap = "op",
-            color = "#F1A7F1",
+            color = "#f6c177",
             strike_through = false,
-          }, -- pink
+          },
           {
             name = "DONE",
             keymap = "od",
-            color = "#A6D854",
+            color = colors.leaf,
             strike_through = true,
-          }, -- green
+          },
         },
         groups = {
           {

@@ -240,10 +240,10 @@ prompt_git_segment() {
         [[ "${xy[2]}" != ' ' ]] && has_unstaged=1
     done
 
-    (( has_staged )) && segment+=" %F{${THEME_COLORS[git_added]}}%f"
-    (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}%f"
-    (( has_untracked )) && segment+=" %F{${THEME_COLORS[git_untracked]}}%f"
-    (( has_conflicts )) && segment+=" %F{${THEME_COLORS[git_unmerged]}}%f"
+    (( has_staged )) && segment+=" %F{${THEME_COLORS[git_added]}}●%f"
+    (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}✚%f"
+    (( has_untracked )) && segment+=" %F{${THEME_COLORS[git_untracked]}}◌%f"
+    (( has_conflicts )) && segment+=" %F{${THEME_COLORS[git_unmerged]}}═%f"
 
     prompt_segment "${THEME_COLORS[git_bg]}" "${THEME_COLORS[git_fg]}" "$segment"
 }

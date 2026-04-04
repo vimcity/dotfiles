@@ -1,7 +1,7 @@
 # Ghostty Configuration 
 # ==================================================
 
-theme = "Catppuccin Frappe"
+theme = "Rose Pine Moon"
 
 # Launch maximized
 window-decoration = false
@@ -13,17 +13,17 @@ window-save-state = always
 # font-family = "CommitMono"
 # adjust-cell-height = 35%
 font-family = "JetBrains Mono NF"
-adjust-cell-height = 25%
+adjust-cell-height = 26%
 font-size = 16
 
 # Background
 # background-image = ~/dotfiles/ghostty/ghostty-bg.png
-background-image = ~/dotfiles/ghostty/bag.jpg
-background-image-fit = cover
-background-image-position = center
-background-image-opacity = 0.10
+# background-image = ~/dotfiles/ghostty/bag.jpg
+# background-image-fit = cover
+# background-image-position = center
+# background-image-opacity = 0.20
 # background-blur=true
-# background-opacity = 0.93
+# background-opacity = 0.95
 
 # Cursor and selection (bluish-grey white)
 cursor-color = #c6d0f5
