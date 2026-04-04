@@ -46,6 +46,42 @@ define_rose_pine_theme() {
     )
 }
 
+# Rose Frappe Theme - Catppuccin Frappe with Rose Pine colors
+# Dark Catppuccin Frappe base with Rose Pine rose/pink accents instead of greens
+define_rose_frappe_theme() {
+    THEME_COLORS=(
+        # Main segments - Catppuccin Frappe base
+        [user_bg]="#45475a"
+        [user_fg]="#f5f5f5"
+        [dir_bg]="#b8669c"
+        [dir_fg]="#1e1e2e"
+        [git_bg]="#313244"
+        [git_fg]="#ebbcba"
+        [venv_bg]="#45475a"
+        [venv_fg]="#cba6f7"
+        
+        # Git status colors - Catppuccin Frappe + Rose Pine roses
+        [git_added]="#ebbcba"
+        [git_modified]="#f9e2af"
+        [git_deleted]="#eb6f92"
+        [git_renamed]="#9ccfd8"
+        [git_unmerged]="#eb6f92"
+        [git_untracked]="#f6a192"
+        [git_ahead]="#c4a7e7"
+        [git_behind]="#a6da95"
+        
+        # Right prompt
+        [right_bg]="#45475a"
+        [right_fg]="#f9e2af"
+        [error_fg]="#eb6f92"
+        [prompt_char]="#ebbcba"
+        
+        # Metadata
+        [name]="rose-frappe"
+        [description]="Catppuccin Frappe with Rose Pine rose colors"
+    )
+}
+
 # Catppuccin Mocha Theme (dark alternative)
 # Colors: bold, modern, high contrast
 define_catppuccin_theme() {
@@ -233,6 +269,9 @@ prompt_load_theme() {
     case "$theme" in
         rose-pine)
             define_rose_pine_theme
+            ;;
+        rose-frappe)
+            define_rose_frappe_theme
             ;;
         catppuccin|mocha)
             define_catppuccin_theme
