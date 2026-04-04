@@ -97,6 +97,12 @@ ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=9,bold'               # light red, bold
 ZSH_HIGHLIGHT_STYLES[redirection]='fg=14'                     # cyan
 
 # ===========================================
+# Prompt Theme System
+# ===========================================
+# Source theme definitions (allows runtime switching)
+source ~/dotfiles/prompt-themes.zsh
+
+# ===========================================
 # Prompt
 # ===========================================
 setopt PROMPT_SUBST
@@ -131,7 +137,7 @@ prompt_segment() {
 
 prompt_context_segment() {
     if [[ -n "$SSH_CONNECTION" || "$EUID" -eq 0 ]]; then
-        prompt_segment '#414559' '#c6d0f5' '%n'
+        prompt_segment "${THEME_COLORS[user_bg]}" "${THEME_COLORS[user_fg]}" '%n'
     fi
 }
 
@@ -175,9 +181,9 @@ prompt_format_duration() {
 
 prompt_venv_segment() {
     if [[ -n "$VIRTUAL_ENV" ]]; then
-        prompt_segment '#414559' '#babbf1' "venv ${VIRTUAL_ENV:t}"
+        prompt_segment "${THEME_COLORS[venv_bg]}" "${THEME_COLORS[venv_fg]}" "venv ${VIRTUAL_ENV:t}"
     elif [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
-        prompt_segment '#414559' '#babbf1' "conda ${CONDA_DEFAULT_ENV}"
+        prompt_segment "${THEME_COLORS[venv_bg]}" "${THEME_COLORS[venv_fg]}" "conda ${CONDA_DEFAULT_ENV}"
     fi
 }
 
@@ -198,14 +204,14 @@ prompt_git_segment() {
         branch="detached"
     fi
 
-    segment="%F{#a6d189} %F{#7287fd}%B${branch}%b%f"
+    segment="%F{${THEME_COLORS[git_added]}} %F{${THEME_COLORS[git_fg]}}%B${branch}%b%f"
 
     if [[ "$branch_line" =~ 'ahead ([0-9]+)' ]]; then
-        segment+=" %F{#8CA0E8}⇡${match[1]}%f"
+        segment+=" %F{${THEME_COLORS[git_ahead]}}⇡${match[1]}%f"
     fi
 
     if [[ "$branch_line" =~ 'behind ([0-9]+)' ]]; then
-        segment+=" %F{#6c76c2}⇣${match[1]}%f"
+        segment+=" %F{${THEME_COLORS[git_behind]}}⇣${match[1]}%f"
     fi
 
     local has_staged=0
@@ -234,16 +240,16 @@ prompt_git_segment() {
         [[ "${xy[2]}" != ' ' ]] && has_unstaged=1
     done
 
-    (( has_staged )) && segment+=" %F{#a6d189}%f"
-    (( has_unstaged )) && segment+=" %F{#e5c890}%f"
-    (( has_untracked )) && segment+=" %F{#ef9f76}%f"
-    (( has_conflicts )) && segment+=" %F{#e78284}%f"
+    (( has_staged )) && segment+=" %F{${THEME_COLORS[git_added]}}%f"
+    (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}%f"
+    (( has_untracked )) && segment+=" %F{${THEME_COLORS[git_untracked]}}%f"
+    (( has_conflicts )) && segment+=" %F{${THEME_COLORS[git_unmerged]}}%f"
 
-    prompt_segment '#2A2C3B' '#7287fd' "$segment"
+    prompt_segment "${THEME_COLORS[git_bg]}" "${THEME_COLORS[git_fg]}" "$segment"
 }
 
 prompt_dir_segment() {
-    prompt_segment '#7287fd' '#202131' "%B$(prompt_dir_display)%b"
+    prompt_segment "${THEME_COLORS[dir_bg]}" "${THEME_COLORS[dir_fg]}" "%B$(prompt_dir_display)%b"
 }
 
 prompt_build_left() {
@@ -258,17 +264,17 @@ prompt_build_right() {
     local out=''
 
     if [[ -n "$PROMPT_LAST_DURATION" ]]; then
-        out+="%K{#414559}%F{#e5c890}  ${PROMPT_LAST_DURATION} %f%k "
+        out+="%K{${THEME_COLORS[right_bg]}}%F{${THEME_COLORS[right_fg]}}  ${PROMPT_LAST_DURATION} %f%k "
     fi
 
     local count
     count=$(jobs -p 2>/dev/null | wc -l | tr -d ' ')
     if [[ "$count" != "0" ]]; then
-        out+="%K{#414559}%F{#e5c890}  ${count} %f%k "
+        out+="%K{${THEME_COLORS[right_bg]}}%F{${THEME_COLORS[right_fg]}}  ${count} %f%k "
     fi
 
     if [[ "$last_status" -ne 0 ]]; then
-        out+="%K{#414559}%F{#e78284} ✘ ${last_status} %f%k"
+        out+="%K{${THEME_COLORS[right_bg]}}%F{${THEME_COLORS[error_fg]}} ✘ ${last_status} %f%k"
     fi
 
     print -n "$out"
@@ -302,7 +308,7 @@ add-zsh-hook precmd prompt_precmd
 add-zsh-hook preexec prompt_preexec
 
 PROMPT='$(prompt_build_left)'
-PROMPT+=$'\n''%F{#ef9f76}$%f '
+PROMPT+=$'\n''%F{${THEME_COLORS[prompt_char]}}$%f '
 
 # ===========================================
 # Zsh History Configuration
@@ -758,5 +764,11 @@ alias qt='qutebrowser >/dev/null 2>&1 &'
 
 # Shell Master - Interactive CLI Learning Tool
 alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
+
+# ===========================================
+# Prompt Theme Switcher
+# ===========================================
+# Source theme switcher shortcuts for easy theme switching
+source ~/dotfiles/theme-switcher.zsh
 
 # zprof
