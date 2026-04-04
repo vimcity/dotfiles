@@ -3,6 +3,7 @@
 
 # Shortcuts for common themes
 alias theme-rp='prompt_switch_theme rose-pine'
+alias theme-rf='prompt_switch_theme rose-frappe'
 alias theme-cat='prompt_switch_theme catppuccin'
 alias theme-nord='prompt_switch_theme nord'
 alias theme-dracula='prompt_switch_theme dracula'
