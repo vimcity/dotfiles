@@ -7,13 +7,13 @@ return {
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
         callback = function()
-          -- GitHub-style colors for dark background
+          -- Rose-frappe diff colors
           local colors = {
-            -- Added lines: green background
-            add_bg = "#1a472a",
+            -- Added lines
+            add_bg = "#264542",
             add_fg = "#7ee787",
-            -- Removed lines: red background
-            delete_bg = "#5a1f1f",
+            -- Removed lines
+            delete_bg = "#3b2234",
             delete_fg = "#ff7b72",
             -- Changed/modified lines: subtle blue
             change_bg = "#1c3d5a",

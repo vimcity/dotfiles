@@ -64,6 +64,11 @@ return {
       enabled = false,
     })
 
+    -- Override dashboard header ASCII art color to match prompt dir color
+    vim.api.nvim_set_hl(0, "SnacksDashboardHeader", { fg = "#7287fd" })
+    vim.api.nvim_set_hl(0, "SnacksDashboardKey", { fg = "#9ccfd8" })
+    vim.api.nvim_set_hl(0, "SnacksDashboardDesc", { fg = "#ca9ee6" })
+    vim.api.nvim_set_hl(0, "SnacksDashboardIcon", { fg = "#7287fd" })
     return opts
   end,
 }
