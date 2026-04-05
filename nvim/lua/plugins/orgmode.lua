@@ -5,18 +5,21 @@ return {
     ft = { "org" },
     config = function()
       local colors = {
-        base = "#191724",
-        surface = "#1f1d2e",
-        overlay = "#6e6a86",
-        muted = "#908caa",
-        subtle = "#e0def4",
-        love = "#eb6f92",
-        gold = "#f6c177",
-        leaf = "#a6d189",
-        rose = "#ebbcba",
-        pine = "#31748f",
-        foam = "#9ccfd8",
-        iris = "#c4a7e7",
+        -- Base from Rose Pine Moon
+        bg = "#232136",
+        surface = "#2a273f",
+        text = "#e0def4",
+        -- Rose/Pink accents (matching rose-frappe theme)
+        rose_pink = "#b8669c",    -- saturated rose pink
+        rose = "#ebbcba",         -- soft rose
+        salmon = "#f6a192",       -- salmon
+        rose_dark = "#eb6f92",    -- darker rose
+        lavender = "#c4a7e7",     -- lavender
+        -- Utilities
+        yellow = "#f5e0ac",       -- modified, warnings
+        green = "#a6da95",        -- additions
+        cyan = "#9ccfd8",         -- types
+        blue = "#89b4fa",         -- comments
       }
 
       -- Get org path from environment variable
@@ -49,8 +52,9 @@ return {
         org_agenda_span = "day",
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
-          PROGRESS = ":foreground " .. colors.gold .. ":weight bold",
-          DONE = ":foreground " .. colors.leaf .. ":weight bold",
+          TODO = ":foreground " .. colors.rose_dark .. ":weight bold",
+          PROGRESS = ":foreground " .. colors.lavender .. ":weight bold",
+          DONE = ":foreground " .. colors.green .. ":weight bold",
         },
         org_capture_templates = capture_templates,
         mappings = {
@@ -74,40 +78,44 @@ return {
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = "*",
         callback = function()
-          local omarchy_blue = "#8CA0E8"
-          -- Headline levels (8 levels with gradient of colors)
-          vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = omarchy_blue, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.iris, bold = true })
-          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.foam, bold = false })
-          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.rose, bold = false })
-          --
-          -- -- Priority markers
-          -- vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.love, bold = true })
-          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.base, bg = colors.gold })
-          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.base, bg = colors.pine })
-          --
-          -- -- Timestamps
-          vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.foam, italic = true })
-          vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.overlay, italic = true })
-          --
-          -- -- Agenda styling
-          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.rose })
-          -- vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.rose, bold = true })
-          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.love, bold = true })
-          --
-          -- -- Markup
+          -- Headline levels with rose/pink gradient
+          vim.api.nvim_set_hl(0, "@org.headline.level1", { fg = colors.lavender, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level2", { fg = colors.rose, bold = true })
+          vim.api.nvim_set_hl(0, "@org.headline.level3", { fg = colors.cyan, bold = false })
+          vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.rose_pink, bold = false })
+          
+          -- Priority markers
+          vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.bg, bg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.bg, bg = colors.yellow })
+          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.bg, bg = colors.cyan })
+          
+          -- Timestamps
+          vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.cyan, italic = true })
+          vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.blue, italic = true })
+          
+          -- Agenda styling
+          vim.api.nvim_set_hl(0, "@org.keyword.todo", { fg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.keyword.done", { fg = colors.green, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.header", { fg = colors.rose, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.today", { fg = colors.lavender, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.weekend", { fg = colors.blue, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.cyan })
+          vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue })
+          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.time_grid", { fg = colors.surface })
+          vim.api.nvim_set_hl(0, "@org.agenda.separator", { fg = colors.surface })
+          vim.api.nvim_set_hl(0, "@org.agenda.tag", { fg = colors.rose_pink, italic = true })
+          
+          -- Markup
           vim.api.nvim_set_hl(0, "@org.bold", { fg = colors.rose, bold = true })
-          vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.iris, italic = true })
-          -- vim.api.nvim_set_hl(0, "@org.strikethrough", { strikethrough = true })
-          -- vim.api.nvim_set_hl(0, "@org.code", { fg = colors.gold, bg = colors.surface })
-          --
-          -- -- Blocks and dividers
-          -- vim.api.nvim_set_hl(0, "Headline", { bg = colors.surface })
-          -- vim.api.nvim_set_hl(0, "CodeBlock", { bg = colors.surface })
-          -- vim.api.nvim_set_hl(0, "Dash", { fg = colors.overlay })
-          --
-          -- -- Tag-specific colors
-          vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.foam, bold = true })
+          vim.api.nvim_set_hl(0, "@org.italic", { fg = colors.lavender, italic = true })
+          
+          -- Tag-specific colors
+          vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.cyan, bold = true })
+          
+          -- Super agenda text colors
+          vim.api.nvim_set_hl(0, "OrgSuperAgendaText", { fg = colors.text })
+          vim.api.nvim_set_hl(0, "OrgSuperAgendaTodo", { fg = colors.lavender, bold = true })
         end,
       })
 
@@ -139,8 +147,9 @@ return {
       -- Get org path from environment variable
       local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
       local colors = {
-        gold = "#f6c177",
-        leaf = "#a6d189",
+        yellow = "#f5e0ac",
+        green = "#a6da95",
+        rose_dark = "#eb6f92",
       }
 
       require("org-super-agenda").setup({
@@ -154,19 +163,19 @@ return {
           {
             name = "TODO",
             keymap = "ot",
-            color = "#eb6f92",
+            color = colors.rose_dark,
             strike_through = false,
           },
           {
             name = "PROGRESS",
             keymap = "op",
-            color = "#f6c177",
+            color = colors.yellow,
             strike_through = false,
           },
           {
             name = "DONE",
             keymap = "od",
-            color = colors.leaf,
+            color = colors.green,
             strike_through = true,
           },
         },
@@ -177,7 +186,7 @@ return {
               return i.todo_state ~= "DONE" and not i.scheduled and not i.deadline
             end,
             sort = { by = "headline", order = "asc" },
-            header = { fg = colors.yellow, bold = true },
+            header = { fg = colors.rose, bold = true },
           },
         },
         view_mode = "compact",

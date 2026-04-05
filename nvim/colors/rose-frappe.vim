@@ -10,8 +10,8 @@ endif
 let g:colors_name = "rose-frappe"
 
 " Rose Frappe Color Palette
-let s:bg = "#303446"           " Dark background
-let s:surface = "#414559"      " Surface/secondary background
+let s:bg = "#232136"           " Rose Pine Moon background
+let s:surface = "#2a273f"      " Rose Pine Moon surface/secondary background
 let s:text = "#c6d0f5"         " Light text
 let s:text_dark = "#191724"    " Very dark text
 let s:rose_pink = "#b8669c"    " Saturated rose pink (directory)

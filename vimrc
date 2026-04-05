@@ -26,26 +26,18 @@ autocmd VimLeave * silent !echo -ne "\e[2 q"
 set clipboard=unnamed     " Use system clipboard on macOS
 " Alternative: set clipboard=unnamedplus  " Use this on Linux 
                           
+" Delete/change without yanking into the default register.
+" Keep these in normal/visual modes only; operator-pending maps break `dd`.
 nnoremap d "_d
-vnoremap d "_d
-nnoremap D "_D                                                                                                                                                                                                                           █
-nnoremap x "_x                                                                                                                                                                                                                           █
-xnoremap x "_x                                                                                                                                                                                                                           █
-nnoremap c "_c                                                                                                                                                                                                                           █
-xnoremap c "_c
+nnoremap D "_D
+nnoremap c "_c
 nnoremap C "_C
+nnoremap x "_x
 nnoremap X "_X
-vnoremap d "_d
-vnoremap D "_D
-vnoremap c "_c
-vnoremap C "_C
-vnoremap x "_x
-vnoremap X "_X
-" Also need operator-pending (for dw, d$, etc.)
-onoremap d "_d
-onoremap D "_D
-onoremap c "_c
-onoremap C "_C
-onoremap x "_x
-onoremap X "_X
 
+xnoremap d "_d
+xnoremap D "_D
+xnoremap c "_c
+xnoremap C "_C
+xnoremap x "_x
+xnoremap X "_X
