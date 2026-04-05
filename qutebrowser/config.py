@@ -120,7 +120,8 @@ c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 c.url.searchengines = {
     "DEFAULT": "https://www.google.com/search?q={}",
     "gh": "https://github.com/search?q={}",
-    "yt": "https://music.youtube.com/search?q={}",
+    "ytm": "https://music.youtube.com/search?q={}",
+    "yt": "https://www.youtube.com/watch?q={}",
     "blog": "https://www.indiehackers.com/search?q={}",
     "wiki": "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}",
     "reddit": "https://www.reddit.com/search/?q={}",
