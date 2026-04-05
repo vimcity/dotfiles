@@ -1,10 +1,10 @@
 return {
-  require("plugins.rosefrappe"),
+  require("plugins.catppuccin-rose"),
 
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "rosefrappe",
+      colorscheme = "catppuccin-rose",
     },
   },
 }
