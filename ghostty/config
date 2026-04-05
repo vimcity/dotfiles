@@ -13,7 +13,7 @@ window-save-state = always
 # font-family = "CommitMono"
 # adjust-cell-height = 35%
 font-family = "JetBrains Mono NF"
-adjust-cell-height = 26%
+adjust-cell-height = 25%
 font-size = 16
 
 # Background
