@@ -1,0 +1,247 @@
+{
+    "$schema": "https://opencode.ai/theme.json",
+    "defs": {
+        "moonBase": "#232136",
+        "moonSurface": "#2a273f",
+        "moonOverlay": "#393552",
+        "moonMuted": "#6e6a86",
+        "moonSubtle": "#908caa",
+        "moonText": "#e0def4",
+        "love": "#eb6f92",
+        "gold": "#f6c177",
+        "rose": "#ea9a97",
+        "pine": "#3e8fb0",
+        "foam": "#9ccfd8",
+        "iris": "#c4a7e7",
+        "highlightLow": "#2a283e",
+        "highlightMed": "#44415a",
+        "highlightHigh": "#56526e",
+        "frappeRosewater": "#f2d5cf",
+        "frappeFlamingo": "#eebebe",
+        "frappePink": "#f4b8e4",
+        "frappeMauve": "#ca9ee6",
+        "frappeRed": "#e78284",
+        "frappeMaroon": "#ea999c",
+        "frappeRose": "#f38ba8",
+        "frappePeach": "#ef9f76",
+        "frappeYellow": "#e5c890",
+        "frappeGreen": "#a6d189",
+        "frappeTeal": "#81c8be",
+        "frappeSky": "#99d1db",
+        "frappeSapphire": "#85c1dc",
+        "frappeBlue": "#8caaee",
+        "frappeLavender": "#babbf1",
+        "frappeText": "#d0cbe0",
+        "frappeSubtext1": "#b5bfe2",
+        "frappeSubtext0": "#a5adce",
+        "frappeOverlay2": "#949cb8",
+        "frappeOverlay1": "#838ba7",
+        "frappeOverlay0": "#737994"
+    },
+    "theme": {
+        "primary": {
+            "dark": "frappeRose",
+            "light": "frappeRose"
+        },
+        "secondary": {
+            "dark": "iris",
+            "light": "iris"
+        },
+        "accent": {
+            "dark": "rose",
+            "light": "rose"
+        },
+        "error": {
+            "dark": "love",
+            "light": "love"
+        },
+        "warning": {
+            "dark": "gold",
+            "light": "gold"
+        },
+        "success": {
+            "dark": "pine",
+            "light": "pine"
+        },
+        "info": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "text": {
+            "dark": "frappeText",
+            "light": "frappeText"
+        },
+        "textMuted": {
+            "dark": "frappeOverlay2",
+            "light": "frappeOverlay2"
+        },
+        "background": {
+            "dark": "moonBase",
+            "light": "moonBase"
+        },
+        "backgroundPanel": {
+            "dark": "moonSurface",
+            "light": "moonSurface"
+        },
+        "backgroundElement": {
+            "dark": "moonOverlay",
+            "light": "moonOverlay"
+        },
+        "backgroundMenu": {
+            "dark": "moonSurface",
+            "light": "moonSurface"
+        },
+        "border": {
+            "dark": "frappeLavender",
+            "light": "highlightMed"
+        },
+        "borderActive": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "borderSubtle": {
+            "dark": "highlightLow",
+            "light": "highlightLow"
+        },
+        "diffAdded": {
+            "dark": "pine",
+            "light": "pine"
+        },
+        "diffRemoved": {
+            "dark": "love",
+            "light": "love"
+        },
+        "diffContext": {
+            "dark": "frappeOverlay1",
+            "light": "frappeOverlay1"
+        },
+        "diffHunkHeader": {
+            "dark": "iris",
+            "light": "iris"
+        },
+        "diffHighlightAdded": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "diffHighlightRemoved": {
+            "dark": "rose",
+            "light": "rose"
+        },
+        "diffAddedBg": {
+            "dark": "#264542",
+            "light": "#264542"
+        },
+        "diffRemovedBg": {
+            "dark": "#3b2234",
+            "light": "#3b2234"
+        },
+        "diffContextBg": {
+            "dark": "moonSurface",
+            "light": "moonSurface"
+        },
+        "diffLineNumber": {
+            "dark": "frappeOverlay0",
+            "light": "frappeOverlay0"
+        },
+        "diffAddedLineNumberBg": {
+            "dark": "#1d2c36",
+            "light": "#1d2c36"
+        },
+        "diffRemovedLineNumberBg": {
+            "dark": "#311f2c",
+            "light": "#311f2c"
+        },
+        "markdownText": {
+            "dark": "frappeText",
+            "light": "frappeText"
+        },
+        "markdownHeading": {
+            "dark": "iris",
+            "light": "iris"
+        },
+        "markdownLink": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "markdownLinkText": {
+            "dark": "frappeSky",
+            "light": "frappeSky"
+        },
+        "markdownCode": {
+            "dark": "frappeMauve",
+            "light": "frappeMauve"
+        },
+        "markdownBlockQuote": {
+            "dark": "frappeYellow",
+            "light": "frappeYellow"
+        },
+        "markdownEmph": {
+            "dark": "frappeYellow",
+            "light": "frappeYellow"
+        },
+        "markdownStrong": {
+            "dark": "rose",
+            "light": "rose"
+        },
+        "markdownHorizontalRule": {
+            "dark": "highlightMed",
+            "light": "highlightMed"
+        },
+        "markdownListItem": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "markdownListEnumeration": {
+            "dark": "frappeSky",
+            "light": "frappeSky"
+        },
+        "markdownImage": {
+            "dark": "foam",
+            "light": "foam"
+        },
+        "markdownImageText": {
+            "dark": "frappeSky",
+            "light": "frappeSky"
+        },
+        "markdownCodeBlock": {
+            "dark": "frappeText",
+            "light": "frappeText"
+        },
+        "syntaxComment": {
+            "dark": "frappeOverlay2",
+            "light": "frappeOverlay2"
+        },
+        "syntaxKeyword": {
+            "dark": "frappeMauve",
+            "light": "frappeMauve"
+        },
+        "syntaxFunction": {
+            "dark": "frappeBlue",
+            "light": "frappeBlue"
+        },
+        "syntaxVariable": {
+            "dark": "frappePeach",
+            "light": "frappePink"
+        },
+        "syntaxString": {
+            "dark": "frappeTeal",
+            "light": "frappeTeal"
+        },
+        "syntaxNumber": {
+            "dark": "frappePeach",
+            "light": "frappePeach"
+        },
+        "syntaxType": {
+            "dark": "frappeYellow",
+            "light": "frappeYellow"
+        },
+        "syntaxOperator": {
+            "dark": "frappeSky",
+            "light": "frappeSky"
+        },
+        "syntaxPunctuation": {
+            "dark": "frappeSubtext1",
+            "light": "frappeSubtext1"
+        }
+    }
+}

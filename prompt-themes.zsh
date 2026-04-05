@@ -4,19 +4,20 @@
 # Easy switching between different prompt themes
 
 # Set current theme (can override in .zshrc.local or shell session)
-export PROMPT_THEME="${PROMPT_THEME:-rose-frappe}"
+export PROMPT_THEME="${PROMPT_THEME:-catppuccin-rose}"
 
 # Define theme colors and styles
 declare -A THEME_COLORS
 
-define_rose_frappe_theme() {
+define_catppuccin_rose_theme() {
     THEME_COLORS=(
         # Main segments - Catppuccin Frappe base
         [user_bg]="#45475a"
         [user_fg]="#f5f5f5"
-        [dir_bg]="#bd93f9"
+        [dir_bg]="#7287fd"
         [dir_fg]="#1e1e2e"
-        [git_fg]="#d679a2"
+        # [git_fg]="#d679a2"
+        [git_fg]="#bd93f9"
         [git_bg]="#302e4b"
         [git_icon]="#a6da95"
         [venv_bg]="#45475a"
@@ -39,7 +40,7 @@ define_rose_frappe_theme() {
         [prompt_char]="#ebbcba"
         
         # Metadata
-        [name]="rose-frappe"
+        [name]="catppuccin-rose"
         [description]="Catppuccin Frappe with Rose rose colors"
     )
 }
@@ -104,14 +105,14 @@ prompt_load_theme() {
     local theme="${1:-$PROMPT_THEME}"
     
     case "$theme" in
-        rose-frappe)
-            define_rose_frappe_theme
+        catppuccin-rose)
+            define_catppuccin_rose_theme
             ;;
         catppuccin)
             define_catppuccin_theme
             ;;
         *)
-            define_rose_frappe_theme
+            define_catppuccin_rose_theme
             ;;
     esac
     
@@ -125,7 +126,7 @@ prompt_switch_theme() {
     if [[ -z "$new_theme" ]]; then
         echo "Available themes:"
         echo "  catppuccin - Bold Catppuccin"
-        echo "  rose-frappe- Catppuccin Rose"
+        echo "  catppuccin-rose - Catppuccin Rose"
         echo ""
         echo "Current theme: $PROMPT_THEME"
         echo ""
