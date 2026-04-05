@@ -113,6 +113,7 @@ fi
 remove_if_exists "$HOME/.config/ghostty"
 remove_if_exists "$HOME/.config/atuin"
 remove_if_exists "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+remove_if_exists "$HOME/.config/opencode/themes"
 remove_if_exists "$HOME/.vimrc"
 remove_if_exists "$HOME/.zshrc"
 remove_if_exists "$HOME/.tmux.conf"
@@ -152,6 +153,7 @@ ln -sf "$DOTFILES_DIR/tmux-cht-languages" "$HOME/.tmux-cht-languages"
 ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
 ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
+ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 
 if [ -d "$DOTFILES_DIR/yazi" ]; then
     echo "📁 Found yazi config in dotfiles, linking..."

@@ -9,7 +9,7 @@ return {
         bg = "#232136",
         surface = "#2a273f",
         text = "#d0cbe0",
-        -- Rose/Pink accents (matching rose-frappe theme)
+        -- Rose/Pink accents (matching the catppuccin-rose theme)
         rose_light = "#f38ba8", -- saturated rose pink
         teal = "#85c1dc", -- soft rose
         salmon = "#f6a192", -- salmon

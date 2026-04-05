@@ -19,7 +19,7 @@ The install script will:
 
 This configuration emphasizes:
 - **Modern CLI replacements** (bat, eza, fd, ripgrep, zoxide)
-- **Catppuccin Frappe theme** across all tools
+- **Catppuccin-based theming** across all tools, with a custom `catppuccin-rose` variant in Neovim/OpenCode
 - **Vim-style keybindings** everywhere
 - **Cross-machine sync** with machine-specific overrides
 - **Performance** with lazy-loading and optimized startup
@@ -39,7 +39,7 @@ This configuration emphasizes:
 **Zsh** - Unix shell with powerful customization
 > Primary command-line interface with enhanced features via Oh My Zsh framework
 
-- **Prompt**: Starship (customized with Catppuccin Mocha colors, shows OS, directory, git status, language versions)
+- **Prompt**: Custom prompt theme system with `catppuccin-rose` as the default, plus Starship modules for context
 - **Plugins**: git, zsh-autosuggestions, zsh-syntax-highlighting, docker-compose
 - **History**: Standard zsh history for up/down arrow, Atuin for fuzzy search (`Ctrl+R`)
 - **Navigation**: Zoxide for smart directory jumping
@@ -120,6 +120,7 @@ This configuration emphasizes:
   - UI: treesitter-context (show current function at top), indent-blankline (visual indent guides), mini-indentscope (highlight current scope)
   - Project management and organization mode (org-agenda support)
 - **Cache Management**: Handles symlinked config with proper cache normalization (fixes treesitter crashes)
+- **Theme**: Custom `catppuccin-rose` colorscheme built on Catppuccin Frappe with rose-toned overrides and Markdown heading tint blocks
 
 ### Git Tools
 **Lazygit** - Terminal UI for git operations
@@ -164,6 +165,7 @@ Custom functions for fuzzy finding:
 
 ### AI Integration
 - **OpenCode** - AI-assisted command workflow (CLI agent tool)
+- **OpenCode Theme** - Custom `catppuccin-rose` theme for the TUI, tracked in `opencode/themes/` and symlinked into config
 - **Fabric voice prompt cleanup** - `voice_to_clean_prompt` pattern for fixing spoken/transcribed prompts
 - **GitHub Copilot** - Code suggestions in Neovim
 - **CodeCompanion** - Local AI chat with Ollama integration (optional)
@@ -213,7 +215,7 @@ dotfiles/
 
 ## Notable Features
 
-- **Catppuccin Frappe** theme consistently applied across terminal, tmux, neovim, and bat
+- **Catppuccin + rose overrides** consistently applied across terminal, tmux, prompt, Neovim, OpenCode, and bat
 - **Vim keybindings** in shell (vi mode), tmux copy mode, neovim, and file managers
 - **Fuzzy finding** integrated throughout with fzf (files, directories, git branches)
 - **Shell history** synced across machines with Atuin

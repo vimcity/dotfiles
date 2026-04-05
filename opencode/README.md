@@ -1,6 +1,6 @@
 # OpenCode Configuration
 
-This directory contains OpenCode configuration and plugins that are symlinked to `~/.config/opencode/`.
+This directory contains OpenCode configuration, themes, and plugins that are symlinked to `~/.config/opencode/`.
 
 ## Plugins
 
@@ -29,13 +29,23 @@ The Tmux focus reset logic is in `zshrc` - it runs when you have a shell in a Tm
 - Tmux available in PATH
 - Zsh shell (for the focus reset hook)
 
+## Themes
+
+### catppuccin-rose.json
+
+A custom OpenCode theme built on Catppuccin Frappe with rose-toned overrides to match the rest of this dotfiles setup.
+
+The theme is tracked in `opencode/themes/catppuccin-rose.json` and symlinked into `~/.config/opencode/themes/` by `install.sh`.
+
 ## Structure
 
 ```
 opencode/
 ├── README.md           # This file
-└── plugins/
-    └── tmux-status.ts # Tmux window color status plugin
+├── plugins/
+│   └── tmux-status.ts  # Tmux window color status plugin
+└── themes/
+    └── catppuccin-rose.json
 ```
 
 ## Installation
@@ -43,7 +53,8 @@ opencode/
 Run the `install.sh` script in the dotfiles root to automatically:
 1. Create the `~/.config/opencode` directory
 2. Symlink `~/dotfiles/opencode/plugins` to `~/.config/opencode/plugins`
-3. Update `zshrc` with the Tmux focus reset hook
+3. Symlink `~/dotfiles/opencode/themes` to `~/.config/opencode/themes`
+4. Update `zshrc` with the Tmux focus reset hook
 
 ```bash
 cd ~/dotfiles
