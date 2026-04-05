@@ -1,4 +1,46 @@
+gui:
+  authorColors:
+    '*': '#c4a7e7'
+  branchColorPatterns:
+    '^main$': '#a6d189'
+    '^master$': '#a6d189'
+    '^feat(ure)?/': '#c4a7e7'
+    '^fix/': '#ea9a97'
+    '^hotfix/': '#eb6f92'
+  theme:
+    # Available Lazygit theme keys:
+    # activeBorderColor, inactiveBorderColor, searchingActiveBorderColor,
+    # optionsTextColor, selectedLineBgColor, inactiveViewSelectedLineBgColor,
+    # cherryPickedCommitFgColor, cherryPickedCommitBgColor,
+    # markedBaseCommitFgColor, markedBaseCommitBgColor,
+    # unstagedChangesColor, defaultFgColor
+    activeBorderColor:
+      - '#c4a7e7'
+      - bold
+    inactiveBorderColor:
+      - '#6e6a86'
+    searchingActiveBorderColor:
+      - '#ea9a97'
+      - bold
+    optionsTextColor:
+      - '#ebbcbA'
+    selectedLineBgColor:
+      - '#393552'
+    inactiveViewSelectedLineBgColor:
+      - '#2a273f'
+    cherryPickedCommitFgColor:
+      - '#99d1db'
+    cherryPickedCommitBgColor:
+      - '#2f3149'
+    markedBaseCommitFgColor:
+      - '#232137'
+    markedBaseCommitBgColor:
+      - '#ebbcbA'
+    unstagedChangesColor:
+      - '#eb6f92'
+    defaultFgColor:
+      - '#ddd6f4'
 git:
   pagers:
     - colorArg: always
-      pager: 'delta --dark --paging=never --syntax-theme "Catppuccin Frappe" --plus-style "syntax #2d3f2f" --plus-emph-style "syntax #3a5440" --minus-style "syntax #4a2d34" --minus-emph-style ""'
+      pager: 'delta --dark --paging=never --syntax-theme "Catppuccin Frappe" --plus-style "syntax #264542" --plus-emph-style "syntax #264542" --minus-style "syntax #3b2234" --minus-emph-style "syntax #3b2234"'
