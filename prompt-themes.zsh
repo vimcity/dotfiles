@@ -14,10 +14,9 @@ define_rose_frappe_theme() {
         # Main segments - Catppuccin Frappe base
         [user_bg]="#45475a"
         [user_fg]="#f5f5f5"
-        # [dir_bg]="#f38ba8"
-        [dir_bg]="#d679a2"
+        [dir_bg]="#bd93f9"
         [dir_fg]="#1e1e2e"
-        [git_fg]="#f6a192"
+        [git_fg]="#d679a2"
         [git_bg]="#302e4b"
         [git_icon]="#a6da95"
         [venv_bg]="#45475a"
@@ -58,7 +57,7 @@ define_catppuccin_theme() {
         [git_fg]="#89b4fa"
         [git_icon]="#a6e3a1"
         [venv_bg]="#45475a"
-        [venv_fg]="#cba6f7"
+        [venv_fg]="#a6e3a1"
         
         # Git status colors
         [git_added]="#a6e3a1"
@@ -84,87 +83,20 @@ define_catppuccin_theme() {
 }
 
 # Nord Theme (cool, professional)
-# Colors: arctic blues and greens
-define_nord_theme() {
-    THEME_COLORS=(
-        # Main segments
-        [user_bg]="#4c566a"
-        [user_fg]="#eceff4"
-        [dir_bg]="#88c0d0"
-        [dir_fg]="#2e3440"
-        [git_bg]="#3b4252"
-        [git_fg]="#88c0d0"
-        [git_icon]="#a3be8c"
-        [venv_bg]="#4c566a"
-        [venv_fg]="#81a1c1"
-        
-        # Git status colors
-        [git_added]="#a3be8c"
-        [git_modified]="#ebcb8b"
-        [git_deleted]="#bf616a"
-        [git_renamed]="#81a1c1"
-        [git_unmerged]="#bf616a"
-        [git_untracked]="#d08770"
-        [git_ahead]="#b48ead"
-        [git_behind]="#5e81ac"
-        [git_stash]="#8fbcbb"
-        
-        # Right prompt
-        [right_bg]="#4c566a"
-        [right_fg]="#ebcb8b"
-        [error_fg]="#bf616a"
-        [prompt_char]="#d08770"
-        
-        # Metadata
-        [name]="nord"
-        [description]="Cool Arctic Nord theme with professional colors"
-    )
-}
-
-# Dracula Theme (dark and vibrant)
-# Colors: bold purples and pinks
-define_dracula_theme() {
-    THEME_COLORS=(
-        # Main segments
-        [user_bg]="#44475a"
-        [user_fg]="#f8f8f2"
-        [dir_bg]="#bd93f9"
-        [dir_fg]="#282a36"
-        [git_bg]="#282a36"
-        [git_fg]="#bd93f9"
-        [git_icon]="#50fa7b"
-        [venv_bg]="#44475a"
-        [venv_fg]="#8be9fd"
-        
-        # Git status colors
-        [git_added]="#50fa7b"
-        [git_modified]="#f1fa8c"
-        [git_deleted]="#ff79c6"
-        [git_renamed]="#8be9fd"
-        [git_unmerged]="#ff79c6"
-        [git_untracked]="#ffb86c"
-        [git_ahead]="#a1efe4"
-        [git_behind]="#6272a4"
-        [git_stash]="#8be9fd"
-        
-        # Right prompt
-        [right_bg]="#44475a"
-        [right_fg]="#f1fa8c"
-        [error_fg]="#ff79c6"
-        [prompt_char]="#ffb86c"
-        
-        # Metadata
-        [name]="dracula"
-        [description]="Dark and vibrant Dracula theme"
-    )
-}
-
-# Colors: warm earth tones
-        # [venv_fg]="#d3869b"
-        # [git_deleted]="#fb4934"
-        # [git_ahead]="#8ec07c"
-        # [git_behind]="#458588"
-        # [git_stash]="#83a598"
+# [dir_bg]="#88c0d0"
+# [dir_bg]="#f38ba8"
+# [git_icon]="#a3be8c"
+# [git_modified]="#ebcb8b"
+# [git_deleted]="#bf616a"
+# [error_fg]="#bf616a"
+# [git_behind]="#5e81ac"
+# [git_unmerged]="#ff79c6"
+# [dir_bg]="#bd93f9"
+# [venv_fg]="#d3869b"
+# [git_deleted]="#fb4934"
+# [git_ahead]="#8ec07c"
+# [git_behind]="#458588"
+# [git_stash]="#83a598"
         
 
 # Load theme based on PROMPT_THEME variable
@@ -177,12 +109,6 @@ prompt_load_theme() {
             ;;
         catppuccin)
             define_catppuccin_theme
-            ;;
-        nord)
-            define_nord_theme
-            ;;
-        dracula)
-            define_dracula_theme
             ;;
         *)
             define_rose_frappe_theme
@@ -200,8 +126,6 @@ prompt_switch_theme() {
         echo "Available themes:"
         echo "  catppuccin - Bold Catppuccin"
         echo "  rose-frappe- Catppuccin Rose"
-        echo "  nord       - Cool Arctic Nord"
-        echo "  dracula    - Dark and vibrant"
         echo ""
         echo "Current theme: $PROMPT_THEME"
         echo ""
