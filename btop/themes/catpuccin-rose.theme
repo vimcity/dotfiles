@@ -1,0 +1,94 @@
+# Catpuccin Rose for btop
+#
+# Palette reference
+#   rp_base      #232136
+#   rp_surface   #2a273f
+#   rp_overlay   #44415a
+#   rp_muted     #6e6a86
+#   rp_subtle    #908caa
+#   rp_text      #e0def4
+#   rp_foam      #9ccfd8
+#   rp_iris      #c4a7e7
+#   rp_love      #eb6f92
+#   cp_teal      #81c8be
+#   cp_sapphire  #85c1dc
+#   cp_blue      #8caaee
+#   cp_lavender  #babbf1
+
+# Base UI
+theme[main_bg]="#232136"
+theme[main_fg]="#8caaee"
+theme[title]="#e0def4"
+theme[hi_fg]="#c4a7e7"
+
+# Selection and chrome
+theme[selected_bg]="#44415a"
+theme[selected_fg]="#e0def4"
+theme[inactive_fg]="#6e6a86"
+theme[graph_text]="#908caa"
+theme[meter_bg]="#2a273f"
+theme[div_line]="#44415a"
+
+# Box outlines
+theme[cpu_box]="#8caaee"
+theme[mem_box]="#81c8be"
+theme[net_box]="#eb6f92"
+theme[proc_box]="#c4a7e7"
+
+# Temperature graph: foam -> iris -> love
+theme[temp_start]="#9ccfd8"
+theme[temp_mid]="#c4a7e7"
+theme[temp_end]="#eb6f92"
+
+# CPU graph: teal -> blue -> iris
+theme[cpu_start]="#81c8be"
+theme[cpu_mid]="#8caaee"
+theme[cpu_end]="#c4a7e7"
+
+# Memory meters
+# Free: teal -> teal -> foam
+theme[free_start]="#81c8be"
+theme[free_mid]="#81c8be"
+theme[free_end]="#9ccfd8"
+
+# Cached: foam -> sapphire -> blue
+theme[cached_start]="#9ccfd8"
+theme[cached_mid]="#85c1dc"
+theme[cached_end]="#8caaee"
+
+# Available: blue -> lavender -> iris
+theme[available_start]="#8caaee"
+theme[available_mid]="#babbf1"
+theme[available_end]="#c4a7e7"
+
+# Used: teal -> blue -> iris
+theme[used_start]="#81c8be"
+theme[used_mid]="#8caaee"
+theme[used_end]="#c4a7e7"
+
+# Network graphs
+# Download: teal -> foam -> sapphire
+theme[download_start]="#81c8be"
+theme[download_mid]="#9ccfd8"
+theme[download_end]="#85c1dc"
+
+# Upload: iris -> love -> lavender
+theme[upload_start]="#c4a7e7"
+theme[upload_mid]="#eb6f92"
+theme[upload_end]="#babbf1"
+
+# Process table
+theme[proc_misc]="#c4a7e7"
+
+# CPU/mem/threads: teal -> teal -> blue
+theme[process_start]="#81c8be"
+theme[process_mid]="#81c8be"
+theme[process_end]="#8caaee"
+
+# Process states and banners
+theme[proc_banner_bg]="#44415a"
+theme[proc_banner_fg]="#e0def4"
+theme[proc_pause_bg]="#c4a7e7"
+theme[proc_follow_bg]="#2a273f"
+theme[followed_bg]="#2a273f"
+theme[followed_fg]="#9ccfd8"

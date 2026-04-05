@@ -108,23 +108,6 @@ source ~/dotfiles/prompt-themes.zsh
 setopt PROMPT_SUBST
 zmodload zsh/datetime
 
-ZSH_THEME_GIT_PROMPT_PREFIX=" %F{#7287fd} "
-ZSH_THEME_GIT_PROMPT_SUFFIX="%f"
-ZSH_THEME_GIT_PROMPT_DIRTY=""
-ZSH_THEME_GIT_PROMPT_CLEAN=""
-
-ZSH_THEME_GIT_PROMPT_ADDED=" %F{#a6d189}●%f"
-ZSH_THEME_GIT_PROMPT_MODIFIED=" %F{#e5c890}✚%f"
-ZSH_THEME_GIT_PROMPT_DELETED=" %F{#e78284}✖%f"
-ZSH_THEME_GIT_PROMPT_RENAMED=" %F{#8caaee}➜%f"
-ZSH_THEME_GIT_PROMPT_UNMERGED=" %F{#e78284}═%f"
-ZSH_THEME_GIT_PROMPT_UNTRACKED=" %F{#ef9f76}◌%f"
-
-ZSH_THEME_GIT_COMMITS_AHEAD_PREFIX=" %F{#8CA0E8}⇡%f"
-ZSH_THEME_GIT_COMMITS_AHEAD_SUFFIX=""
-ZSH_THEME_GIT_COMMITS_BEHIND_PREFIX=" %F{#6c76c2}⇣%f"
-ZSH_THEME_GIT_COMMITS_BEHIND_SUFFIX=""
-
 typeset -gF PROMPT_CMD_START=0
 typeset -g PROMPT_LAST_DURATION=''
 
@@ -187,6 +170,25 @@ prompt_venv_segment() {
     fi
 }
 
+prompt_git_recent_stash() {
+    local stash_output stash_epoch stash_subject
+    local week_seconds=604800
+
+    stash_output="$(__git_prompt_git stash list -1 --date=unix --format='%ct%x1f%gs' 2>/dev/null)" || return
+    [[ -z "$stash_output" ]] && return
+
+    stash_epoch="${stash_output%%$'\x1f'*}"
+    stash_subject="${stash_output#*$'\x1f'}"
+
+    [[ -z "$stash_epoch" || -z "$stash_subject" ]] && return
+    (( EPOCHSECONDS - stash_epoch > week_seconds )) && return
+
+    stash_subject="${stash_subject#*: }"
+    stash_subject="${stash_subject//\%/%%}"
+
+    print -n -- "%F{${THEME_COLORS[git_stash]}}≡ ${stash_subject}%f"
+}
+
 prompt_git_segment() {
     local git_output
     git_output="$(__git_prompt_git status --porcelain -b 2>/dev/null)" || return
@@ -204,7 +206,9 @@ prompt_git_segment() {
         branch="detached"
     fi
 
-    segment="%F{${THEME_COLORS[git_added]}} %F{${THEME_COLORS[git_fg]}}%B${branch}%b%f"
+    branch="${branch//\%/%%}"
+
+    segment="%F{${THEME_COLORS[git_icon]}} %f%F{${THEME_COLORS[git_fg]}}%B${branch}%b%f"
 
     if [[ "$branch_line" =~ 'ahead ([0-9]+)' ]]; then
         segment+=" %F{${THEME_COLORS[git_ahead]}}⇡${match[1]}%f"
@@ -216,8 +220,6 @@ prompt_git_segment() {
 
     local has_staged=0
     local has_unstaged=0
-    local has_untracked=0
-    local has_conflicts=0
     local line xy
 
     for line in "${lines[@]:1}"; do
@@ -226,24 +228,20 @@ prompt_git_segment() {
         xy="${line[1,2]}"
 
         if [[ "$xy" == '??' ]]; then
-            has_untracked=1
+            has_unstaged=1
             continue
         fi
-
-        case "$xy" in
-            UU|AA|DD|AU|UA|UD|DU)
-                has_conflicts=1
-                ;;
-        esac
 
         [[ "${xy[1]}" != ' ' ]] && has_staged=1
         [[ "${xy[2]}" != ' ' ]] && has_unstaged=1
     done
 
     (( has_staged )) && segment+=" %F{${THEME_COLORS[git_added]}}●%f"
-    (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}✚%f"
-    (( has_untracked )) && segment+=" %F{${THEME_COLORS[git_untracked]}}◌%f"
-    (( has_conflicts )) && segment+=" %F{${THEME_COLORS[git_unmerged]}}═%f"
+    (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}%f"
+
+    local stash_segment
+    stash_segment="$(prompt_git_recent_stash)"
+    [[ -n "$stash_segment" ]] && segment+=" ${stash_segment}"
 
     prompt_segment "${THEME_COLORS[git_bg]}" "${THEME_COLORS[git_fg]}" "$segment"
 }
@@ -451,6 +449,7 @@ alias yz=yazi
 alias lz=lazygit
 alias lzz=lazygit
 alias lzd=lazydocker
+alias ghb='gh browse'
 
 # Ensure lazygit loads dotfiles-managed config on macOS
 if [ -f "$HOME/.lazygit-local.yml" ]; then
@@ -768,7 +767,12 @@ alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
 # ===========================================
 # Prompt Theme Switcher
 # ===========================================
-# Source theme switcher shortcuts for easy theme switching
-source ~/dotfiles/theme-switcher.zsh
 
+# Quick theme switcher alias
+alias theme-list='prompt_switch_theme'
+
+# Quick switcher function
+theme() {
+    prompt_switch_theme "$1"
+}
 # zprof

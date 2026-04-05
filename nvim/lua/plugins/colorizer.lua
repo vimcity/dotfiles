@@ -1,0 +1,47 @@
+return {
+  {
+    "norcalli/nvim-colorizer.lua",
+    event = { "BufReadPre", "BufNewFile" },
+    cmd = {
+      "ColorizerAttachToBuffer",
+      "ColorizerDetachFromBuffer",
+      "ColorizerReloadAllBuffers",
+      "ColorizerToggle",
+    },
+    config = function()
+      require("colorizer").setup({
+        "*",
+        css = { css = true, RRGGBBAA = true },
+        scss = { css = true, RRGGBBAA = true },
+        sass = { css = true, RRGGBBAA = true },
+        html = { css = true, RRGGBBAA = true },
+        javascript = { css = true, RRGGBBAA = true },
+        javascriptreact = { css = true, RRGGBBAA = true },
+        typescript = { css = true, RRGGBBAA = true },
+        typescriptreact = { css = true, RRGGBBAA = true },
+        json = { RRGGBBAA = true },
+        jsonc = { RRGGBBAA = true },
+        sh = { names = false },
+        bash = { names = false },
+        zsh = { names = false },
+        conf = { names = false },
+        dosini = { names = false },
+        tmux = { names = false },
+        lua = { names = false },
+        toml = { names = false },
+        yaml = { names = false },
+      }, {
+        RGB = true,
+        RRGGBB = true,
+        RRGGBBAA = true,
+        names = false,
+        rgb_fn = true,
+        hsl_fn = true,
+        css_fn = true,
+        css = false,
+        -- mode = "foreground",
+        mode = "background",
+      })
+    end,
+  },
+}
