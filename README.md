@@ -29,11 +29,10 @@ This configuration emphasizes:
 **Ghostty** - Modern GPU-accelerated terminal emulator
 > Fast, native macOS terminal with GPU rendering for smooth scrolling and animations
 
-- Catppuccin Frappe theme with custom darker background
-- JetBrains Mono Nerd Font at 16pt
-- Custom cursor shader (blaze effect)
+- **Theme**: Custom `catppuccin-rose` (tracked in `ghostty/themes/`, derived from Catppuccin Frappe with rose accents)
+- Font: CommitMono at 16pt with 40% cell height adjustment
 - Quick terminal toggle (`Cmd+Shift+\``)
-- Ligatures disabled
+- Shell integration enabled for Zsh
 
 ### Shell Environment
 **Zsh** - Unix shell with powerful customization

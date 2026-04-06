@@ -118,7 +118,7 @@ c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 
 # Search engine bang commands for quick site searches
 c.url.searchengines = {
-    "DEFAULT": "https://www.google.com/search?q={}",
+    "DEFAULT": "https://duckduckgo.com/search?q={}",
     "gh": "https://github.com/search?q={}",
     "ytm": "https://music.youtube.com/search?q={}",
     "yt": "https://www.youtube.com/watch?q={}",
