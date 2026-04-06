@@ -13,7 +13,7 @@ return {
       color_overrides = {
         frappe = {
           -- Rose Pine Moon UI
-          base = "#232137",
+          base = "#29273f",
           mantle = "#1f1d30",
           crust = "#1f1d30",
           surface0 = "#2a273f",
@@ -38,16 +38,16 @@ return {
       },
       custom_highlights = function(colors)
         return {
-          Normal = { bg = "#232137", fg = colors.text },
-          NormalNC = { bg = "#232137", fg = colors.text },
-          EndOfBuffer = { bg = "#232137", fg = "#232137" },
+          Normal = { bg = "#29273f", fg = colors.text },
+          NormalNC = { bg = "#29273f", fg = colors.text },
+          EndOfBuffer = { bg = "#29273f", fg = "#29273f" },
           -- Nudge the UI closer to Rose Pine Moon in places Catppuccin styles differently
           CursorLine = { bg = "#393552" },
           ColorColumn = { bg = "#393552" },
           CursorLineNr = { fg = colors.text, bold = true },
           LineNr = { fg = "#6e6a86" },
-          SignColumn = { bg = "#232137" },
-          FoldColumn = { bg = "#232137", fg = "#6e6a86" },
+          SignColumn = { bg = "#29273f" },
+          FoldColumn = { bg = "#29273f", fg = "#6e6a86" },
           NormalFloat = { bg = "NONE", fg = colors.text },
           FloatBorder = { bg = "NONE", fg = "#393552" },
           FloatTitle = { bg = "NONE", fg = colors.iris or colors.lavender },
