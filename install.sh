@@ -154,6 +154,7 @@ ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
 ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
 ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
+ln -sf "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
 
 if [ -d "$DOTFILES_DIR/yazi" ]; then
     echo "📁 Found yazi config in dotfiles, linking..."
