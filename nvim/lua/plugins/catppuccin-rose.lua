@@ -63,9 +63,9 @@ return {
           Search = { bg = "#393552", fg = colors.gold or colors.yellow },
           IncSearch = { bg = colors.green, fg = colors.base },
           SnacksPicker = { bg = "NONE", fg = colors.text },
-          SnacksPickerBorder = { bg = "NONE", fg = "#393552" },
+          SnacksPickerBorder = { bg = "NONE", fg = colors.lavender },
           SnacksPickerInput = { bg = "NONE", fg = colors.text },
-          SnacksPickerInputBorder = { bg = "NONE", fg = "#393552" },
+          SnacksPickerInputBorder = { bg = "NONE", fg = colors.lavender },
           SnacksPickerList = { bg = "NONE", fg = colors.text },
 
           -- Make a few language/LSP choices feel more Frappe than Moon
@@ -87,6 +87,9 @@ return {
           DiagnosticOk = { fg = colors.green },
           GitSignsAdd = { fg = colors.green },
           DiffAdd = { fg = colors.green },
+          DiffDelete = { fg = colors.maroon },
+          DiffChange = { fg = colors.yellow },
+          DiffText = { fg = colors.text },
 
           markdownH1 = { fg = colors.rosewater, bold = true },
           markdownH2 = { fg = colors.mauve, bold = true },
