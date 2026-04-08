@@ -14,6 +14,7 @@ return {
         teal = "#85c1dc", -- soft rose
         salmon = "#f6a192", -- salmon
         rose_dark = "#eb6f92", -- darker rose
+        red = "#E78284",
         lavender = "#c4a7e7", -- lavender
         mauve = "#ca9ee6",
         -- Utilities
@@ -53,7 +54,7 @@ return {
         org_agenda_span = "day",
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
-          TODO = ":foreground " .. colors.rose_dark .. ":weight bold",
+          TODO = ":foreground " .. colors.red .. ":weight bold",
           PROGRESS = ":foreground " .. colors.yellow .. ":weight bold",
           DONE = ":foreground " .. colors.green .. ":weight bold",
         },
@@ -86,7 +87,7 @@ return {
           vim.api.nvim_set_hl(0, "@org.headline.level4", { fg = colors.rose_pink, bold = false })
 
           -- Priority markers
-          vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.bg, bg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.bg, bg = colors.red, bold = true })
           vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.bg, bg = colors.yellow })
           vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.bg, bg = colors.cyan })
 
@@ -95,14 +96,14 @@ return {
           vim.api.nvim_set_hl(0, "@org.timestamp.inactive", { fg = colors.blue, italic = true })
 
           -- Agenda styling
-          vim.api.nvim_set_hl(0, "@org.keyword.todo", { fg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.keyword.todo", { fg = colors.red, bold = true })
           vim.api.nvim_set_hl(0, "@org.keyword.done", { fg = colors.green, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.header", { fg = colors.rose, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.today", { fg = colors.lavender, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.weekend", { fg = colors.blue, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = colors.rose_pink })
           vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { fg = colors.blue })
-          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.rose_dark, bold = true })
+          vim.api.nvim_set_hl(0, "@org.agenda.deadline", { fg = colors.red, bold = true })
           vim.api.nvim_set_hl(0, "@org.agenda.time_grid", { fg = colors.surface })
           vim.api.nvim_set_hl(0, "@org.agenda.separator", { fg = colors.surface })
           vim.api.nvim_set_hl(0, "@org.agenda.tag", { fg = colors.rose_pink, italic = true })

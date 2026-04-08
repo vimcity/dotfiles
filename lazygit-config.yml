@@ -1,4 +1,5 @@
 gui:
+  nerdFontsVersion: '3'
   authorColors:
     '*': '#c4a7e7'
   branchColorPatterns:
@@ -8,12 +9,7 @@ gui:
     '^fix/': '#ea9a97'
     '^hotfix/': '#eb6f92'
   theme:
-    # Available Lazygit theme keys:
-    # activeBorderColor, inactiveBorderColor, searchingActiveBorderColor,
-    # optionsTextColor, selectedLineBgColor, inactiveViewSelectedLineBgColor,
-    # cherryPickedCommitFgColor, cherryPickedCommitBgColor,
-    # markedBaseCommitFgColor, markedBaseCommitBgColor,
-    # unstagedChangesColor, defaultFgColor
+    # Catppuccin Rose theme - explicit colors ensure consistency in Neovim terminal
     activeBorderColor:
       - '#c4a7e7'
       - bold
@@ -33,7 +29,7 @@ gui:
     cherryPickedCommitBgColor:
       - '#2f3149'
     markedBaseCommitFgColor:
-       - '#29273f'
+      - '#29273f'
     markedBaseCommitBgColor:
       - '#ebbcbA'
     unstagedChangesColor:
