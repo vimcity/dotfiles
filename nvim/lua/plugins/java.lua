@@ -2,6 +2,73 @@
 -- LazyVim's Java extras already provides jdtls, nvim-dap, and debugging out of the box
 -- Debug configurations are in .vscode/launch.json (auto-discovered by jdtls)
 
+local function is_import_line(line)
+  return line:match("^import%s") ~= nil
+end
+
+local function is_blank_line(line)
+  return line:match("^%s*$") ~= nil
+end
+
+local function java_import_foldexpr(lnum)
+  local line = vim.fn.getline(lnum)
+  local prev_nonblank = vim.fn.prevnonblank(lnum - 1)
+  local next_nonblank = vim.fn.nextnonblank(lnum + 1)
+  local prev = prev_nonblank > 0 and vim.fn.getline(prev_nonblank) or ""
+  local next_line = next_nonblank > 0 and vim.fn.getline(next_nonblank) or ""
+
+  if is_blank_line(line) then
+    if is_import_line(prev) and is_import_line(next_line) then
+      return "1"
+    end
+    return "0"
+  end
+
+  if not is_import_line(line) then
+    return "0"
+  end
+  if not is_import_line(prev) then
+    return ">1"
+  end
+  if is_import_line(next_line) then
+    return "1"
+  end
+  return "<1"
+end
+
+local function close_java_import_fold(bufnr)
+  local max_lines = math.min(vim.api.nvim_buf_line_count(bufnr), 100)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, max_lines, false)
+
+  vim.cmd.normal({ args = { "zx" }, bang = true })
+
+  for i, line in ipairs(lines) do
+    if is_import_line(line) and vim.fn.foldlevel(i) > 0 then
+      vim.cmd(i .. "foldclose")
+      break
+    end
+  end
+end
+
+_G.java_import_foldexpr = java_import_foldexpr
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function(args)
+    vim.opt_local.foldmethod = "expr"
+    vim.opt_local.foldexpr = "v:lua.java_import_foldexpr(v:lnum)"
+    vim.opt_local.foldenable = true
+    vim.opt_local.foldlevel = 99
+    vim.opt_local.foldlevelstart = 99
+
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(args.buf) and vim.bo[args.buf].filetype == "java" then
+        close_java_import_fold(args.buf)
+      end
+    end)
+  end,
+})
+
 return {
   -- Configure nvim-jdtls to disable jdtls test runner in favor of NeoTest
   {
@@ -14,6 +81,8 @@ return {
       -- Set JAVA_HOME to Java 21 for jdtls wrapper script
       local original_jdtls = opts.jdtls
       opts.jdtls = function(jdtls_opts, root_dir)
+        local formatter_settings = vim.uri_from_fname(vim.fn.stdpath("config") .. "/java/jdtls-format.properties")
+
         if type(original_jdtls) == "function" then
           jdtls_opts = original_jdtls(jdtls_opts, root_dir)
         end
@@ -25,6 +94,9 @@ return {
         -- Download source jars for dependencies so breakpoints work in library code
         jdtls_opts.settings = vim.tbl_deep_extend("force", jdtls_opts.settings or {}, {
           java = {
+            settings = {
+              url = formatter_settings,
+            },
             eclipse = {
               downloadSources = true,
             },

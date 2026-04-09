@@ -483,9 +483,6 @@ alias vnva="source venv/bin/activate"
 # Zoxide - smarter cd
 eval "$(zoxide init zsh)"
 
-# Starship prompt
-# eval "$(starship init zsh)"
-
 # fzf configuration (for file search only)
 export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info'
 
@@ -682,8 +679,6 @@ alias down='cd ~/Downloads'
 alias clont='claude --continue'  # Resume latest chat
 export USE_BUILTIN_RIPGREP=0
 
-alias oc='opencode'  # Quick access to OpenCode
-
 cheat() {
     curl "https://cheat.sh/$1"
 }
@@ -776,3 +771,10 @@ theme() {
     prompt_switch_theme "$1"
 }
 # zprof
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
