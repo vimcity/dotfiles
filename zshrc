@@ -770,6 +770,9 @@ alias theme-list='prompt_switch_theme'
 theme() {
     prompt_switch_theme "$1"
 }
+olf() {
+    ollama run "$(ollama list | fzf | awk '{print $1}')" "$@";
+}
 # zprof
 
 # bun completions
