@@ -1,1 +1,49 @@
-/Users/rgaur/dotfiles/ghostty/themes/catppuccin-rose.ghostty
+# Catppuccin Frappe with Rose Accents for Ghostty
+# Based on Catppuccin Frappe palette with custom rose-toned highlights
+# Colors derived from ~/.config/opencode/themes and nvim catppuccin-rose setup
+
+# Base Colors
+background = #29273f
+foreground = #d0cbe0
+
+# Cursor
+cursor-color = #c6d0f5
+cursor-text = #29273f
+cursor-style = bar
+
+# Selection
+selection-background = #393552
+selection-foreground = #d0cbe0
+
+# ANSI 16 Color Palette
+# Black
+palette = 0=#29273f
+palette = 8=#6e6a86
+
+# Red
+palette = 1=#e78284
+palette = 9=#ea999c
+
+# Green
+palette = 2=#a6d189
+palette = 10=#a6d189
+
+# Yellow
+palette = 3=#e5c890
+palette = 11=#e5c890
+
+# Blue
+palette = 4=#8caaee
+palette = 12=#8caaee
+
+# Magenta (Rose accent)
+palette = 5=#ca9ee6
+palette = 13=#f38ba8
+
+# Cyan (Teal/Foam)
+palette = 6=#81c8be
+palette = 14=#9ccfd8
+
+# White
+palette = 7=#b5bfe2
+palette = 15=#d0cbe0
