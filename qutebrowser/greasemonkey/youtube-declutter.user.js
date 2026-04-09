@@ -33,7 +33,7 @@
     "from the shop",
   ];
 
-  const BASE_CSS = `
+  const CSS = `
     #secondary,
     #secondary-inner,
     ytd-watch-next-secondary-results-renderer,
@@ -75,43 +75,12 @@
     }
   `;
 
-  const HOME_SHORTS_CSS = `
-    ytd-rich-shelf-renderer[is-shorts],
-    ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
-    ytd-rich-item-renderer:has(a[href^="/shorts"]),
-    ytd-video-renderer:has(a[href^="/shorts"]),
-    ytd-grid-video-renderer:has(a[href^="/shorts"]),
-    ytd-compact-video-renderer:has(a[href^="/shorts"]),
-    ytd-rich-grid-media:has(a[href^="/shorts"]),
-    a[href^="/shorts"] {
-      display: none !important;
-    }
-  `;
-
-  function isHomePage() {
-    const path = location.pathname;
-    // Don't hide shorts on channel /shorts pages
-    if (path.includes("/shorts")) {
-      return false;
-    }
-    return path === "/" || path === "" || path === "/feed/home";
-  }
-
   function injectStyle() {
-    if (!document.head) {
-      return;
-    }
-
-    let style = document.getElementById("qute-youtube-declutter-style");
-    if (!style) {
-      style = document.createElement("style");
+    if (document.head && !document.getElementById("qute-youtube-declutter-style")) {
+      const style = document.createElement("style");
       style.id = "qute-youtube-declutter-style";
+      style.textContent = CSS;
       document.head.appendChild(style);
-    }
-
-    const css = `${BASE_CSS}\n${isHomePage() ? HOME_SHORTS_CSS : ""}`;
-    if (style.textContent !== css) {
-      style.textContent = css;
     }
   }
 
@@ -134,18 +103,12 @@
     }
   }
 
-   function maybeHideShelf(shelf) {
-     const label = textOf(shelf.querySelector("#title, #header, yt-formatted-string")) || textOf(shelf);
-     
-     // Skip hiding shorts on non-home pages (channels, /shorts pages, etc)
-     if (label.includes("shorts") && !isHomePage()) {
-       return;
-     }
-
-     if (BLOCKED_SHELF_TEXT.some((text) => label.includes(text))) {
-       hide(shelf);
-     }
-   }
+  function maybeHideShelf(shelf) {
+    const label = textOf(shelf.querySelector("#title, #header, yt-formatted-string")) || textOf(shelf);
+    if (BLOCKED_SHELF_TEXT.some((text) => label.includes(text))) {
+      hide(shelf);
+    }
+  }
 
   function scan(root) {
     if (!root || root.nodeType !== Node.ELEMENT_NODE) {
