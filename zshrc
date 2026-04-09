@@ -754,7 +754,16 @@ alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
+# ===========================================
+# YouTube & Qutebrowser
+# ===========================================
 alias qt='qutebrowser >/dev/null 2>&1 &'
+alias qte='~/.local/qute-scripts/qute-cookies-export'   # Extract cookies from qutebrowser
+alias yts='~/.local/qute-scripts/yt-subs'               # Fetch subscriptions (requires cookies)
+alias ytsi='~/.local/qute-scripts/yt-subs-import'       # Import subscriptions to config
+alias ytr='~/.local/qute-scripts/yt-refresh'            # Refresh video cache
+alias ytp='~/.local/qute-scripts/yt-pick'               # Pick and play video
+alias qtr='~/.local/qute-scripts/qute-remote'           # Remote control qutebrowser
 
 # Shell Master - Interactive CLI Learning Tool
 alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
