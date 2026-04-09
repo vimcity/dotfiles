@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Import fetched YouTube subscriptions into youtube-channels.conf
+# Can merge with existing config or overwrite.
+set -euo pipefail
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/yt-pick"
+SUBS_CACHE="$CACHE_DIR/subscriptions.json"
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+CONFIG_FILE="$CONFIG_HOME/youtube-channels.conf"
+
+if [[ ! -f "$SUBS_CACHE" ]]; then
+    echo "✗ Subscriptions cache not found: $SUBS_CACHE" >&2
+    echo "  Run: yt-subs" >&2
+    exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+    echo "✗ jq not installed. Install with: brew install jq" >&2
+    exit 1
+fi
+
+echo "📋 Import YouTube subscriptions to: $CONFIG_FILE"
+echo ""
+echo "⚠ Note: Make sure you've run 'yt-subs' first to fetch your subscriptions."
+echo ""
+
+# Count channels
+count=$(jq 'length' "$SUBS_CACHE")
+echo "Channels to import: $count"
+echo ""
+
+# Check if config already exists
+if [[ -f "$CONFIG_FILE" ]]; then
+    echo "⚠ Config file already exists."
+    echo ""
+    echo "Options:"
+    echo "  [o] Overwrite (replace with fetched subs)"
+    echo "  [m] Merge (add new ones, keep existing)"
+    echo "  [c] Cancel"
+    echo ""
+    read -p "Choice [m/o/c]: " choice
+    
+    case "$choice" in
+        o|O)
+            echo "Overwriting..."
+            ;;
+        m|M)
+            echo "Merging..."
+            # Extract existing channel IDs
+            existing=$(grep -v '^#\|^$' "$CONFIG_FILE" 2>/dev/null | cut -d'|' -f1 | sort || true)
+            ;;
+        *)
+            echo "Cancelled."
+            exit 0
+            ;;
+    esac
+else
+    choice="o"
+    mkdir -p "$CONFIG_HOME"
+fi
+
+# Build new config
+if [[ "$choice" == "o" || "$choice" == "O" ]]; then
+    # Overwrite: just use fetched subs
+    {
+        echo "# YouTube channels (auto-imported from subscriptions)"
+        echo "# Last updated: $(date)"
+        echo "# Format: channel_id|display_name"
+        echo ""
+        jq -r '.[] | "\(.id)|\(.channel)"' "$SUBS_CACHE" | sort
+    } > "$CONFIG_FILE"
+    
+    echo "✓ Wrote $count channels to: $CONFIG_FILE"
+elif [[ "$choice" == "m" || "$choice" == "M" ]]; then
+    # Merge: keep existing, add new ones
+    {
+        echo "# YouTube channels (auto-imported from subscriptions)"
+        echo "# Last updated: $(date)"
+        echo "# Format: channel_id|display_name"
+        echo ""
+        
+        # Show existing manual entries (first section)
+        grep -v '^#\|^$' "$CONFIG_FILE" 2>/dev/null | while read -r line; do
+            echo "$line"
+        done
+        
+        echo ""
+        echo "# New channels from subscriptions:"
+        jq -r '.[] | "\(.id)|\(.channel)"' "$SUBS_CACHE" | sort
+    } > "$CONFIG_FILE.tmp"
+    
+    mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+    echo "✓ Merged. Updated: $CONFIG_FILE"
+fi
+
+echo ""
+echo "Next steps:"
+echo "  1. Review the config: cat $CONFIG_FILE"
+echo "  2. Refresh videos:   yt-refresh"
+echo "  3. Pick a video:     yt-pick"

@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Refresh cached YouTube video metadata for all configured channels.
+# Stores JSON in ~/.cache/yt-pick/
+set -euo pipefail
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/youtube-channels.conf"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/yt-pick"
+
+if [[ ! -f "$CONFIG" ]]; then
+    echo "✗ Config not found: $CONFIG" >&2
+    echo "  Please create it with channel entries (see youtube-channels.conf)" >&2
+    exit 1
+fi
+
+# Validate yt-dlp is available
+if ! command -v yt-dlp >/dev/null 2>&1; then
+    echo "✗ yt-dlp not installed. Install with: brew install yt-dlp" >&2
+    exit 1
+fi
+
+mkdir -p "$CACHE_DIR"
+
+# Read config and refresh each channel
+while IFS='|' read -r channel_id display_name; do
+    # Skip empty lines and comments
+    [[ -z "$channel_id" || "$channel_id" =~ ^# ]] && continue
+    
+    channel_id="${channel_id// /}"
+    display_name="${display_name// /}"
+    
+    echo "📺 Refreshing: $display_name"
+    
+    # Fetch recent videos (last 50) from channel
+    # Output: JSON with url, title, thumbnail
+    cache_file="$CACHE_DIR/${display_name}.json"
+    
+    yt-dlp \
+        --flat-playlist \
+        --playlist-items "1:50" \
+        -j \
+        --no-warnings \
+        "https://www.youtube.com/@${channel_id}/videos" \
+        2>/dev/null | jq -c '
+            . as $item |
+            {
+                url: .url,
+                id: .id,
+                title: .title,
+                duration: .duration,
+                upload_date: .upload_date,
+                channel: .channel,
+                thumbnail: .thumbnail
+            }
+        ' > "$cache_file.tmp" 2>/dev/null || {
+        echo "  ⚠ Failed to fetch $display_name" >&2
+        continue
+    }
+    
+    # Combine into single JSON array and write atomically
+    if [[ -f "$cache_file.tmp" ]]; then
+        # Get line count
+        lines=$(wc -l < "$cache_file.tmp" || echo 0)
+        if [[ "$lines" -gt 0 ]]; then
+            cat "$cache_file.tmp" | jq -s '.' > "$cache_file"
+            rm "$cache_file.tmp"
+            echo "  ✓ Cached $(grep -c . "$cache_file" || echo 0) videos"
+        else
+            rm "$cache_file.tmp"
+            echo "  ⚠ No videos found for $display_name" >&2
+        fi
+    fi
+done < <(grep -v '^#\|^$' "$CONFIG")
+
+echo "✓ Refresh complete. Cache in: $CACHE_DIR"
