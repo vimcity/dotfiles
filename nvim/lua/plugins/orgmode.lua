@@ -89,7 +89,7 @@ return {
           -- Priority markers
           vim.api.nvim_set_hl(0, "@org.priority.highest", { fg = colors.bg, bg = colors.red, bold = true })
           vim.api.nvim_set_hl(0, "@org.priority.default", { fg = colors.bg, bg = colors.yellow })
-          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.bg, bg = colors.cyan })
+          vim.api.nvim_set_hl(0, "@org.priority.lowest", { fg = colors.bg, bg = colors.blue })
 
           -- Timestamps
           vim.api.nvim_set_hl(0, "@org.timestamp.active", { fg = colors.mauve, italic = true })
