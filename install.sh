@@ -18,93 +18,93 @@ echo "🔧 Installing dotfiles..."
 # Remove existing configs before relinking
 remove_if_exists() {
     if [ -L "$1" ]; then
-        echo "🔗 Removing existing symlink $1"
+        echo "󰔌 Removing existing symlink $1"
         rm "$1"
     elif [ -e "$1" ]; then
-        echo "🗑️ Removing existing $1"
+        echo "󰆴 Removing existing $1"
         rm -rf "$1"
     fi
 }
 
 # Install Oh My Zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "📥 Installing Oh My Zsh..."
+    echo "󰇚 Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended
 else
-    echo "✓ Oh My Zsh already installed"
+    echo "󰄵 Oh My Zsh already installed"
 fi
 
 # Install Oh My Zsh plugins
-echo "📦 Installing Oh My Zsh plugins..."
+echo "󰌶 Installing Oh My Zsh plugins..."
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 # zsh-autosuggestions
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    echo "  - Installing zsh-autosuggestions..."
+    echo "  󰌶 Installing zsh-autosuggestions..."
     git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 else
-    echo "  ✓ zsh-autosuggestions already installed"
+    echo "  󰄵 zsh-autosuggestions already installed"
 fi
 
 # fast-syntax-highlighting (replaces zsh-syntax-highlighting for faster typing)
 if [ ! -d "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" ]; then
-    echo "  - Installing fast-syntax-highlighting..."
+    echo "  󰌶 Installing fast-syntax-highlighting..."
     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
 else
-    echo "  ✓ fast-syntax-highlighting already installed"
+    echo "  󰄵 fast-syntax-highlighting already installed"
 fi
 
 # zsh-completions
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
-    echo "  - Installing zsh-completions..."
+    echo "  󰌶 Installing zsh-completions..."
     git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
 else
-    echo "  ✓ zsh-completions already installed"
+    echo "  󰄵 zsh-completions already installed"
 fi
 
 # Install TPM (Tmux Plugin Manager)
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-    echo "📦 Installing TPM (Tmux Plugin Manager)..."
+    echo "󰌶 Installing TPM (Tmux Plugin Manager)..."
     git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 else
-    echo "✓ TPM already installed"
+    echo "󰄵 TPM already installed"
 fi
 
 # Install tools via brew
 for formula in lazygit lazydocker git-delta; do
     if brew list "$formula" &> /dev/null; then
-        echo "✓ $formula already installed"
+        echo "󰄵 $formula already installed"
     else
-        echo "📦 Installing $formula..."
+        echo "󰌶 Installing $formula..."
         brew install "$formula"
     fi
 done
 
 # Install tools from custom taps
-echo "📦 Installing tools from custom taps..."
+echo "󰌶 Installing tools from custom taps..."
 
 # taproom from gromgit/brewtils
 if brew list "taproom" &> /dev/null; then
-    echo "✓ taproom already installed"
+    echo "󰄵 taproom already installed"
 else
-    echo "  - Installing taproom..."
+    echo "  󰌶 Installing taproom..."
     brew install gromgit/brewtils/taproom
 fi
 
 # llmfit from AlexsJones/llmfit
 if brew list "llmfit" &> /dev/null; then
-    echo "✓ llmfit already installed"
+    echo "󰄵 llmfit already installed"
 else
-    echo "  - Installing llmfit..."
+    echo "  󰌶 Installing llmfit..."
     brew tap AlexsJones/llmfit
     brew install llmfit
 fi
 
 # models from arimxyer/tap
 if brew list "models" &> /dev/null; then
-    echo "✓ models already installed"
+    echo "󰄵 models already installed"
 else
-    echo "  - Installing models..."
+    echo "  󰌶 Installing models..."
     brew tap arimxyer/tap
     brew install models
 fi
@@ -139,7 +139,7 @@ mkdir -p "$QUTE_CONFIG_DIR"
 mkdir -p "$QUTE_DATA_DIR/userscripts"
 
 # Create symlinks
-echo "🔗 Creating symlinks..."
+echo "󰔌 Creating symlinks..."
 ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
 ln -sf "$DOTFILES_DIR/atuin" "$HOME/.config/atuin"
 ln -sf "$DOTFILES_DIR/lazygit-config.yml" "$HOME/.config/lazygit/config.yml"
@@ -149,6 +149,7 @@ ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
 ln -sf "$DOTFILES_DIR/tmux/tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$DOTFILES_DIR/fdignore" "$HOME/.fdignore"
 ln -sf "$DOTFILES_DIR/bin" "$HOME/.local/scripts"
+ln -sf "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
 ln -sf "$DOTFILES_DIR/tmux-cht-languages" "$HOME/.tmux-cht-languages"
 ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
 ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
@@ -157,7 +158,7 @@ ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 ln -sf "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
 
 if [ -d "$DOTFILES_DIR/yazi" ]; then
-    echo "📁 Found yazi config in dotfiles, linking..."
+    echo "󰉋 Found yazi config in dotfiles, linking..."
     ln -sf "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
 fi
 
@@ -167,9 +168,9 @@ ln -sf "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
 ln -sf "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
 ln -sf "$DOTFILES_DIR/qutebrowser/userscripts/bw-copy" "$QUTE_DATA_DIR/userscripts/bw-copy"
 
-echo "✅ Dotfiles installed successfully!"
+echo "󰸞 Dotfiles installed successfully!"
 echo ""
-echo "📝 Optional: Create ~/.zshrc.local for machine-specific configs:"
+echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs:"
 echo "   - Work-specific environment variables and paths"
 echo "   - API keys and authentication tokens"
 echo "   - Company-specific tooling and aliases"
@@ -177,7 +178,7 @@ echo "   - Machine-specific performance tweaks"
 echo ""
 echo "   This file will be automatically sourced by .zshrc if it exists."
 echo ""
-echo "🔌 To install Tmux plugins:"
+echo "󰔌 To install Tmux plugins:"
 echo "   1. Start tmux: tmux"
 echo "   2. Press: Ctrl+Space then Shift+I (capital i)"
 echo "   3. Wait for plugins to install"

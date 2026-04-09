@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Fetch YouTube subscriptions using yt-dlp + cookies file.
+# Usage: yt-subs /path/to/cookies.txt
+set -euo pipefail
+
+COOKIES_FILE="${1:-}"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/yt-pick"
+SUBS_CACHE="$CACHE_DIR/subscriptions.json"
+SUBS_RAW="$CACHE_DIR/subscriptions.raw.json"
+
+if [[ -z "$COOKIES_FILE" ]]; then
+    echo "Usage: yt-subs /path/to/cookies.txt" >&2
+    echo "" >&2
+    echo "Get cookies from qutebrowser:" >&2
+    echo "  ~/.local/scripts/qute-cookies-export" >&2
+    exit 1
+fi
+
+if [[ ! -f "$COOKIES_FILE" ]]; then
+    echo "✗ Cookies file not found: $COOKIES_FILE" >&2
+    exit 1
+fi
+
+# Validate dependencies
+for cmd in yt-dlp jq; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "✗ $cmd not installed" >&2
+        exit 1
+    fi
+done
+
+mkdir -p "$CACHE_DIR"
+
+echo "📥 Fetching YouTube subscriptions..."
+echo "   Cookies: $COOKIES_FILE"
+echo ""
+
+if ! yt-dlp \
+    --flat-playlist \
+    -j \
+    --no-warnings \
+    --cookies "$COOKIES_FILE" \
+    "https://www.youtube.com/feed/subscriptions" \
+    2>/dev/null | jq -c '.[] | {url, id, title, channel}' > "$SUBS_RAW"; then
+    echo "✗ Failed to fetch subscriptions" >&2
+    rm -f "$SUBS_RAW"
+    exit 1
+fi
+
+lines=$(wc -l < "$SUBS_RAW" || echo 0)
+if [[ "$lines" -eq 0 ]]; then
+    echo "✗ No subscriptions found. Check your cookies." >&2
+    rm -f "$SUBS_RAW"
+    exit 1
+fi
+
+# Parse subscriptions and save to cache
+jq -s '
+    . as $items |
+    $items 
+    | group_by(.channel) 
+    | map({
+        channel: .[0].channel,
+        id: (.[0].url | gsub(".*watch\\?v="; "") | .[0:11]),
+        count: length
+    })
+    | sort_by(.channel)
+' "$SUBS_RAW" > "$SUBS_CACHE"
+
+count=$(jq 'length' "$SUBS_CACHE")
+echo "✓ Fetched $count subscribed channels"
+echo "  Saved to: $SUBS_CACHE"
+echo ""
+echo "Next: yt-subs-import"
+
+rm -f "$SUBS_RAW"

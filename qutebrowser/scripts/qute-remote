@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Send commands to an existing qutebrowser window, or launch qute first if needed.
+set -euo pipefail
+
+cmd="${1:-}"
+[[ -z "$cmd" ]] && {
+    cat >&2 <<'EOF'
+Usage: qute-remote ':open https://example.com'
+       qute-remote ':tab-next'
+       qute-remote ':quickmark-load key'
+
+Commands are qutebrowser command-mode strings (prefix with ':')
+EOF
+    exit 1
+}
+
+# Try to send to existing window
+if pgrep -x qutebrowser >/dev/null 2>&1; then
+    qutebrowser --target window "$cmd"
+else
+    # Launch qute + wait for it to be ready, then send command
+    qutebrowser >/dev/null 2>&1 &
+    sleep 0.5
+    qutebrowser --target window "$cmd"
+fi
