@@ -68,6 +68,7 @@ ZSH_THEME=""
 plugins=(
   git
   brew
+  copypath
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
@@ -440,7 +441,6 @@ bwrm() {
         esac
     done
 }
-
 
 
 alias vi=vim
