@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTube Declutter
 // @namespace    qutebrowser
-// @version      1.0
-// @description  Hide distracting YouTube UI like recommendations, Shorts, comments, merch, and promo shelves
+// @version      2.0
+// @description  Clean up YouTube: hide distracting UI elements. Shorts only hidden on home.
 // @match        https://www.youtube.com/*
 // @match        https://m.youtube.com/*
 // @run-at       document-start
@@ -12,168 +12,211 @@
 (function () {
   "use strict";
 
-  const HIDDEN_ATTR = "data-qute-yt-hidden";
-  const BLOCKED_SHELF_TEXT = [
-    "people also watched",
-    "for you",
-    "recommended",
-    "recommended for you",
-    "because you watched",
-    "you might also like",
-    "new to you",
-    "top picks for you",
-    "playables",
-    "podcasts",
-    "community posts",
-    "breaking news",
-    "latest news",
-    "live now",
-    "shopping",
-    "products for this video",
-    "from the shop",
-  ];
+  /**
+   * CONFIGURATION: Customize what to hide by setting these to true/false
+   */
+  const CONFIG = {
+    hideHomeShorts: true,           // Hide shorts shelf on home page
+    hideHomeFeed: true,             // Hide the entire home feed (keeps recommendations off)
+    hideWatchPageSidebar: true,     // Hide recommendations on video watch page
+    hideComments: true,             // Hide comments section
+    hideMerch: true,                // Hide merch shelves
+    hideAds: true,                  // Hide ads and promotions
+    hideLiveChat: true,             // Hide live chat
+    hideCards: true,                // Hide video cards and end screens
+    hideCommunityPosts: true,       // Hide community posts
+    hideTrendingTab: true,          // Hide trending in sidebar
+    hideExploreTab: true,           // Hide explore in sidebar
+    hideShortsGuide: true,          // Hide shorts from sidebar guide
+    hidePlayables: true,            // Hide playables/games
+    hideBreakingNews: true,         // Hide news banners
+    hidePodcasts: true,             // Hide podcasts shelf
+  };
 
-  const CSS = `
-    #secondary,
-    #secondary-inner,
-    ytd-watch-next-secondary-results-renderer,
-    #comments,
-    ytd-comments,
-    ytd-comment-thread-renderer,
-    ytd-merch-shelf-renderer,
-    ytd-product-list-renderer,
-    ytd-video-masthead-ad-advertiser-info-renderer,
-    ytd-display-ad-renderer,
-    ytd-ad-slot-renderer,
-    ytd-promoted-sparkles-web-renderer,
-    ytd-feed-nudge-renderer,
-    ytd-statement-banner-renderer,
-    ytd-banner-promo-renderer,
-    ytd-inline-survey-renderer,
-    ytd-primetime-promo-renderer,
-    .ytp-ce-element,
-    .ytp-cards-teaser,
-    .ytp-paid-content-overlay,
-    .iv-branding,
-    #clarify-box,
-    #chat,
-    ytd-live-chat-frame,
-    ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-structured-description"],
-    ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-clip-create"],
-    ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-shopping-shelf"],
-    ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-macro-markers-description-chapters"] {
-      display: none !important;
+  /**
+   * Build CSS based on CONFIG
+   */
+  function buildCSS() {
+    const selectors = [];
+
+    // Always hide on every page
+    if (CONFIG.hideWatchPageSidebar) {
+      selectors.push("#secondary", "#secondary-inner", "ytd-watch-next-secondary-results-renderer");
     }
 
-    ytd-watch-flexy[is-two-columns_] #primary {
-      max-width: min(100%, 1600px) !important;
-      margin-inline: auto !important;
+    if (CONFIG.hideComments) {
+      selectors.push("#comments", "ytd-comments", "ytd-comment-thread-renderer");
     }
 
-    ytd-watch-flexy[is-two-columns_] #columns {
-      display: block !important;
+    if (CONFIG.hideMerch) {
+      selectors.push("ytd-merch-shelf-renderer", "ytd-product-list-renderer");
     }
-  `;
+
+    if (CONFIG.hideAds) {
+      selectors.push(
+        "ytd-video-masthead-ad-advertiser-info-renderer",
+        "ytd-display-ad-renderer",
+        "ytd-ad-slot-renderer",
+        "ytd-promoted-sparkles-web-renderer",
+        "ytd-feed-nudge-renderer",
+        "ytd-statement-banner-renderer",
+        "ytd-banner-promo-renderer",
+        "ytd-inline-survey-renderer",
+        "ytd-primetime-promo-renderer"
+      );
+    }
+
+    if (CONFIG.hideLiveChat) {
+      selectors.push("#clarify-box", "#chat", "ytd-live-chat-frame");
+    }
+
+    if (CONFIG.hideCards) {
+      selectors.push(
+        ".ytp-ce-element",
+        ".ytp-cards-teaser",
+        ".ytp-paid-content-overlay",
+        ".iv-branding",
+        "ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-structured-description']",
+        "ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-clip-create']",
+        "ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-shopping-shelf']",
+        "ytd-engagement-panel-section-list-renderer[target-id='engagement-panel-macro-markers-description-chapters']"
+      );
+    }
+
+    if (CONFIG.hideCommunityPosts) {
+      selectors.push("ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Community'))");
+    }
+
+    if (CONFIG.hidePlayables) {
+      selectors.push("ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Playables'))");
+    }
+
+    if (CONFIG.hidePodcasts) {
+      selectors.push("ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Podcasts'))");
+    }
+
+    if (CONFIG.hideBreakingNews) {
+      selectors.push(
+        "ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Breaking'))",
+        "ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Latest'))",
+        "ytd-rich-shelf-renderer:has(yt-formatted-string:contains('Live Now'))"
+      );
+    }
+
+    // Only on home page
+    if (isHomePage()) {
+      if (CONFIG.hideHomeShorts) {
+        selectors.push(
+          "ytd-reel-shelf-renderer",
+          "ytd-rich-shelf-renderer[is-shorts]",
+          "ytd-rich-section-renderer:has(ytd-reel-shelf-renderer)",
+          "ytd-rich-item-renderer:has(a[href^='/shorts'])",
+          "ytd-video-renderer:has(a[href^='/shorts'])",
+          "ytd-grid-video-renderer:has(a[href^='/shorts'])",
+          "ytd-compact-video-renderer:has(a[href^='/shorts'])",
+          "ytd-rich-grid-media:has(a[href^='/shorts'])"
+        );
+      }
+
+      if (CONFIG.hideHomeFeed) {
+        // Hide main feed container but keep header
+        selectors.push("ytd-rich-grid-renderer");
+      }
+
+      if (CONFIG.hideShortsGuide) {
+        selectors.push(
+          "ytd-guide-entry-renderer:has(yt-formatted-string:contains('Shorts'))",
+          "ytm-pivot-bar-item-renderer:has(yt-formatted-string:contains('Shorts'))"
+        );
+      }
+
+      if (CONFIG.hideExploreTab) {
+        selectors.push(
+          "ytd-guide-entry-renderer:has(yt-formatted-string:contains('Explore'))",
+          "ytm-pivot-bar-item-renderer:has(yt-formatted-string:contains('Explore'))"
+        );
+      }
+
+      if (CONFIG.hideTrendingTab) {
+        selectors.push(
+          "ytd-guide-entry-renderer:has(yt-formatted-string:contains('Trending'))",
+          "ytm-pivot-bar-item-renderer:has(yt-formatted-string:contains('Trending'))"
+        );
+      }
+    }
+
+    const css = selectors.map((s) => s).join(",\n") + " { display: none !important; }";
+
+    // Adjust video player width on watch page
+    const adjustments = `
+      ytd-watch-flexy[is-two-columns_] #primary {
+        max-width: min(100%, 1600px) !important;
+        margin-inline: auto !important;
+      }
+      ytd-watch-flexy[is-two-columns_] #columns {
+        display: block !important;
+      }
+    `;
+
+    return css + "\n" + adjustments;
+  }
+
+  function isHomePage() {
+    const path = location.pathname;
+    // Don't hide shorts on channel /shorts pages or anywhere other than home
+    if (path.includes("/shorts") || path.includes("/c/") || path.includes("/@")) {
+      return false;
+    }
+    return path === "/" || path === "" || path === "/feed/home" || path === "/feed/discover";
+  }
 
   function injectStyle() {
-    if (document.head && !document.getElementById("qute-youtube-declutter-style")) {
-      const style = document.createElement("style");
+    if (!document.head) {
+      return;
+    }
+
+    let style = document.getElementById("qute-youtube-declutter-style");
+    if (!style) {
+      style = document.createElement("style");
       style.id = "qute-youtube-declutter-style";
-      style.textContent = CSS;
       document.head.appendChild(style);
     }
-  }
 
-  function textOf(node) {
-    return (node?.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-  }
-
-  function hide(node) {
-    if (!node || node.nodeType !== Node.ELEMENT_NODE || node.getAttribute(HIDDEN_ATTR) === "1") {
-      return;
-    }
-    node.setAttribute(HIDDEN_ATTR, "1");
-    node.style.setProperty("display", "none", "important");
-  }
-
-  function maybeHideGuideEntry(entry) {
-    const label = textOf(entry);
-    if (label === "explore" || label === "trending") {
-      hide(entry);
+    const newCSS = buildCSS();
+    if (style.textContent !== newCSS) {
+      style.textContent = newCSS;
     }
   }
 
-  function maybeHideShelf(shelf) {
-    const label = textOf(shelf.querySelector("#title, #header, yt-formatted-string")) || textOf(shelf);
-    if (BLOCKED_SHELF_TEXT.some((text) => label.includes(text))) {
-      hide(shelf);
-    }
-  }
-
-  function scan(root) {
-    if (!root || root.nodeType !== Node.ELEMENT_NODE) {
-      return;
-    }
-
-    if (root.matches?.("ytd-guide-entry-renderer, ytm-pivot-bar-item-renderer")) {
-      maybeHideGuideEntry(root);
-    }
-
-    if (
-      root.matches?.(
-        "ytd-rich-shelf-renderer, ytd-rich-section-renderer, ytd-item-section-renderer, ytd-shelf-renderer"
-      )
-    ) {
-      maybeHideShelf(root);
-    }
-
-    root
-      .querySelectorAll?.("ytd-guide-entry-renderer, ytm-pivot-bar-item-renderer")
-      .forEach(maybeHideGuideEntry);
-
-    root
-      .querySelectorAll?.(
-        "ytd-rich-shelf-renderer, ytd-rich-section-renderer, ytd-item-section-renderer, ytd-shelf-renderer"
-      )
-      .forEach(maybeHideShelf);
-  }
-
-  function boot() {
-    injectStyle();
-    if (!document.body) {
-      return;
-    }
-
-    scan(document.body);
-
-    const observer = new MutationObserver((mutations) => {
-      injectStyle();
-      for (const mutation of mutations) {
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            scan(node);
-          }
-        }
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    let lastUrl = location.href;
-    setInterval(() => {
-      injectStyle();
-      if (location.href !== lastUrl) {
-        lastUrl = location.href;
-        scan(document.body);
-      }
-    }, 1000);
-  }
-
+  // Initial injection
   injectStyle();
   document.addEventListener("readystatechange", injectStyle);
+
+  // Re-inject on page navigation
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
+    document.addEventListener("DOMContentLoaded", () => {
+      injectStyle();
+      observeChanges();
+    });
   } else {
-    boot();
+    injectStyle();
+    observeChanges();
+  }
+
+  function observeChanges() {
+    // Re-inject style when DOM changes (for dynamic page loads)
+    const observer = new MutationObserver(() => {
+      injectStyle();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Also check for navigation changes every 1 second
+    let lastUrl = location.href;
+    setInterval(() => {
+      if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        injectStyle();
+      }
+    }, 1000);
   }
 })();
