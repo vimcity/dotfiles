@@ -20,8 +20,8 @@ define_catppuccin_rose_theme() {
         [git_fg]="#bd93f9"
         [git_bg]="#302e4b"
         [git_icon]="#a6da95"
-        [venv_bg]="#45475a"
-        [venv_fg]="#cba6f7"
+        [venv_bg]="#74c678"
+        [venv_fg]="#1e1e2e"
         
         [git_added]="#f6a192"
         [git_modified]="#f9e2af"

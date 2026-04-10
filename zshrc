@@ -109,6 +109,9 @@ source ~/dotfiles/prompt-themes.zsh
 setopt PROMPT_SUBST
 zmodload zsh/datetime
 
+# Suppress venv's default prompt prefix injection; our prompt_venv_segment handles display
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
 typeset -gF PROMPT_CMD_START=0
 typeset -g PROMPT_LAST_DURATION=''
 
@@ -164,10 +167,9 @@ prompt_format_duration() {
 }
 
 prompt_venv_segment() {
-    if [[ -n "$VIRTUAL_ENV" ]]; then
-        prompt_segment "${THEME_COLORS[venv_bg]}" "${THEME_COLORS[venv_fg]}" "venv ${VIRTUAL_ENV:t}"
-    elif [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
-        prompt_segment "${THEME_COLORS[venv_bg]}" "${THEME_COLORS[venv_fg]}" "conda ${CONDA_DEFAULT_ENV}"
+    # Only show venv if the current directory is at or inside the venv's project root
+    if [[ -n "$VIRTUAL_ENV" && "$PWD" == "${VIRTUAL_ENV:h}"* ]]; then
+        prompt_segment "${THEME_COLORS[venv_bg]}" "${THEME_COLORS[venv_fg]}" "%B${VIRTUAL_ENV:t}%b"
     fi
 }
 
@@ -462,6 +464,14 @@ fi
 alias pipr="pip install -r requirements.txt"
 alias vnvinit="python -m venv venv"
 alias vnva="source venv/bin/activate"
+
+# Auto-deactivate venv when leaving its project directory
+_venv_chpwd() {
+    if [[ -n "$VIRTUAL_ENV" && "$PWD" != "${VIRTUAL_ENV:h}"* ]]; then
+        deactivate
+    fi
+}
+add-zsh-hook chpwd _venv_chpwd
 
 # Zoxide - smarter cd
 eval "$(zoxide init zsh)"
