@@ -33,9 +33,10 @@ percentage=$((used_bytes * 100 / total_bytes))
 icon="󰍛"
 
 # Color scheme
-green="#a6e3a1"     # Green (healthy)
-yellow="#E5C890"    # More orangy yellow (warning)
-red="#e25a8a"       # Red (matches prefix color, critical)
+green="#a6e3a1"  # Green (healthy)
+yellow="#E5C890" # More orangy yellow (warning)
+red="#e78284"
+"                   # Red (matches prefix color, critical)
 text_dark="#000000" # Dark text for contrast
 
 # Determine color based on percentage (thirds: 0-33% green, 33-67% yellow, 67%+ red)

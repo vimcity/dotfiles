@@ -41,9 +41,19 @@ vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
 })
 
 -- Auto-format Java files on save using jdtls (LSP)
+-- Toggle with :JavaFormatToggle
+vim.g.java_autoformat = true
+
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.java",
   callback = function()
-    vim.lsp.buf.format({ async = false })
+    if vim.g.java_autoformat then
+      vim.lsp.buf.format({ async = false })
+    end
   end,
 })
+
+vim.api.nvim_create_user_command("JavaFormatToggle", function()
+  vim.g.java_autoformat = not vim.g.java_autoformat
+  vim.notify("Java autoformat: " .. (vim.g.java_autoformat and "ON" or "OFF"))
+end, { desc = "Toggle Java format on save" })
