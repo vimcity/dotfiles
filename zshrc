@@ -458,23 +458,6 @@ else
     export LG_CONFIG_FILE="$HOME/dotfiles/lazygit-config.yml"
 fi
 
-export PYENV_ROOT=
-export PATH="$HOME/.local/bin:$PATH"
-# SKIP pyenv shims in PATH for now (adds ~5ms)
-# Only init pyenv if actually needed (check .python-version files)
-_lazy_init_pyenv() {
-  if [[ -z "$_PYENV_INITIALIZED" ]]; then
-    if command -v pyenv 1>/dev/null 2>&1; then
-      eval "$(pyenv init - --no-rehash)"
-      export _PYENV_INITIALIZED=1
-      # Add shims to PATH now
-      export PATH="$PYENV_ROOT/shims:$PATH"
-    fi
-  fi
-}
-# Trigger on python command or if .python-version exists
-[[ -f ".python-version" ]] && _lazy_init_pyenv
-
 # Python utilities
 alias pipr="pip install -r requirements.txt"
 alias vnvinit="python -m venv venv"
@@ -790,3 +773,5 @@ olf() {
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+source /Users/rgaur/.gimme-aws-creds-xaws
