@@ -444,7 +444,6 @@ bwrm() {
     done
 }
 
-
 alias vi=vim
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
@@ -464,14 +463,6 @@ fi
 alias pipr="pip install -r requirements.txt"
 alias vnvinit="python -m venv venv"
 alias vnva="source venv/bin/activate"
-
-# Auto-deactivate venv when leaving its project directory
-_venv_chpwd() {
-    if [[ -n "$VIRTUAL_ENV" && "$PWD" != "${VIRTUAL_ENV:h}"* ]]; then
-        deactivate
-    fi
-}
-add-zsh-hook chpwd _venv_chpwd
 
 # Zoxide - smarter cd
 eval "$(zoxide init zsh)"
@@ -716,6 +707,10 @@ if [[ -f "$HOME/.zshrc.local" ]]; then
     source "$HOME/.zshrc.local"
 fi
 
+if [[ -f "$HOME/.zshrc.ps.local" ]]; then
+    source "$HOME/.zshrc.ps.local"
+fi
+
 #fastfetch
 alias ffs='fastfetch'
 # killer() { kill $(lsof -t -i:$1); }
@@ -739,6 +734,7 @@ gwa() { git worktree add "../$1" "$1"; }      # existing branch
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.lmstudio/bin"
+export PATH="$PATH:$HOME/.local/scripts"
 
 alias vimlocal="nvim ~/.zshrc.local"
 alias fabric="fabric-ai"
@@ -748,15 +744,20 @@ export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 
 # ===========================================
-# YouTube & Qutebrowser
+# YouTube (ytui)
+# ===========================================
+alias yt='open -na Ghostty.app --args -e ~/.local/scripts/ytui'  # new Ghostty window (real TTY = pixel thumbnails)
+alias ytr='ytui refresh'               # refresh feed cache
+alias yts='ytui search'                # search youtube
+alias ytw='ytui watch-later'           # open watch-later list
+alias ytc='ytui channel'               # browse a channel
+alias yta='ytui add'                   # add video to watch-later
+
+# ===========================================
+# Qutebrowser
 # ===========================================
 alias qt='qutebrowser >/dev/null 2>&1 &'
-alias qte='~/.local/qute-scripts/qute-cookies-export'   # Extract cookies from qutebrowser
-alias yts='~/.local/qute-scripts/yt-subs'               # Fetch subscriptions (requires cookies)
-alias ytsi='~/.local/qute-scripts/yt-subs-import'       # Import subscriptions to config
-alias ytr='~/.local/qute-scripts/yt-refresh'            # Refresh video cache
-alias ytp='~/.local/qute-scripts/yt-pick'               # Pick and play video
-alias qtr='~/.local/qute-scripts/qute-remote'           # Remote control qutebrowser
+alias qtr='~/.local/qute-scripts/qute-remote'           # remote control qutebrowser
 
 # Shell Master - Interactive CLI Learning Tool
 alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
