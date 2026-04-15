@@ -380,27 +380,32 @@ if [ -n "$ts" ] && [ "$ts" != "0" ] 2>/dev/null; then
     date_fmt=$(date -r "$ts" "+%Y-%m-%d" 2>/dev/null || true)
 fi
 
-# Thumbnail
+# Thumbnail — prefer hqdefault (480x360) over mqdefault (320x180)
 thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/ytui/thumbnails"
 thumb_path="$thumb_dir/${id}.jpg"
 if [ ! -f "$thumb_path" ]; then
-    curl -sL --max-time 5 "https://i.ytimg.com/vi/${id}/mqdefault.jpg" \
+    curl -sL --max-time 5 "https://i.ytimg.com/vi/${id}/hqdefault.jpg" \
         -o "$thumb_path" 2>/dev/null || rm -f "$thumb_path"
+    # hqdefault can return a 120x90 placeholder for some videos; fall back to mq
+    size=$(stat -f%z "$thumb_path" 2>/dev/null || echo 0)
+    if [ "$size" -lt 5000 ]; then
+        curl -sL --max-time 5 "https://i.ytimg.com/vi/${id}/mqdefault.jpg" \
+            -o "$thumb_path" 2>/dev/null || rm -f "$thumb_path"
+    fi
 fi
 
 if [ -f "$thumb_path" ]; then
-    # Use ~55% of preview height for image, rest for text
-    img_lines=$(( FZF_PREVIEW_LINES * 55 / 100 ))
-    [ "$img_lines" -lt 5 ] && img_lines=5
+    # Image gets 60% of preview height; text goes below
+    img_lines=$(( FZF_PREVIEW_LINES * 60 / 100 ))
+    [ "$img_lines" -lt 6 ] && img_lines=6
     img_cols="${FZF_PREVIEW_COLUMNS}"
     if [ -n "$GHOSTTY_RESOURCES_DIR" ] || [ -n "$KITTY_WINDOW_ID" ]; then
         if command -v kitten > /dev/null 2>&1; then
+            # No sed post-processing — it strips escape sequences and shrinks the image
             kitten icat --clear --transfer-mode=memory --unicode-placeholder \
                 --stdin=no --place="${img_cols}x${img_lines}@0x0" "$thumb_path" \
-                2>/dev/null \
-                | sed '$d' \
-                | sed $'$s/$/\e[m/'
-            # push cursor below image so text doesn't overlap
+                2>/dev/null
+            # Push cursor below image so text doesn't overlap
             printf '%0.s\n' $(seq 1 "$img_lines")
         else
             chafa --format symbols --colors full \
