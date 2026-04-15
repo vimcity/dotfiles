@@ -102,7 +102,7 @@ play_video() {
     info "Playing $url"
     if command -v mpv &>/dev/null; then
         mpv --ytdl=yes \
-            --ytdl-format="bestvideo[height<=1080]+bestaudio/best" \
+            --ytdl-format="best[height<=720]/best" \
             --no-terminal \
             "$url" &
         disown
@@ -120,12 +120,13 @@ summarize_video() {
     if ! command -v fabric-ai &>/dev/null; then
         die "fabric-ai not found"
     fi
-    # Override model via env: YTUI_MODEL=qwen2.5:3b YTUI_VENDOR=ollama ytui
+    # Override via env: YTUI_MODEL=qwen2.5:3b YTUI_VENDOR=ollama YTUI_PATTERN=extract_wisdom
     local model_flags=""
     [[ -n "${YTUI_MODEL:-}" ]] && model_flags="-m $YTUI_MODEL"
     [[ -n "${YTUI_VENDOR:-}" ]] && model_flags="$model_flags --vendor $YTUI_VENDOR"
+    local pattern="${YTUI_PATTERN:-yt_summary}"
     info "Fetching transcript and summarizing $url ..."
-    fabric-ai -y "$url" --transcript -p "${YTUI_PATTERN:-yt_summary}" $model_flags
+    fabric-ai -y "$url" --transcript -p "$pattern" $model_flags --yt-dlp-args="--sleep-requests 1"
 }
 
 # ---------------------------------------------------------------------------
