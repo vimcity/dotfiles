@@ -405,8 +405,8 @@ if [ -f "$thumb_path" ]; then
             kitten icat --clear --transfer-mode=memory --unicode-placeholder \
                 --stdin=no --place="${img_cols}x${img_lines}@0x0" "$thumb_path" \
                 2>/dev/null
-            # Push cursor below image so text doesn't overlap
-            printf '%0.s\n' $(seq 1 "$img_lines")
+            # Push cursor to just below the image (1 blank line gap)
+            printf '\n'
         else
             chafa --format symbols --colors full \
                 --size "${img_cols}x${img_lines}" "$thumb_path" 2>/dev/null || true
