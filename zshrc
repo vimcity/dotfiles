@@ -124,7 +124,7 @@ prompt_segment() {
 
 prompt_context_segment() {
     if [[ -n "$SSH_CONNECTION" || "$EUID" -eq 0 ]]; then
-        prompt_segment "${THEME_COLORS[user_bg]}" "${THEME_COLORS[user_fg]}" '%n'
+        # prompt_segment "${THEME_COLORS[user_bg]}" "${THEME_COLORS[user_fg]}" '%n'
     fi
 }
 
@@ -784,5 +784,3 @@ olf() {
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-
-source /Users/rgaur/.gimme-aws-creds-xaws
