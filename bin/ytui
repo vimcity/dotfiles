@@ -28,9 +28,9 @@ YTUI_WATCHLATER_FILE="$YTUI_CONFIG_DIR/watch-later.tsv"
 YTUI_FEED_CACHE="$YTUI_CACHE_DIR/feed.tsv"
 YTUI_THUMB_CACHE="$YTUI_CACHE_DIR/thumbnails"
 
-FEED_VIDEOS_PER_CHANNEL=15  # how many recent videos to fetch per channel on refresh
-SEARCH_RESULTS=30            # max search results
-CHANNEL_VIDEOS=50            # videos to show when browsing a channel
+FEED_VIDEOS_PER_CHANNEL=15 # how many recent videos to fetch per channel on refresh
+SEARCH_RESULTS=30          # max search results
+CHANNEL_VIDEOS=50          # videos to show when browsing a channel
 
 # Colors (for non-fzf output)
 RED='\033[0;31m'
@@ -42,9 +42,12 @@ RST='\033[0m'
 # ---------------------------------------------------------------------------
 # Utilities
 # ---------------------------------------------------------------------------
-die()  { printf "${RED}error:${RST} %s\n" "$*" >&2; exit 1; }
+die() {
+    printf "${RED}error:${RST} %s\n" "$*" >&2
+    exit 1
+}
 info() { printf "${BLU}:${RST} %s\n" "$*" >&2; }
-ok()   { printf "${GRN}ok:${RST} %s\n" "$*" >&2; }
+ok() { printf "${GRN}ok:${RST} %s\n" "$*" >&2; }
 warn() { printf "${YLW}warn:${RST} %s\n" "$*" >&2; }
 
 ensure_dirs() {
@@ -60,9 +63,11 @@ fmt_display() {
     local dur="--:--"
     secs="${secs%.*}"
     if [[ -n "$secs" && "$secs" -gt 0 ]] 2>/dev/null; then
-        local h=$(( secs / 3600 )) m=$(( (secs % 3600) / 60 )) s=$(( secs % 60 ))
-        if (( h > 0 )); then dur=$(printf "%d:%02d:%02d" "$h" "$m" "$s")
-        else                 dur=$(printf "%d:%02d" "$m" "$s")
+        local h=$((secs / 3600)) m=$(((secs % 3600) / 60)) s=$((secs % 60))
+        if ((h > 0)); then
+            dur=$(printf "%d:%02d:%02d" "$h" "$m" "$s")
+        else
+            dur=$(printf "%d:%02d" "$m" "$s")
         fi
     fi
 
@@ -71,12 +76,17 @@ fmt_display() {
     if [[ -n "$ts" && "$ts" != "0" ]] 2>/dev/null; then
         local now diff
         now=$(date +%s)
-        diff=$(( now - ts ))
-        if   (( diff < 3600 ));       then date_str="${diff}s ago"
-        elif (( diff < 86400 ));      then date_str="$(( diff / 3600 ))h ago"
-        elif (( diff < 2592000 ));    then date_str="$(( diff / 86400 ))d ago"
-        elif (( diff < 31536000 ));   then date_str="$(( diff / 2592000 ))mo ago"
-        else                               date_str="$(( diff / 31536000 ))y ago"
+        diff=$((now - ts))
+        if ((diff < 3600)); then
+            date_str="${diff}s ago"
+        elif ((diff < 86400)); then
+            date_str="$((diff / 3600))h ago"
+        elif ((diff < 2592000)); then
+            date_str="$((diff / 86400))d ago"
+        elif ((diff < 31536000)); then
+            date_str="$((diff / 2592000))mo ago"
+        else
+            date_str="$((diff / 31536000))y ago"
         fi
     fi
     date_str=$(printf '%-8s' "$date_str")
@@ -98,7 +108,8 @@ video_url() { echo "https://www.youtube.com/watch?v=${1}"; }
 # ---------------------------------------------------------------------------
 play_video() {
     local video_id="$1"
-    local url; url=$(video_url "$video_id")
+    local url
+    url=$(video_url "$video_id")
     info "Playing $url"
     if command -v mpv &>/dev/null; then
         mpv --ytdl=yes \
@@ -121,12 +132,13 @@ play_video() {
 download_and_play() {
     local video_id="$1"
     local title="$2"
-    local url; url=$(video_url "$video_id")
+    local url
+    url=$(video_url "$video_id")
     local outdir="$HOME/Downloads"
     local outfile="$outdir/%(title)s.%(ext)s"
     info "Downloading $url to $outdir ..."
     local downloaded
-    downloaded=$(yt-dlp         --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best"         --merge-output-format mp4         --output "$outfile"         --print after_move:filepath         "$url" 2>/dev/null)
+    downloaded=$(yt-dlp --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" --merge-output-format mp4 --output "$outfile" --print after_move:filepath "$url" 2>/dev/null)
     if [[ -n "$downloaded" && -f "$downloaded" ]]; then
         ok "Downloaded: $downloaded"
         mpv --no-terminal "$downloaded" &
@@ -142,7 +154,8 @@ download_and_play() {
 # ---------------------------------------------------------------------------
 summarize_video() {
     local video_id="$1"
-    local url; url=$(video_url "$video_id")
+    local url
+    url=$(video_url "$video_id")
     if ! command -v fabric-ai &>/dev/null; then
         die "fabric-ai not found"
     fi
@@ -172,8 +185,8 @@ watchlater_add() {
 
     info "Fetching video metadata..."
     local meta
-    meta=$(yt-dlp -J --skip-download "$(video_url "$video_id")" 2>/dev/null) \
-        || die "yt-dlp failed"
+    meta=$(yt-dlp -J --skip-download "$(video_url "$video_id")" 2>/dev/null) ||
+        die "yt-dlp failed"
     local title duration channel upload_date views ts
     title=$(printf '%s' "$meta" | jq -r '.title // "Unknown"')
     duration=$(printf '%s' "$meta" | jq -r '.duration // 0')
@@ -184,7 +197,7 @@ watchlater_add() {
     display=$(fmt_display "$video_id" "$title" "$duration" "$channel" "$views" "$ts")
     printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
         "$video_id" "$title" "$duration" "$channel" "$views" "$ts" "$display" \
-        >> "$YTUI_WATCHLATER_FILE"
+        >>"$YTUI_WATCHLATER_FILE"
     ok "Added: $title"
 }
 
@@ -198,8 +211,8 @@ subs_add() {
     local channel_url="https://www.youtube.com/@${handle}"
     info "Resolving channel: $channel_url"
     local meta
-    meta=$(yt-dlp --flat-playlist -J --playlist-end 1 --extractor-args "youtubetab:approximate_date" "$channel_url/videos" 2>/dev/null) \
-        || die "Could not reach channel: $channel_url"
+    meta=$(yt-dlp --flat-playlist -J --playlist-end 1 --extractor-args "youtubetab:approximate_date" "$channel_url/videos" 2>/dev/null) ||
+        die "Could not reach channel: $channel_url"
     local channel_id channel_name
     channel_id=$(printf '%s' "$meta" | jq -r '.channel_id // .uploader_id // empty')
     channel_name=$(printf '%s' "$meta" | jq -r '.channel // .uploader // empty')
@@ -209,25 +222,29 @@ subs_add() {
         return
     fi
     printf '%s\t%s\t%s\n' "$channel_id" "${channel_name:-$handle}" "$handle" \
-        >> "$YTUI_SUBS_FILE"
+        >>"$YTUI_SUBS_FILE"
     ok "Subscribed to $channel_name ($channel_id)"
 }
 
 subs_remove() {
     local input="$1"
     [[ -f "$YTUI_SUBS_FILE" ]] || return
-    local tmp; tmp=$(mktemp)
-    grep -v "	${input}	\|^${input}	" "$YTUI_SUBS_FILE" > "$tmp" || true
+    local tmp
+    tmp=$(mktemp)
+    grep -v "	${input}	\|^${input}	" "$YTUI_SUBS_FILE" >"$tmp" || true
     mv "$tmp" "$YTUI_SUBS_FILE"
     ok "Unsubscribed from $input"
 }
 
 subs_list() {
-    [[ -f "$YTUI_SUBS_FILE" ]] || { warn "No subscriptions. Add one with: ytui subs add @handle"; return; }
+    [[ -f "$YTUI_SUBS_FILE" ]] || {
+        warn "No subscriptions. Add one with: ytui subs add @handle"
+        return
+    }
     while IFS=$'\t' read -r channel_id channel_name handle; do
         [[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
         printf '  %-30s  %s\n' "$channel_name" "@${handle}"
-    done < "$YTUI_SUBS_FILE"
+    done <"$YTUI_SUBS_FILE"
 }
 
 # ---------------------------------------------------------------------------
@@ -262,14 +279,18 @@ _fetch_one_channel() {
         display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
         printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
             "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
-    done > "$tmp_out"
+    done >"$tmp_out"
 }
 
 refresh_feed() {
     ensure_dirs
-    [[ -f "$YTUI_SUBS_FILE" ]] || { warn "No subscriptions. Add one with: ytui subs add @handle"; return; }
+    [[ -f "$YTUI_SUBS_FILE" ]] || {
+        warn "No subscriptions. Add one with: ytui subs add @handle"
+        return
+    }
 
-    local tmp_dir; tmp_dir=$(mktemp -d)
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
     local pids=() handles=() names=()
     local count=0
 
@@ -281,20 +302,20 @@ refresh_feed() {
         pids+=($!)
         handles+=("$handle")
         names+=("$channel_name")
-        count=$(( count + 1 ))
-    done < "$YTUI_SUBS_FILE"
+        count=$((count + 1))
+    done <"$YTUI_SUBS_FILE"
 
     # Wait for all jobs
     local i=0
     for pid in "${pids[@]}"; do
         wait "$pid" || warn "Failed: ${names[$i]}"
-        i=$(( i + 1 ))
+        i=$((i + 1))
     done
 
     # Merge all per-channel TSVs into feed cache (sorted by timestamp desc)
-    cat "$tmp_dir"/*.tsv 2>/dev/null \
-        | sort -t$'\t' -k6 -rn \
-        > "$YTUI_FEED_CACHE"
+    cat "$tmp_dir"/*.tsv 2>/dev/null |
+        sort -t$'\t' -k6 -rn \
+            >"$YTUI_FEED_CACHE"
     rm -rf "$tmp_dir"
 
     ok "Refreshed feed for $count channel(s) → $YTUI_FEED_CACHE"
@@ -311,8 +332,8 @@ fetch_channel() {
     raw=$(yt-dlp --flat-playlist -J \
         --playlist-end "$limit" \
         --extractor-args "youtubetab:approximate_date" \
-        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) \
-        || die "Could not fetch channel: $handle"
+        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) ||
+        die "Could not fetch channel: $handle"
 
     local channel_name
     channel_name=$(printf '%s' "$raw" | jq -r '.channel // .uploader // "@'"$handle"'"')
@@ -344,8 +365,8 @@ do_search() {
     info "Searching: $query"
     yt-dlp --flat-playlist -J \
         --playlist-end "$limit" \
-        "ytsearch${limit}:${query}" 2>/dev/null \
-    | jq -r '
+        "ytsearch${limit}:${query}" 2>/dev/null |
+        jq -r '
         .entries[]? |
         [
             (.id // ""),
@@ -372,7 +393,8 @@ fzf_pick() {
     local extra_expect="${2:-}"
 
     local preview_script
-    preview_script=$(cat <<'PREVIEW'
+    preview_script=$(
+        cat <<'PREVIEW'
 line="$1"
 id=$(printf '%s' "$line" | cut -f1)
 title=$(printf '%s' "$line" | cut -f2)
@@ -461,7 +483,7 @@ echo ""
 echo ""
 printf "\033[2menter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download\033[0m\n"
 PREVIEW
-)
+    )
 
     local expect="ctrl-s,ctrl-w,ctrl-y,ctrl-o,ctrl-d"
     [[ -n "$extra_expect" ]] && expect="${expect},${extra_expect}"
@@ -495,19 +517,19 @@ _handle_pick() {
     video_id=$(printf '%s' "$line" | cut -f1)
     title=$(printf '%s' "$line" | cut -f2)
     case "$key" in
-        ctrl-s) summarize_video "$video_id" ;;
-        ctrl-w)
-            ensure_dirs
-            printf '%s\n' "$line" >> "$YTUI_WATCHLATER_FILE"
-            ok "Added to watch later: $title"
-            ;;
-        ctrl-y)
-            video_url "$video_id" | pbcopy
-            ok "Copied: $(video_url "$video_id")"
-            ;;
-        ctrl-o) open "$(video_url "$video_id")" ;;
-        ctrl-d) download_and_play "$video_id" "$title" ;;
-        *)      play_video "$video_id" ;;
+    ctrl-s) summarize_video "$video_id" ;;
+    ctrl-w)
+        ensure_dirs
+        printf '%s\n' "$line" >>"$YTUI_WATCHLATER_FILE"
+        ok "Added to watch later: $title"
+        ;;
+    ctrl-y)
+        video_url "$video_id" | pbcopy
+        ok "Copied: $(video_url "$video_id")"
+        ;;
+    ctrl-o) open "$(video_url "$video_id")" ;;
+    ctrl-d) download_and_play "$video_id" "$title" ;;
+    *) play_video "$video_id" ;;
     esac
 }
 
@@ -517,10 +539,10 @@ _handle_pick() {
 run_picker() {
     local source_tsv="$1"
     local label="${2:-Videos}"
-    [[ ! -f "$source_tsv" || ! -s "$source_tsv" ]] && \
+    [[ ! -f "$source_tsv" || ! -s "$source_tsv" ]] &&
         die "No videos to show. Run: ytui refresh"
     local result
-    result=$(fzf_pick "$label" < "$source_tsv") || return 0
+    result=$(fzf_pick "$label" <"$source_tsv") || return 0
     _handle_pick "$result"
 }
 
@@ -553,17 +575,18 @@ cmd_search() {
     ensure_dirs
     local limit=$SEARCH_RESULTS
     while true; do
-        local tmp_results; tmp_results=$(mktemp)
-        do_search "$query" "$limit" > "$tmp_results"
+        local tmp_results
+        tmp_results=$(mktemp)
+        do_search "$query" "$limit" >"$tmp_results"
         local result
-        result=$(fzf_pick "Search: $query  [C-l: load more]" "ctrl-l" < "$tmp_results")
+        result=$(fzf_pick "Search: $query  [C-n: load more]" "ctrl-n" <"$tmp_results")
         local fzf_exit=$?
         rm -f "$tmp_results"
         [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
         local key
         key=$(printf '%s' "$result" | head -1)
-        if [[ "$key" == "ctrl-l" ]]; then
-            limit=$(( limit + SEARCH_RESULTS ))
+        if [[ "$key" == "ctrl-n" ]]; then
+            limit=$((limit + SEARCH_RESULTS))
             info "Loading $limit results..."
             continue
         fi
@@ -595,17 +618,18 @@ cmd_channel() {
     ensure_dirs
     local limit=$CHANNEL_VIDEOS
     while true; do
-        local tmp_results; tmp_results=$(mktemp)
-        fetch_channel "$handle" "$limit" > "$tmp_results"
+        local tmp_results
+        tmp_results=$(mktemp)
+        fetch_channel "$handle" "$limit" >"$tmp_results"
         local result
-        result=$(fzf_pick "Channel: ${handle#@}  [C-l: load more  C-f: search]" "ctrl-l,ctrl-f" < "$tmp_results")
+        result=$(fzf_pick "Channel: ${handle#@}  [C-n: load more  C-f: search]" "ctrl-n,ctrl-f" <"$tmp_results")
         local fzf_exit=$?
         rm -f "$tmp_results"
         [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
         local key
         key=$(printf '%s' "$result" | head -1)
-        if [[ "$key" == "ctrl-l" ]]; then
-            limit=$(( limit + CHANNEL_VIDEOS ))
+        if [[ "$key" == "ctrl-n" ]]; then
+            limit=$((limit + CHANNEL_VIDEOS))
             info "Loading $limit videos..."
             continue
         fi
@@ -614,11 +638,13 @@ cmd_channel() {
             local search_query
             read -r search_query
             [[ -z "$search_query" ]] && continue
-            local tmp_search; tmp_search=$(mktemp)
-            do_search "$search_query in:@${handle#@}" "$SEARCH_RESULTS" > "$tmp_search"
+            local tmp_search
+            tmp_search=$(mktemp)
+            do_search "$search_query in:@${handle#@}" "$SEARCH_RESULTS" >"$tmp_search"
             local sresult
-            sresult=$(fzf_pick "Search '@${handle#@}': $search_query" "" < "$tmp_search") || {
-                rm -f "$tmp_search"; continue
+            sresult=$(fzf_pick "Search '@${handle#@}': $search_query" "" <"$tmp_search") || {
+                rm -f "$tmp_search"
+                continue
             }
             rm -f "$tmp_search"
             [[ -z "$(printf '%s' "$sresult" | tail -1)" ]] && continue
@@ -647,10 +673,10 @@ cmd_subs() {
     local sub_cmd="${1:-list}"
     shift || true
     case "$sub_cmd" in
-        add)    subs_add "${1:-}" ;;
-        remove) subs_remove "${1:-}" ;;
-        list)   subs_list ;;
-        *)      die "Usage: ytui subs [add|remove|list]" ;;
+    add) subs_add "${1:-}" ;;
+    remove) subs_remove "${1:-}" ;;
+    list) subs_list ;;
+    *) die "Usage: ytui subs [add|remove|list]" ;;
     esac
 }
 
@@ -678,7 +704,7 @@ Picker keys:
   Ctrl-Y      copy URL to clipboard
   Ctrl-O      open in browser
   Ctrl-D      download then play in mpv
-  Ctrl-L      load more results (search/channel)
+  Ctrl-N      load more results (search/channel)
 
 Config:
   Subscriptions : $YTUI_SUBS_FILE
@@ -694,13 +720,13 @@ cmd="${1:-feed}"
 shift || true
 
 case "$cmd" in
-    feed)              cmd_feed ;;
-    search|s)          cmd_search "$@" ;;
-    watch-later|wl)    cmd_watch_later ;;
-    channel|c)         cmd_channel "${1:-}" ;;
-    add)               cmd_add "${1:-}" ;;
-    refresh|r)         cmd_refresh ;;
-    subs|sub)          cmd_subs "$@" ;;
-    help|--help|-h)    cmd_help ;;
-    *)                 die "Unknown command: $cmd. Run: ytui help" ;;
+feed) cmd_feed ;;
+search | s) cmd_search "$@" ;;
+watch-later | wl) cmd_watch_later ;;
+channel | c) cmd_channel "${1:-}" ;;
+add) cmd_add "${1:-}" ;;
+refresh | r) cmd_refresh ;;
+subs | sub) cmd_subs "$@" ;;
+help | --help | -h) cmd_help ;;
+*) die "Unknown command: $cmd. Run: ytui help" ;;
 esac
