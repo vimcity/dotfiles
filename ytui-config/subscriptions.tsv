@@ -1,0 +1,98 @@
+# ytui subscriptions
+# Format: channel_id <TAB> channel_name <TAB> handle
+#
+# Manage with:
+#   ytui subs add @handle      — subscribe
+#   ytui subs remove @handle   — unsubscribe
+#   ytui subs                  — list all
+#   ytui refresh               — refresh feed cache after adding channels
+#
+# Lines starting with # are ignored.
+
+# --- Placeholder channels (replace with your own) ---
+UCVls1GmFKf6WlTraIb_IaJg	ThePrimeagen	ThePrimeagen
+UCd3dNckv1Za2coSaHGHl5aA	TJ DeVries	teej_dv
+UC8zTlrhQ0w1-TZjc2-jdcag	Andre Antunes	AndreAntunesofficial
+UChDkP71cJOHop-iRgl_8pVg	Bloodywood	Bloodywood
+UCdp4_l1vPmpN-gDbUwhaRUQ	Branch Education	BranchEducation
+UCwHwDuNd9lCdA7chyyquDXw	Bread on Penguins	BreadOnPenguins
+UCOQN5u9oIocoYEdn3LQID4Q	But Why?	ButWhySci
+UCIhJnsJ0IHlVNnYfp-gw_5Q	Cal Newport	CalNewportMedia
+UC8XKyvQ5Ne_bvYbgv8LaIeg	Captain Sinbad	CaptainSinbad
+UCr3cBLTYmIK9kY0F_OdFWFQ	Casually Explained	CasuallyExplained
+UCTpc-_MvnaSuRA0BR6Rz9ZQ	Cosmic FuzzFm	CosmicFuzzFM
+UCkHPqmBsJkws8HbPP1cd_NA	Cusack Creatures	CusackCreatures
+UCtfT_sKutzeLdCsG_DuxBrQ	Decoding TV	DecodingTV
+UChfo46ZNOV-vtehDc25A1Ug	Deep Dive with Ali Abdaal 	DeepDivewithAliAbdaal
+UCimiUgDLbi6P17BdaCZpVbg	exurb1a	Exurb1a
+UCsBjURrPoezykLs9EqgamOA	Fireship	Fireship
+UCkZjTZNvuxq1CYMS3cwZa1Q	Huberman Lab Clips	HubermanLabClips
+UCx1Fxl7pFuccFkcOA4mSfZA	India's Got Latent Clips	IndiasGotLatentOfficial
+UCVYywLrE_O6etiQxQiVvVVA	JaruJaru Japanese Comedy - EN. Channel	JaruJaruJapaneseComedy-ENChann
+UCmMGlb7mGXYVthrXYSwlQhw	Joma 2nd Channel	JomaTheSecond
+UCYLS9TSah19IsB8yyUpiDzg	Jordindian	Jordindian
+UCUkyyRJdVdXFmBuxPLFYmPw	K boges	Kboges
+UCzNq9i-DlDDBLjPerVzJW-A	Kenny Sebastian	KennySebastian
+UCF3HC9AaHNwqpBOiFS-bpow	Aaditya Kulshreshth aka Kullu	Kullubaazi
+UCN2_bPtmHFbJLjx-39S_4lg	LazyPillow (Yotam Perel)	LazyPillow
+UC0Wu8k-3Yc6tro6KYmLZRvQ	MainSqueezeMusic	MainSqueezeMusic
+UCPdaxSov0mgwh77JvjQO2jQ	Man Carrying Thing	ManCarryingThing
+UCLgTr0PFPCmvhgiuZ4d4xvw	Mostly True	MostlyTrue
+UCKnNrlSJF_hWoBSz1lY_D7g	NOT YOUR TYPE	NOTYOURTYPE
+UCJkMlOu7faDgqh4PfzbpLdg	Nerdwriter1	Nerdwriter1
+UC5fy9izAhlANCISUdU8quDg	Newel of Knowledge 	NewelOfKnowledge
+UC0intLFzLaudFG-xAvUEO-A	Not Just Bikes	NotJustBikes
+UC88UWPPyIn-LVunZ6qyM4BA	ObuLikesYouTube	ObuLikesYouTube
+UCV5wuGZmg_FGQp25uzKKDaw	OneyNG	OneyNG
+UCNIuvl7V8zACPpTmmNIqP2A	OverSimplified	OverSimplified
+UCfSr8qVAKjQtJ3DvqyIKCIw	PFINNEY	PFINNEY
+UC-lHJZR3Gqxm24_Vd_AJ5Yw	PewDiePie	PewDiePie
+UCAov2BBv1ZJav0c_yHEciAw	Samay Raina	SamayRainaOfficial
+UCYLf5YEC59GX69au3yb1-KQ	SubwayTakes with Kareem Rahma	SubwayTakes
+UCmHz7DQbbkcY_UoWY8bBJLw	Switch Angel	Switch-Angel
+UCsooa4yRKGN_zEE8iknghZA	TED-Ed	TEDEd
+UCV1G6JkQtB2nobFm3MGNsBQ	THE BIG LEZ SHOW OFFICIAL	THEBIGLEZSHOWOFFICIAL
+UCm6r_b2K5jn1JGkwDcwJXrQ	Anthony Vincent	TenSecondSongs
+UCfDraCuFqkftTzzh8tU1y_Q	The Ancient King	The.AncientKing
+UCPKgIhTC3BdkAwMw6s-GEug	TheDooo	TheDooo
+UCUyeluBRhGPCW4rPe_UvBZQ	The PrimeTime	ThePrimeTimeagen
+UC8ENHE5xdFSwx71u3fDH5Xw	ThePrimeagen	ThePrimeagen
+UChk6TQce1EJMn6_liKdHDog	ThePrimeagenHighlights	ThePrimeagenHighlights
+UCAHK6_CVUjWtJ9i-dQ8Td_A	Xearching For Sounds	TheXMusicArchive
+UCqYPhGiB9tkShZorfgcL2lA	Joseph Everett - WIL	WhatIveLearned
+UCfQk5qGOEO5cPPDFlQe2lFQ	Your Average Tech Bro	YourAverageTechBro
+UCLKPca3kwwd-B59HNr-_lvA	AI Engineer	aiDotEngineer
+UCoOae5nYA7VqaXzerajD0lg	Ali Abdaal	aliabdaal
+UCP6Np_iMYhBQBAcYlDf97iw	DoodletmeGO	ashipwright
+UCXEHlIvfdsgKnstJ8ZwIgLQ	Bailey Schildbach	bailey.schildbach
+UC9H0HzpKf5JlazkADWnW1Jw	bashbunni	bashbunni
+UCkVfrGwV-iG9bSsgCbrNPxQ	Better Stack	betterstack
+UC5--wS0Ljbin1TjWQX6eafA	bigboxSWE	bigboxSWE
+UCpbWmV3trWP4kqbNawlXIcQ	Jeff Arcuri	comedianJeffArcuri
+UCa3tynMmZ6CuBQF-5WcPpww	Create with Koko	create-with-koko
+UCP_Q1HA-cA4BxocbDWJqR-A	Denée	deneetamia
+UC7yZ6keOGsvERMp2HaEbbXQ	devaslife	devaslife
+UCYeiozh-4QwuC1sjgCmB92w	DevOps Toolbox	devopstoolbox
+UCUkM9uMpWatT7gVWShgtKFw	David Heinemeier Hansson	dhh37
+UCWQaM7SpSECp9FELz-cHzuQ	Dreams of Code	dreamsofcode
+UCTSRIY3GLFYIpkR2QwyeklA	Drew Gooden	drewisgooden
+UCnmgSO_4g6QcRzy0yFeglyA	Grand Illusions	grandillusions
+UCOT2iLov0V7Re7ku_3UBtcQ	Hank Green	hankschannel
+UCsEPI9OwGEw5Lm0E7Paq62g	hoe_math (PsychoMath)	hoe_math
+UCUOoZUDKtLDHvyXd0nTFd2Q	Master Tingus	itsMastertingus
+UCWp9djP-UB5xbJoxhSlkzdQ	JA Westenberg	jawestenberg
+UCKZdVJU8cEBceM3lUAFJTpg	josh czuba	joshczuba
+UCuPgdqQKpq4T4zeqmTelnFg	kaptainkristian	kaptainkristian
+UCsXVk37bltHxD1rDPwtNM8Q	Kurzgesagt – In a Nutshell	kurzgesagt
+UCrdWRLq10OHuy7HmSckV3Vg	Nathaniel Drew	nathanieldrew
+UC--BMyA2X4a9PGAo3lTuopg	psychicpebbles	psychicpebbles
+UCEor-us3G9E1J1CpJKyAnuA	Shortsophy	shortsophy
+UChbE5OZQ6dRHECsX0tEPEZQ	장삐쭈	studio_jbbj
+UCChWvNbRQYQ5fj1Nj3RQu8Q	surreal entertainment	surrealentertainment
+UCbRP3c757lWg9M-U7TyEkXA	Theo - t3․gg	t3dotgg
+UC0rE2qq81of4fojo-KhO5rg	Tanmay Bhat	tanmaybhat
+UC7IcJI8PUf5Z3zKxnZvTBog	The School of Life	theschooloflifetv
+UCqW61mnL1n6gZiudw9_wdCQ	Tyler Visser	tylervisserdrums
+UCqrrxZeeFSNCjGmD-33SKMw	u m a m i	umami
+UCnCikd0s4i9KoDtaHPlK-JA	Unsupervised Learning	unsupervised-learning
+UCGaVdbSav8xWuFWTadK6loA	vlogbrothers	vlogbrothers
