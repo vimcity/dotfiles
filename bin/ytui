@@ -102,10 +102,11 @@ play_video() {
     info "Playing $url"
     if command -v mpv &>/dev/null; then
         mpv --ytdl=yes \
-            --ytdl-format="bestvideo[height<=1080]+bestaudio/best" \
-            --demuxer-max-bytes=100MiB \
-            --demuxer-readahead-secs=30 \
+            --ytdl-format="bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
+            --demuxer-max-bytes=150MiB \
+            --demuxer-readahead-secs=60 \
             --cache=yes \
+            --cache-pause-wait=3 \
             --no-terminal \
             "$url" &
         disown
@@ -446,7 +447,6 @@ PREVIEW
         --no-sort \
         --delimiter=$'\t' \
         --with-nth=7 \
-        --nth=2,4 \
         --header="$header_label" \
         --preview="bash -c $(printf '%q' "$preview_script") -- {}" \
         --preview-window="right:45%:wrap" \
