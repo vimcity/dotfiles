@@ -202,46 +202,69 @@ subs_list() {
 # ---------------------------------------------------------------------------
 # Feed refresh
 # ---------------------------------------------------------------------------
+_fetch_one_channel() {
+    # Called in a subshell: args: channel_name handle tmp_dir
+    local channel_name="$1" handle="$2" tmp_dir="$3"
+    local tmp_out="$tmp_dir/${handle}.tsv"
+
+    local raw
+    raw=$(yt-dlp --flat-playlist -J \
+        --playlist-end "$FEED_VIDEOS_PER_CHANNEL" \
+        "https://www.youtube.com/@${handle}/videos" 2>/dev/null) || {
+        warn "Failed to fetch $channel_name, skipping"
+        return
+    }
+
+    printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
+        .entries[]? |
+        [
+            (.id // ""),
+            (.title // "Unknown"),
+            (.duration // 0 | floor | tostring),
+            $ch,
+            (.view_count // 0 | tostring),
+            (.timestamp // 0 | tostring)
+        ] | @tsv
+    ' 2>/dev/null | while IFS=$'\t' read -r id title secs ch views ts; do
+        [[ -z "$id" ]] && continue
+        display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
+        printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+            "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
+    done > "$tmp_out"
+}
+
 refresh_feed() {
     ensure_dirs
     [[ -f "$YTUI_SUBS_FILE" ]] || { warn "No subscriptions. Add one with: ytui subs add @handle"; return; }
 
-    local tmp_feed; tmp_feed=$(mktemp)
+    local tmp_dir; tmp_dir=$(mktemp -d)
+    local pids=() handles=() names=()
     local count=0
 
+    # Launch all fetches in parallel
     while IFS=$'\t' read -r channel_id channel_name handle; do
         [[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
         info "Fetching feed for $channel_name..."
-
-        local raw
-        raw=$(yt-dlp --flat-playlist -J \
-            --playlist-end "$FEED_VIDEOS_PER_CHANNEL" \
-            "https://www.youtube.com/@${handle}/videos" 2>/dev/null) || {
-            warn "Failed to fetch $channel_name, skipping"
-            continue
-        }
-
-        printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
-            .entries[]? |
-            [
-                (.id // ""),
-                (.title // "Unknown"),
-                (.duration // 0 | floor | tostring),
-                $ch,
-                (.view_count // 0 | tostring),
-                (.timestamp // 0 | tostring)
-            ] | @tsv
-        ' 2>/dev/null | while IFS=$'\t' read -r id title secs ch views ts; do
-            [[ -z "$id" ]] && continue
-            display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
-            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-                "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
-        done >> "$tmp_feed" || true
-
+        _fetch_one_channel "$channel_name" "$handle" "$tmp_dir" &
+        pids+=($!)
+        handles+=("$handle")
+        names+=("$channel_name")
         count=$(( count + 1 ))
     done < "$YTUI_SUBS_FILE"
 
-    mv "$tmp_feed" "$YTUI_FEED_CACHE"
+    # Wait for all jobs
+    local i=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" || warn "Failed: ${names[$i]}"
+        i=$(( i + 1 ))
+    done
+
+    # Merge all per-channel TSVs into feed cache (sorted by timestamp desc)
+    cat "$tmp_dir"/*.tsv 2>/dev/null \
+        | sort -t$'\t' -k6 -rn \
+        > "$YTUI_FEED_CACHE"
+    rm -rf "$tmp_dir"
+
     ok "Refreshed feed for $count channel(s) → $YTUI_FEED_CACHE"
 }
 
@@ -366,19 +389,26 @@ if [ ! -f "$thumb_path" ]; then
 fi
 
 if [ -f "$thumb_path" ]; then
-    dim="${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}"
+    # Use ~55% of preview height for image, rest for text
+    img_lines=$(( FZF_PREVIEW_LINES * 55 / 100 ))
+    [ "$img_lines" -lt 5 ] && img_lines=5
+    img_cols="${FZF_PREVIEW_COLUMNS}"
     if [ -n "$GHOSTTY_RESOURCES_DIR" ] || [ -n "$KITTY_WINDOW_ID" ]; then
         if command -v kitten > /dev/null 2>&1; then
             kitten icat --clear --transfer-mode=memory --unicode-placeholder \
-                --stdin=no --place="${dim}@0x0" "$thumb_path" \
+                --stdin=no --place="${img_cols}x${img_lines}@0x0" "$thumb_path" \
                 2>/dev/null \
                 | sed '$d' \
                 | sed $'$s/$/\e[m/'
+            # push cursor below image so text doesn't overlap
+            printf '%0.s\n' $(seq 1 "$img_lines")
         else
-            chafa --format symbols --colors full --size 40x11 "$thumb_path" 2>/dev/null || true
+            chafa --format symbols --colors full \
+                --size "${img_cols}x${img_lines}" "$thumb_path" 2>/dev/null || true
         fi
     else
-        chafa --format symbols --colors full --size 40x11 "$thumb_path" 2>/dev/null || true
+        chafa --format symbols --colors full \
+            --size "${img_cols}x${img_lines}" "$thumb_path" 2>/dev/null || true
     fi
 fi
 
