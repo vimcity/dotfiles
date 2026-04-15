@@ -102,7 +102,10 @@ play_video() {
     info "Playing $url"
     if command -v mpv &>/dev/null; then
         mpv --ytdl=yes \
-            --ytdl-format="best[height<=720]/best" \
+            --ytdl-format="bestvideo[height<=1080]+bestaudio/best" \
+            --demuxer-max-bytes=100MiB \
+            --demuxer-readahead-secs=30 \
+            --cache=yes \
             --no-terminal \
             "$url" &
         disown
