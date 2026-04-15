@@ -30,7 +30,7 @@ YTUI_THUMB_CACHE="$YTUI_CACHE_DIR/thumbnails"
 
 FEED_VIDEOS_PER_CHANNEL=15  # how many recent videos to fetch per channel on refresh
 SEARCH_RESULTS=30            # max search results
-CHANNEL_VIDEOS=30            # videos to show when browsing a channel
+CHANNEL_VIDEOS=50            # videos to show when browsing a channel
 
 # Colors (for non-fzf output)
 RED='\033[0;31m'
@@ -198,7 +198,7 @@ subs_add() {
     local channel_url="https://www.youtube.com/@${handle}"
     info "Resolving channel: $channel_url"
     local meta
-    meta=$(yt-dlp --flat-playlist -J --playlist-end 1 "$channel_url/videos" 2>/dev/null) \
+    meta=$(yt-dlp --flat-playlist -J --playlist-end 1 --extractor-args "youtubetab:approximate_date" "$channel_url/videos" 2>/dev/null) \
         || die "Could not reach channel: $channel_url"
     local channel_id channel_name
     channel_id=$(printf '%s' "$meta" | jq -r '.channel_id // .uploader_id // empty')
@@ -241,7 +241,8 @@ _fetch_one_channel() {
     local raw
     raw=$(yt-dlp --flat-playlist -J \
         --playlist-end "$FEED_VIDEOS_PER_CHANNEL" \
-        "https://www.youtube.com/@${handle}/videos" 2>/dev/null) || {
+        --extractor-args "youtubetab:approximate_date" \
+        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) || {
         warn "Failed to fetch $channel_name, skipping"
         return
     }
@@ -309,7 +310,8 @@ fetch_channel() {
     local raw
     raw=$(yt-dlp --flat-playlist -J \
         --playlist-end "$limit" \
-        "https://www.youtube.com/@${handle}/videos" 2>/dev/null) \
+        --extractor-args "youtubetab:approximate_date" \
+        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) \
         || die "Could not fetch channel: $handle"
 
     local channel_name
@@ -554,10 +556,10 @@ cmd_search() {
         local tmp_results; tmp_results=$(mktemp)
         do_search "$query" "$limit" > "$tmp_results"
         local result
-        result=$(fzf_pick "Search: $query  [C-l: load more]" "ctrl-l" < "$tmp_results") || {
-            rm -f "$tmp_results"; return 0
-        }
+        result=$(fzf_pick "Search: $query  [C-l: load more]" "ctrl-l" < "$tmp_results")
+        local fzf_exit=$?
         rm -f "$tmp_results"
+        [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
         local key
         key=$(printf '%s' "$result" | head -1)
         if [[ "$key" == "ctrl-l" ]]; then
@@ -565,6 +567,7 @@ cmd_search() {
             info "Loading $limit results..."
             continue
         fi
+        [[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
         _handle_pick "$result"
         break
     done
@@ -595,10 +598,10 @@ cmd_channel() {
         local tmp_results; tmp_results=$(mktemp)
         fetch_channel "$handle" "$limit" > "$tmp_results"
         local result
-        result=$(fzf_pick "Channel: ${handle#@}  [C-l: load more]" "ctrl-l" < "$tmp_results") || {
-            rm -f "$tmp_results"; return 0
-        }
+        result=$(fzf_pick "Channel: ${handle#@}  [C-l: load more  C-f: search]" "ctrl-l,ctrl-f" < "$tmp_results")
+        local fzf_exit=$?
         rm -f "$tmp_results"
+        [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
         local key
         key=$(printf '%s' "$result" | head -1)
         if [[ "$key" == "ctrl-l" ]]; then
@@ -606,6 +609,23 @@ cmd_channel() {
             info "Loading $limit videos..."
             continue
         fi
+        if [[ "$key" == "ctrl-f" ]]; then
+            printf "Search in channel @%s: " "${handle#@}" >&2
+            local search_query
+            read -r search_query
+            [[ -z "$search_query" ]] && continue
+            local tmp_search; tmp_search=$(mktemp)
+            do_search "$search_query in:@${handle#@}" "$SEARCH_RESULTS" > "$tmp_search"
+            local sresult
+            sresult=$(fzf_pick "Search '@${handle#@}': $search_query" "" < "$tmp_search") || {
+                rm -f "$tmp_search"; continue
+            }
+            rm -f "$tmp_search"
+            [[ -z "$(printf '%s' "$sresult" | tail -1)" ]] && continue
+            _handle_pick "$sresult"
+            break
+        fi
+        [[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
         _handle_pick "$result"
         break
     done
