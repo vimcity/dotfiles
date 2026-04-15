@@ -71,7 +71,7 @@ else
 fi
 
 # Install tools via brew
-for formula in lazygit lazydocker git-delta; do
+for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
     if brew list "$formula" &> /dev/null; then
         echo "󰄵 $formula already installed"
     else
@@ -79,6 +79,14 @@ for formula in lazygit lazydocker git-delta; do
         brew install "$formula"
     fi
 done
+
+# Install casks for ytui (kitten binary for kitty graphics protocol)
+if brew list --cask kitty &> /dev/null; then
+    echo "󰄵 kitty already installed"
+else
+    echo "󰌶 Installing kitty (for kitten icat thumbnails)..."
+    brew install --cask kitty
+fi
 
 # Install tools from custom taps
 echo "󰌶 Installing tools from custom taps..."
