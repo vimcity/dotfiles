@@ -116,6 +116,28 @@ play_video() {
 }
 
 # ---------------------------------------------------------------------------
+# Download & play
+# ---------------------------------------------------------------------------
+download_and_play() {
+    local video_id="$1"
+    local title="$2"
+    local url; url=$(video_url "$video_id")
+    local outdir="$HOME/Downloads"
+    local outfile="$outdir/%(title)s.%(ext)s"
+    info "Downloading $url to $outdir ..."
+    local downloaded
+    downloaded=$(yt-dlp         --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best"         --merge-output-format mp4         --output "$outfile"         --print after_move:filepath         "$url" 2>/dev/null)
+    if [[ -n "$downloaded" && -f "$downloaded" ]]; then
+        ok "Downloaded: $downloaded"
+        mpv --no-terminal "$downloaded" &
+        disown
+    else
+        warn "Download failed, falling back to stream"
+        play_video "$video_id"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Summarize
 # ---------------------------------------------------------------------------
 summarize_video() {
@@ -435,11 +457,11 @@ echo ""
 [ -n "$views_fmt" ] && printf "  Views    : %s\n" "$views_fmt"
 [ -n "$date_fmt"  ] && printf "  Uploaded : %s\n" "$date_fmt"
 echo ""
-printf "\033[2menter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser\033[0m\n"
+printf "\033[2menter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download\033[0m\n"
 PREVIEW
 )
 
-    local expect="ctrl-s,ctrl-w,ctrl-y,ctrl-o"
+    local expect="ctrl-s,ctrl-w,ctrl-y,ctrl-o,ctrl-d"
     [[ -n "$extra_expect" ]] && expect="${expect},${extra_expect}"
 
     fzf \
@@ -482,6 +504,7 @@ _handle_pick() {
             ok "Copied: $(video_url "$video_id")"
             ;;
         ctrl-o) open "$(video_url "$video_id")" ;;
+        ctrl-d) download_and_play "$video_id" "$title" ;;
         *)      play_video "$video_id" ;;
     esac
 }
@@ -515,7 +538,7 @@ cmd_feed() {
         info "Feed cache outdated format, refreshing..."
         refresh_feed
     fi
-    run_picker "$YTUI_FEED_CACHE" "Feed  |  enter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser"
+    run_picker "$YTUI_FEED_CACHE" "Feed  |  enter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download"
 }
 
 cmd_search() {
@@ -554,7 +577,7 @@ cmd_watch_later() {
         printf "Add a video with: ytui add <url>\n"
         return 0
     fi
-    run_picker "$YTUI_WATCHLATER_FILE" "Watch Later  |  enter:play  C-s:summarize  C-y:copy  C-o:browser"
+    run_picker "$YTUI_WATCHLATER_FILE" "Watch Later  |  enter:play  C-s:summarize  C-y:copy  C-o:browser  C-d:download"
 }
 
 cmd_channel() {
@@ -634,6 +657,7 @@ Picker keys:
   Ctrl-W      add to watch later
   Ctrl-Y      copy URL to clipboard
   Ctrl-O      open in browser
+  Ctrl-D      download then play in mpv
   Ctrl-L      load more results (search/channel)
 
 Config:
