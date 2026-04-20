@@ -72,7 +72,7 @@ fi
 
 # Install tools via brew
 for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
-    if brew list "$formula" &> /dev/null; then
+    if brew list "$formula" &>/dev/null; then
         echo "󰄵 $formula already installed"
     else
         echo "󰌶 Installing $formula..."
@@ -81,7 +81,7 @@ for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
 done
 
 # Install casks for ytui (kitten binary for kitty graphics protocol)
-if brew list --cask kitty &> /dev/null; then
+if brew list --cask kitty &>/dev/null; then
     echo "󰄵 kitty already installed"
 else
     echo "󰌶 Installing kitty (for kitten icat thumbnails)..."
@@ -92,7 +92,7 @@ fi
 echo "󰌶 Installing tools from custom taps..."
 
 # taproom from gromgit/brewtils
-if brew list "taproom" &> /dev/null; then
+if brew list "taproom" &>/dev/null; then
     echo "󰄵 taproom already installed"
 else
     echo "  󰌶 Installing taproom..."
@@ -100,7 +100,7 @@ else
 fi
 
 # llmfit from AlexsJones/llmfit
-if brew list "llmfit" &> /dev/null; then
+if brew list "llmfit" &>/dev/null; then
     echo "󰄵 llmfit already installed"
 else
     echo "  󰌶 Installing llmfit..."
@@ -109,7 +109,7 @@ else
 fi
 
 # models from arimxyer/tap
-if brew list "models" &> /dev/null; then
+if brew list "models" &>/dev/null; then
     echo "󰄵 models already installed"
 else
     echo "  󰌶 Installing models..."
@@ -121,7 +121,7 @@ fi
 remove_if_exists "$HOME/.config/ghostty"
 remove_if_exists "$HOME/.config/atuin"
 remove_if_exists "$HOME/.config/ytui"
-remove_if_exists "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+remove_if_exists "$HOME/.config/btop/themes/catppuccin-rose"
 remove_if_exists "$HOME/.config/opencode/themes"
 remove_if_exists "$HOME/.vimrc"
 remove_if_exists "$HOME/.zshrc"
@@ -162,7 +162,7 @@ ln -sf "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
 ln -sf "$DOTFILES_DIR/ytui-config" "$HOME/.config/ytui"
 ln -sf "$DOTFILES_DIR/tmux-cht-languages" "$HOME/.tmux-cht-languages"
 ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
-ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME/.config/btop/themes/catppuccin-frappe.theme"
+ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME/.config/btop/themes/catppuccin-rose"
 ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
 ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 ln -sf "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
