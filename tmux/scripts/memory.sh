@@ -33,20 +33,20 @@ percentage=$((used_bytes * 100 / total_bytes))
 icon="󰍛"
 
 # Color scheme
-green="#a6e3a1"  # Green (healthy)
-yellow="#E5C890" # More orangy yellow (warning)
-red="#e78284"    # Red (matches prefix color, critical)
+green="#a6e3a1"     # Green (healthy)
+yellow="#f6c177"    # More orangy yellow (warning)
+red="#e78284"       # Red (matches prefix color, critical)
 text_dark="#000000" # Dark text for contrast
 
 # Determine color based on percentage (thirds: 0-33% green, 33-67% yellow, 67%+ red)
-if [ "$percentage" -lt 33 ]; then
-    bg_color="$green"
-elif [ "$percentage" -lt 67 ]; then
-    bg_color="$yellow"
+if [ "$percentage" -lt 40 ]; then
+    fg_color="$green"
+elif [ "$percentage" -lt 70 ]; then
+    fg_color="$yellow"
 else
-    bg_color="$red"
+    fg_color="$red"
 fi
 
 # Output colored text without pill box
 # Format: [color code] icon used_gb (percentage%) [reset]
-printf "#[fg=%s,bold]%s %sGB (%s%%)#[default]" "$bg_color" "$icon" "$used_gb" "$percentage"
+printf "#[bg=%s,fg=%s,bold]%s %sGB | %s%% " "$fg_color" "$text_dark" " $icon" "$used_gb" "$percentage"
