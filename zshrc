@@ -5,9 +5,13 @@
 # Force true color support (24-bit RGB) for tmux and neovim
 export COLORTERM=truecolor
 
-# Homebrew - must be before OMZ so fpath is consistent across login and non-login shells
-# (tmux panes are non-login; without this, fpath differs and zcompdump rebuilds every pane)
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Homebrew - static exports avoid spawning `brew` on every shell startup
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
+export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
+export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
 
 
 # ===========================================
@@ -16,7 +20,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_CUSTOM="$ZSH/custom"
 export ZSH_CACHE_DIR="$ZSH/cache"
-export ZSH_COMPDUMP="$ZSH/cache/.zcompdump-$HOST"
 export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
 export ZSH_DISABLE_COMPFIX=true
@@ -26,30 +29,6 @@ export _CACHED_CHECK=true
 # Completion caching - AGGRESSIVE FAST PATH
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-policy _omz_cache_policy
-
-# Skip compinit entirely if dump exists and is recent (< 7 days old)
-# This is the fastest path: 0ms overhead
-if [[ -f "$ZSH_COMPDUMP" ]] && [[ $(( $(date +%s) - $(stat -f %m "$ZSH_COMPDUMP" 2>/dev/null || echo 0) )) -lt 604800 ]]; then
-  # Dump is recent; skip compinit entirely and just load the pre-compiled dump
-  source "$ZSH_COMPDUMP"
-else
-  # Dump is missing or stale; do a full init (only happens ~once a week or on new plugins)
-  autoload -Uz compinit
-  compinit() {
-    unfunction compinit
-    autoload -Uz compinit
-    if [[ -f "$ZSH_COMPDUMP" ]]; then
-      compinit -C -D -d "$ZSH_COMPDUMP"
-    else
-      compinit -d "$ZSH_COMPDUMP"
-    fi
-  }
-  # Trigger compinit for this startup
-  compinit -d "$ZSH_COMPDUMP"
-fi
-
-# Stub zrecompile - .zwc from last full build is still valid, no need to recompile every start
-zrecompile() { : }
 
 # ===========================================
 # Shell Behavior Toggles
@@ -67,8 +46,8 @@ ZSH_THEME=""
 
 plugins=(
   git
-  brew
-  copypath
+  # brew
+  # copypath
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
@@ -776,11 +755,8 @@ theme() {
 olf() {
     ollama run "$(ollama list | fzf | awk '{print $1}')" "$@";
 }
-# zprof
-
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+# zprof
