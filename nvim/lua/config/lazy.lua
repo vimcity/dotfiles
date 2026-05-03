@@ -49,7 +49,12 @@ require("lazy").setup({
     -- { import = "lazyvim.plugins.extras.util.octo" }, -- GitHub PR/issue integration
 
     -- AI
-    -- { import = "lazyvim.plugins.extras.ai.copilot", cond = function() return (os.getenv("PERSONAL") == "0") end }, -- GitHub Copilot (disabled if PERSONAL=1)
+    {
+      import = "lazyvim.plugins.extras.ai.copilot",
+      cond = function()
+        return (os.getenv("PERSONAL") == "0")
+      end,
+    }, -- GitHub Copilot (disabled if PERSONAL=1)
 
     -- 3. Your custom plugins (must come last)
     { import = "plugins" },

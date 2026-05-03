@@ -39,7 +39,7 @@ return {
       sources = {
         explorer = {
           hidden = true, -- Show hidden files (dotfiles)
-          ignored = false, -- Respect gitignore, fd-ignore, and rg-ignore files
+          ignored = true, -- Respect gitignore, fd-ignore, and rg-ignore files
         },
         -- Exclude TS-compiled JS artifacts from file and grep pickers.
         -- Only targets application/ where TS compilation outputs live;

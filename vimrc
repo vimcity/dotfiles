@@ -41,3 +41,9 @@ xnoremap c "_c
 xnoremap C "_C
 xnoremap x "_x
 xnoremap X "_X
+
+" ===========================================
+" Scroll Centering
+" ===========================================
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
