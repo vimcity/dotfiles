@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+notify() {
+    if command -v tmux >/dev/null 2>&1 && [[ -n "${TMUX:-}" ]]; then
+        tmux display-message "$1"
+    else
+        printf '%s\n' "$1" >&2
+    fi
+}
+
+require_command() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        notify "anon clip: missing $1"
+        exit 0
+    fi
+}
+
+pick_smallest_ollama_model() {
+    if [[ -n "${ANONYMIZE_OLLAMA_MODEL:-}" ]]; then
+        printf '%s\n' "$ANONYMIZE_OLLAMA_MODEL"
+        return
+    fi
+
+    ollama list | awk '
+        NR > 1 && NF >= 4 {
+            size = $3 + 0
+            unit = $4
+            mult = 1
+
+            if (unit == "KB") mult = 1024
+            else if (unit == "MB") mult = 1024 * 1024
+            else if (unit == "GB") mult = 1024 * 1024 * 1024
+            else if (unit == "TB") mult = 1024 * 1024 * 1024 * 1024
+
+            printf "%.0f\t%s\n", size * mult, $1
+        }
+    ' | sort -n | awk 'NR == 1 { print $2 }'
+}
+
+require_command pbpaste
+require_command pbcopy
+require_command ollama
+
+input_text="$(pbpaste)"
+
+if [[ -z "${input_text//[[:space:]]/}" ]]; then
+    notify "anon clip: clipboard empty"
+    exit 0
+fi
+
+model="$(pick_smallest_ollama_model)"
+
+if [[ -z "$model" ]]; then
+    notify "anon clip: no ollama models found"
+    exit 0
+fi
+
+prompt=$(cat <<'EOF'
+Anonymize following text.
+
+Rules:
+- Replace names, emails, phone numbers, addresses, URLs, company names, IDs, ticket numbers, account numbers, repo names, hostnames, IPs, secrets, and any other identifying details with neutral placeholders.
+- Preserve technical meaning, structure, formatting, code fences, and debugging value.
+- Keep language same.
+- Use consistent placeholders when same entity appears multiple times.
+- Do not add explanation.
+- Output only anonymized text.
+
+Text:
+EOF
+)
+
+anonymized_text="$({ printf '%s\n\n' "$prompt"; printf '%s' "$input_text"; } | ollama run "$model" --think=false --hidethinking --nowordwrap)"
+
+if [[ -z "${anonymized_text//[[:space:]]/}" ]]; then
+    notify "anon clip: model returned empty output"
+    exit 0
+fi
+
+printf '%s' "$anonymized_text" | pbcopy
+printf '%s' "$anonymized_text"

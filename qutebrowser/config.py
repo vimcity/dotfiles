@@ -24,7 +24,8 @@ c.content.blocking.adblock.lists = [
 ]
 
 # Prevent videos from auto-playing when loading many tabs.
-c.content.autoplay = False
+c.content.autoplay = True
+
 c.content.headers.do_not_track = True
 # Open PDF files inside qutebrowser (PDF.js) instead of download prompt when possible.
 c.content.pdfjs = True

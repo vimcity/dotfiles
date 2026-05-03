@@ -100,6 +100,8 @@ This configuration emphasizes:
 - Path monitoring script for directory tracking
 - **Prompt cleanup shortcut**: `Prefix + p` reads macOS clipboard, runs `fabric -p voice_to_clean_prompt`, and writes the improved prompt back to clipboard
   - Requires `fabric` in `PATH` and `~/.config/fabric/patterns/voice_to_clean_prompt/system.md`
+- **Clipboard anonymize shortcut**: `Prefix + A` reads macOS clipboard, runs local `ollama` with smallest installed model, copies anonymized text back to clipboard, and pastes it into current tmux pane
+  - Override model with `ANONYMIZE_OLLAMA_MODEL=<model>`
 
 ### Text Editor
 **Neovim (LazyVim)** - Modern modal text editor

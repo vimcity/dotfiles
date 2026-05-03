@@ -3,7 +3,7 @@
 
 local function is_personal_machine()
   local personal_env = os.getenv("PERSONAL")
-  return personal_env == nil or personal_env == "1"
+  return personal_env == nil or personal_env == "1" or personal_env == "0"
 end
 
 return {
