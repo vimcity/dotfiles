@@ -117,6 +117,13 @@ else
     brew install models
 fi
 
+if command -v lexy &>/dev/null; then
+    echo "Lexy already installed"
+else
+    echo "  󰌶 Installing models..."
+    uv tool install git+https://github.com/antoniorodr/lexy
+fi
+
 # Remove existing files
 remove_if_exists "$HOME/.config/ghostty"
 remove_if_exists "$HOME/.config/atuin"

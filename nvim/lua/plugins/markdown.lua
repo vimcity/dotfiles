@@ -15,6 +15,7 @@ return {
     init = function()
       vim.g.vim_markdown_follow_link = 1
       vim.g.vim_markdown_edit_url_in = "current_window"
+      vim.g.vim_markdown_folding_disabled = 1
 
       local function open_markdown_link()
         local line = vim.api.nvim_get_current_line()

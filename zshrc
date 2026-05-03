@@ -759,4 +759,6 @@ olf() {
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+alias aws-check="env | fzf +i --query 'AWS_'"
 # zprof
