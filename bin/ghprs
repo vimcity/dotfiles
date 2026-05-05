@@ -120,22 +120,36 @@ fetch_mine() {
 }
 
 fetch_review() {
-    local requested reviewed
-    requested=$(GH_HOST="$GH_HOST" gh search prs \
+    local tmpdir requested_file reviewed_file
+    tmpdir=$(mktemp -d)
+    requested_file="$tmpdir/requested.json"
+    reviewed_file="$tmpdir/reviewed.json"
+    trap 'rm -rf "$tmpdir"' RETURN
+
+    GH_HOST="$GH_HOST" gh search prs \
         --review-requested=@me \
         --owner="$GH_ORG" \
         --state=open \
         --limit=100 \
-        --json "$FIELDS")
-    reviewed=$(GH_HOST="$GH_HOST" gh search prs \
+        --json "$FIELDS" \
+        -- -review:approved >"$requested_file" &
+    local requested_pid=$!
+
+    GH_HOST="$GH_HOST" gh search prs \
         --reviewed-by=@me \
         --owner="$GH_ORG" \
         --state=open \
         --limit=100 \
-        --json "$FIELDS")
+        --json "$FIELDS" \
+        -- -review:approved >"$reviewed_file" &
+    local reviewed_pid=$!
+
+    wait "$requested_pid"
+    wait "$reviewed_pid"
+
     # Merge, dedup by url, sort newest-updated first
     jq -s '(.[0] + .[1]) | unique_by(.url) | sort_by(.updatedAt) | reverse' \
-        <(echo "$requested") <(echo "$reviewed")
+        "$requested_file" "$reviewed_file"
 }
 
 fetch_project() {
