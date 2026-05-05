@@ -328,6 +328,7 @@ alias neo="z ~/Projects && nvim"
 alias vim="nvim"
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
+alias sp='~/dotfiles/tmux/scripts/session-picker.sh'
 export EDITOR="nvim"
 export VISUAL="nvim"
 
@@ -762,3 +763,13 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 alias aws-check="env | fzf +i --query 'AWS_'"
 # zprof
+
+# pi privacy/security profile
+export PI_TELEMETRY=0
+export PI_OFFLINE=1
+export PI_SKIP_VERSION_CHECK=1
+
+# toofan
+export PATH="$HOME/.local/bin:$PATH"
+
+envs()='env | fzf +i --query '\'${1}\'
