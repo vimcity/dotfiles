@@ -37,10 +37,6 @@ return {
     opts.picker = vim.tbl_deep_extend("force", opts.picker or {}, {
       show_delay = 0,
       sources = {
-        explorer = {
-          hidden = true, -- Show hidden files (dotfiles)
-          ignored = true, -- Respect gitignore, fd-ignore, and rg-ignore files
-        },
         -- Exclude TS-compiled JS artifacts from file and grep pickers.
         -- Only targets application/ where TS compilation outputs live;
         -- intentional JS files (webpack configs, assets/lib, etc.) are unaffected.

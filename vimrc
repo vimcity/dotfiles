@@ -47,3 +47,4 @@ xnoremap X "_X
 " ===========================================
 nnoremap <C-d> <C-d>zz
 nnoremap <C-u> <C-u>zz
+set rtp+=/opt/homebrew/opt/fzf
