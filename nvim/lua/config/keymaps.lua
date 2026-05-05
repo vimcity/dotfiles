@@ -6,6 +6,15 @@
 vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
+-- Oil.nvim file explorer (floating window by default)
+vim.keymap.set("n", "-", function()
+  require("oil").toggle_float()
+end, { desc = "Open parent directory (Oil float)" })
+vim.keymap.set("n", "<leader>e", function()
+  require("oil").toggle_float()
+end, { desc = "Open file explorer (Oil float)" })
+vim.keymap.set("n", "<leader>E", "<cmd>Oil<cr>", { desc = "Open Oil in split" })
+
 -- Project management
 vim.keymap.set("n", "<leader>fp", function()
   -- Expand the path before passing to the async finder

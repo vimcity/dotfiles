@@ -73,6 +73,7 @@ return {
   -- Configure nvim-jdtls to disable jdtls test runner in favor of NeoTest
   {
     "mfussenegger/nvim-jdtls",
+    ft = "java",
     opts = function(_, opts)
       -- Disable jdtls test runner - we're using NeoTest instead
       opts.test = false
