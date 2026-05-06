@@ -99,6 +99,26 @@ else
     brew install gromgit/brewtils/taproom
 fi
 
+if brew list "tailspin" &>/dev/null; then
+    echo "󰄵 taproom already installed"
+else
+    echo "  󰌶 Installing tailspin..."
+    brew install tailspin
+fi
+
+if brew list "reddix" &>/dev/null; then
+    echo "󰄵 taproom already installed"
+else
+    echo "  󰌶 Installing reddix..."
+    brew install reddix
+fi
+
+if brew list "slides" &>/dev/null; then
+    echo "󰄵 taproom already installed"
+else
+    echo "  󰌶 Installing slides..."
+    brew install slides
+fi
 # llmfit from AlexsJones/llmfit
 if brew list "llmfit" &>/dev/null; then
     echo "󰄵 llmfit already installed"

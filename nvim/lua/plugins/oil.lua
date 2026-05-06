@@ -3,115 +3,57 @@ return {
   ---@module 'oil'
   ---@type oil.SetupOpts
   opts = {
-    default_file_explorer = true,
-    columns = {
-      "icon",
-    },
-    buf_options = {
-      buflisted = false,
-      bufhidden = "hide",
-    },
-    win_options = {
-      wrap = false,
-      signcolumn = "no",
-      cursorcolumn = false,
-      foldcolumn = "0",
-      spell = false,
-      list = false,
-      conceallevel = 3,
-      concealcursor = "nvic",
-    },
     delete_to_trash = true,
     skip_confirm_for_simple_edits = true,
-    prompt_save_on_select_new_entry = true,
-    cleanup_delay_ms = 2000,
-    lsp_file_methods = {
-      enabled = true,
-      timeout_ms = 1000,
-      autosave_changes = false,
-    },
-    constrain_cursor = "editable",
-    watch_for_changes = false,
     keymaps = {
-      ["g?"] = { "actions.show_help", mode = "n" },
-      ["<CR>"] = "actions.select",
-      ["<C-s>"] = { "actions.select", opts = { vertical = true } },
-      ["<C-h>"] = { "actions.select", opts = { horizontal = true } },
-      ["<C-t>"] = { "actions.select", opts = { tab = true } },
-      ["<C-p>"] = "actions.preview",
-      ["<C-c>"] = { "actions.close", mode = "n" },
-      ["<C-l>"] = "actions.refresh",
-      ["-"] = { "actions.parent", mode = "n" },
-      ["_"] = { "actions.open_cwd", mode = "n" },
-      ["`"] = { "actions.cd", mode = "n" },
-      ["g~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
-      ["gs"] = { "actions.change_sort", mode = "n" },
-      ["gx"] = "actions.open_external",
-      ["g."] = { "actions.toggle_hidden", mode = "n" },
-      ["g<BS>"] = { "actions.toggle_trash", mode = "n" },
+      ["<CR>"] = {
+        callback = function()
+          local oil = require("oil")
+          local actions = require("oil.actions")
+          local util = require("oil.util")
+
+          local entry = oil.get_cursor_entry()
+          if not entry then
+            return
+          end
+
+          if util.is_directory(entry) then
+            actions.select.callback()
+            return
+          end
+
+          local oil_bufnr = vim.api.nvim_get_current_buf()
+          local oil_win = vim.api.nvim_get_current_win()
+          local target_win = vim.g.oil_sidebar_target_win
+          util.get_edit_path(oil_bufnr, entry, function(path)
+            if target_win and vim.api.nvim_win_is_valid(target_win) then
+              vim.api.nvim_set_current_win(target_win)
+            end
+            vim.cmd.edit(vim.fn.fnameescape(path))
+            if vim.api.nvim_win_is_valid(oil_win) then
+              vim.api.nvim_win_close(oil_win, true)
+            end
+          end)
+        end,
+        desc = "Open entry in previous window",
+        mode = "n",
+      },
+      ["q"] = {
+        callback = function()
+          vim.api.nvim_win_close(0, true)
+        end,
+        desc = "Close oil sidebar",
+        mode = "n",
+      },
     },
-    use_default_keymaps = true,
     view_options = {
       show_hidden = true,
-      is_hidden_file = function(name, bufnr)
-        local m = name:match("^%.")
-        return m ~= nil
-      end,
-      is_always_hidden = function(name, bufnr)
-        return false
-      end,
-      natural_order = "fast",
-      case_insensitive = false,
-      sort = {
-        { "type", "asc" },
-        { "name", "asc" },
-      },
-    },
-    float = {
-      padding = 2,
-      max_width = 100,
-      max_height = 30,
-      border = "rounded",
-      win_options = {
-        winblend = 0,
-      },
-      preview_split = "right",
-      override = function(conf)
-        return conf
-      end,
-    },
-    preview_win = {
-      update_on_cursor_moved = true,
-      preview_method = "fast_scratch",
-      disable_preview = function(filename)
-        return false
-      end,
-      win_options = {},
     },
     confirmation = {
-      max_width = 0.9,
-      min_width = { 40, 0.4 },
-      width = nil,
-      max_height = 0.9,
-      min_height = { 5, 0.1 },
-      height = nil,
       border = "rounded",
-      win_options = {
-        winblend = 0,
-      },
     },
     progress = {
-      max_width = 0.9,
-      min_width = { 40, 0.4 },
-      width = nil,
-      max_height = { 10, 0.9 },
-      min_height = { 5, 0.1 },
-      height = nil,
       border = "rounded",
-      minimized_border = "none",
-      win_options = {
-        winblend = 0,
-      },
     },
     ssh = {
       border = "rounded",
@@ -121,6 +63,5 @@ return {
     },
   },
   dependencies = { { "nvim-mini/mini.icons", opts = {} } },
-  -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
   lazy = false,
 }
