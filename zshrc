@@ -754,7 +754,7 @@ theme() {
     prompt_switch_theme "$1"
 }
 olf() {
-    ollama run "$(ollama list | fzf | awk '{print $1}')" "$@";
+    ollama run "$(ollama list | fzf | awk '{print $1}')" "Answer the following quetion as precisely as you can: $@";
 }
 
 # bun
