@@ -6,16 +6,10 @@
 vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
--- Oil.nvim file explorer
-vim.keymap.set("n", "-", function()
-  require("oil").toggle_float()
-end, { desc = "Open parent directory (Oil float)" })
+-- Snacks explorer
 vim.keymap.set("n", "<leader>e", function()
-  vim.g.oil_sidebar_target_win = vim.api.nvim_get_current_win()
-  vim.cmd("topleft vertical 30split")
-  vim.cmd("Oil")
-end, { desc = "Open file explorer (Oil sidebar)" })
-vim.keymap.set("n", "<leader>E", "<cmd>Oil --float<cr>", { desc = "Open file explorer (Oil float)" })
+  Snacks.explorer()
+end, { desc = "Open file explorer" })
 
 -- Project management
 vim.keymap.set("n", "<leader>fp", function()
