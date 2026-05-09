@@ -46,8 +46,8 @@ ZSH_THEME=""
 
 plugins=(
   git
-  # brew
-  # copypath
+  brew
+  copypath
   zsh-autosuggestions
   zsh-syntax-highlighting
 )
