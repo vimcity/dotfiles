@@ -10,10 +10,12 @@ window-step-resize = true
 window-save-state = always
 
 # Font settings
-font-family = "CommitMono"
-adjust-cell-height = 40%
-# font-family = "JetBrains Mono NF"
-# adjust-cell-height = 20%
+# font-family = "CommitMono"
+# adjust-cell-height = 40%
+# font-family = "FiraCode Nerd Font"
+# adjust-cell-height = 40%
+font-family = "JetBrains Mono NF"
+adjust-cell-height = 20%
 font-size = 16
 
 # Background
