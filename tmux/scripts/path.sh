@@ -32,4 +32,3 @@ text_dark="#000000" # Dark text for contrast
 # Output with colored text without pill box
 # Format: [color code] icon path [reset]
 printf "#[fg=%s,bg=%s,bold]%s %s#[default]" "$text_dark" "$fg_color" " $icon" "$display_path "
-p

@@ -12,35 +12,38 @@ vim.keymap.set("n", "<leader>e", function()
 end, { desc = "Open file explorer" })
 
 -- Project management
-vim.keymap.set("n", "<leader>fp", function()
-  -- Expand the path before passing to the async finder
-  local projects_dir = vim.fn.expand("~/Projects")
-  
-  Snacks.picker.projects({
-    dev = { projects_dir },
-    recent = false, -- Show all projects, not just recently visited
-    -- Simple finder: just list all directories in Projects
-    finder = function(opts, ctx)
-      local dev_dirs = type(opts.dev) == "string" and { opts.dev } or opts.dev or {}
-      
-      return function(cb)
-        for _, dev_dir in ipairs(dev_dirs) do
-          local handle = vim.loop.fs_scandir(dev_dir)
-          if handle then
-            while true do
-              local name, type_name = vim.loop.fs_scandir_next(handle)
-              if not name then break end
-              if type_name == "directory" then
-                local project_path = dev_dir .. "/" .. name
-                cb({ file = project_path, text = name, dir = true })
-              end
-            end
-          end
-        end
-      end
-    end,
-  })
-end, { desc = "Find Projects" })
+-- vim.keymap.set("n", "<leader>fp", function()
+-- Expand the path before passing to the async finder
+-- local projects_dir = vim.fn.expand("~/Projects")
+-- local dotfiles_dir = vim.fn.expand("~/dotfiles")
+
+--   Snacks.picker.projects({
+--     dev = { projects_dir, dotfiles_dir },
+--     recent = false, -- Show all projects, not just recently visited
+--     -- Simple finder: just list all directories in Projects
+--     finder = function(opts, ctx)
+--       local dev_dirs = type(opts.dev) == "string" and { opts.dev } or opts.dev or {}
+--
+--       return function(cb)
+--         for _, dev_dir in ipairs(dev_dirs) do
+--           local handle = vim.loop.fs_scandir(dev_dir)
+--           if handle then
+--             while true do
+--               local name, type_name = vim.loop.fs_scandir_next(handle)
+--               if not name then
+--                 break
+--               end
+--               if type_name == "directory" then
+--                 local project_path = dev_dir .. "/" .. name
+--                 cb({ file = project_path, text = name, dir = true })
+--               end
+--             end
+--           end
+--         end
+--       end
+--     end,
+--   })
+-- end, { desc = "Find Projects" })
 
 -- Copy buffer path to clipboard
 vim.keymap.set("n", "<leader>yp", function()
