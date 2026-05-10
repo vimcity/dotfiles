@@ -1,8 +1,14 @@
 -- gh-review.nvim
 -- Inline PR review inside DiffView. No Snacks dependency.
 
+local function is_personal_machine()
+  local personal_env = os.getenv("PERSONAL")
+  return personal_env == nil or personal_env == "1" or personal_env == "0"
+end
+
 return {
   dir = "~/Projects/gh-review.nvim",
+  cond = not is_personal_machine(),
   name = "gh-review",
   dependencies = { "sindrets/diffview.nvim" },
   event = "VeryLazy",
