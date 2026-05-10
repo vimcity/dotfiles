@@ -757,6 +757,17 @@ olf() {
     ollama run "$(ollama list | fzf | awk '{print $1}')" "Answer the following quetion as precisely as you can: $@";
 }
 
+ols() {
+    ollama run 'gemma4:e2b' "Answer the following quetion as precisely as you can: $@";
+}
+
+olm() {
+    ollama run 'gemma4:e4b' "Answer the following quetion as precisely as you can: $@";
+}
+
+olh() {
+    ollama run 'gemma4:31b' "Answer the following quetion as precisely as you can: $@";
+}
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
