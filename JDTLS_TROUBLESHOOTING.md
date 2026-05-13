@@ -16,7 +16,7 @@ Then restart Neovim and open a Java file. The server will reinitialize with a fr
 
 ## Common Symptoms
 
-Look for these errors in `/Users/rgaur/.local/state/nvim/lsp.log`:
+Look for these errors in `$HOME/.local/state/nvim/lsp.log`:
 
 - `java.io.UTFDataFormatException` - Corrupted index files
 - `java.lang.OutOfMemoryError: Java heap space` - Running out of memory
