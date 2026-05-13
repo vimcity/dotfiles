@@ -81,68 +81,68 @@ for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
 done
 
 # Install casks for ytui (kitten binary for kitty graphics protocol)
-if brew list --cask kitty &>/dev/null; then
-    echo "󰄵 kitty already installed"
-else
-    echo "󰌶 Installing kitty (for kitten icat thumbnails)..."
-    brew install --cask kitty
-fi
-
-# Install tools from custom taps
-echo "󰌶 Installing tools from custom taps..."
-
-# taproom from gromgit/brewtils
-if brew list "taproom" &>/dev/null; then
-    echo "󰄵 taproom already installed"
-else
-    echo "  󰌶 Installing taproom..."
-    brew install gromgit/brewtils/taproom
-fi
-
-if brew list "tailspin" &>/dev/null; then
-    echo "󰄵 taproom already installed"
-else
-    echo "  󰌶 Installing tailspin..."
-    brew install tailspin
-fi
-
-if brew list "reddix" &>/dev/null; then
-    echo "󰄵 taproom already installed"
-else
-    echo "  󰌶 Installing reddix..."
-    brew install reddix
-fi
-
-if brew list "slides" &>/dev/null; then
-    echo "󰄵 taproom already installed"
-else
-    echo "  󰌶 Installing slides..."
-    brew install slides
-fi
-# llmfit from AlexsJones/llmfit
-if brew list "llmfit" &>/dev/null; then
-    echo "󰄵 llmfit already installed"
-else
-    echo "  󰌶 Installing llmfit..."
-    brew tap AlexsJones/llmfit
-    brew install llmfit
-fi
-
+# if brew list --cask kitty &>/dev/null; then
+#     echo "󰄵 kitty already installed"
+# else
+#     echo "󰌶 Installing kitty (for kitten icat thumbnails)..."
+#     brew install --cask kitty
+# fi
+#
+# # Install tools from custom taps
+# echo "󰌶 Installing tools from custom taps..."
+#
+# # taproom from gromgit/brewtils
+# if brew list "taproom" &>/dev/null; then
+#     echo "󰄵 taproom already installed"
+# else
+#     echo "  󰌶 Installing taproom..."
+#     brew install gromgit/brewtils/taproom
+# fi
+#
+# if brew list "tailspin" &>/dev/null; then
+#     echo "󰄵 tailspin already installed"
+# else
+#     echo "  󰌶 Installing tailspin..."
+#     brew install tailspin
+# fi
+#
+# if brew list "reddix" &>/dev/null; then
+#     echo "󰄵 reddix already installed"
+# else
+#     echo "  󰌶 Installing reddix..."
+#     brew install reddix
+# fi
+#
+# if brew list "slides" &>/dev/null; then
+#     echo "󰄵 slides already installed"
+# else
+#     echo "  󰌶 Installing slides..."
+#     brew install slides
+# fi
+# # llmfit from AlexsJones/llmfit
+# if brew list "llmfit" &>/dev/null; then
+#     echo "󰄵 llmfit already installed"
+# else
+#     echo "  󰌶 Installing llmfit..."
+#     brew tap AlexsJones/llmfit
+#     brew install llmfit
+# fi
+#
 # models from arimxyer/tap
-if brew list "models" &>/dev/null; then
-    echo "󰄵 models already installed"
-else
-    echo "  󰌶 Installing models..."
-    brew tap arimxyer/tap
-    brew install models
-fi
+# if brew list "models" &>/dev/null; then
+#     echo "󰄵 models already installed"
+# else
+#     echo "  󰌶 Installing models..."
+#     brew tap arimxyer/tap
+#     brew install models
+# fi
 
-if command -v lexy &>/dev/null; then
-    echo "Lexy already installed"
-else
-    echo "  󰌶 Installing models..."
-    uv tool install git+https://github.com/antoniorodr/lexy
-fi
+# if command -v lexy &>/dev/null; then
+#     echo "Lexy already installed"
+# else
+#     echo "  󰌶 Installing models..."
+#     uv tool install git+https://github.com/antoniorodr/lexy
+# fi
 
 # Remove existing files
 remove_if_exists "$HOME/.config/ghostty"
