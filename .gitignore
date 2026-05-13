@@ -24,3 +24,5 @@ atuin/key
 # Neovim package manager lock file
 nvim/lazy-lock.json
 snacks-diffview/*
+**/__pycache__/**
+*.ruff_cache**
