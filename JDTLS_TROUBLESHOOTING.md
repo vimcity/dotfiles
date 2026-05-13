@@ -89,7 +89,7 @@ Look for patterns like:
 
 - jdtls config: Usually in `~/.config/jdtls/` (not normally needed)
 - Runtime cache: `~/.cache/nvim/jdtls/`
-- Log file: `/Users/rgaur/.local/state/nvim/lsp.log`
+- Log file: `/$HOME/.local/state/nvim/lsp.log`
 
 ## Additional Resources
 
