@@ -425,6 +425,7 @@ bwrm() {
 }
 
 alias vi=vim
+alias zo="cd \$(zoxide query -i)"
 alias lsa="eza --icons=always -s=time -la"
 alias yz=yazi
 alias lz=lazygit
@@ -576,7 +577,7 @@ ff() {
 # Interactive directory finder
 fdir() {
     fd --type d --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-        | fzf --preview "eza --tree --level=2 --icons {}"
+        | fzf --preview "eza --tree --level=2 --icons {}" | xargs -r cd
 }
 
 # Find and open file in editor
