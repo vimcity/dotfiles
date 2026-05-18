@@ -1,4 +1,4 @@
- # zmodload zsh/zprof
+# zmodload zsh/zprof
 # ===========================================
 # Terminal & Color Support
 # ===========================================
@@ -577,7 +577,7 @@ ff() {
 # Interactive directory finder
 fdir() {
     fd --type d --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-        | fzf --preview "eza --tree --level=2 --icons {}" | xargs -r cd
+        | fzf --preview "eza --tree --level=2 --icons {}" | echo 
 }
 
 # Find and open file in editor
@@ -774,7 +774,6 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 alias aws-check="env | fzf +i --query 'AWS_'"
-# zprof
 
 # pi privacy/security profile
 export PI_TELEMETRY=0
@@ -785,3 +784,7 @@ export PI_SKIP_VERSION_CHECK=1
 export PATH="$HOME/.local/bin:$PATH"
 
 envs()='env | fzf +i --query '\'${1}\'
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+# zprof
