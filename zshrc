@@ -325,8 +325,9 @@ alias cat=bat
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
 alias sp='~/dotfiles/tmux/scripts/session-picker.sh'
-
 alias vimz="nvim ~/.zshrc"
+alias vimzz="nvim ~/.zshrc"
+alias cur='cursor-agent'
 alias vim=nvim
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -780,8 +781,6 @@ export PI_SKIP_VERSION_CHECK=1
 
 # toofan
 export PATH="$HOME/.local/bin:$PATH"
-
-envs()='env | fzf +i --query '\'${1}\'
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
