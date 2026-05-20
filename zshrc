@@ -321,17 +321,15 @@ alias ahl="atuin history list"
 # Ctrl+R uses atuin search with popup (will be set by deferred atuin init)
 # Up/down arrows use standard zsh history (default behavior restored)
 
-alias vimz="nvim ~/.zshrc"
-alias vimzz="vimz"
 alias cat=bat
-alias neo="z ~/Projects && nvim"
-alias vim="nvim"
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
 alias sp='~/dotfiles/tmux/scripts/session-picker.sh'
+
+alias vimz="nvim ~/.zshrc"
+alias vim=nvim
 export EDITOR="nvim"
 export VISUAL="nvim"
-
 # Neovim cache management (for symlink/treesitter issues)
 alias nvclear="rm -rf ~/.cache/nvim ~/.local/share/nvim && echo '✓ Neovim caches cleared'"
 alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '✓ Neovim rebuilt'"
