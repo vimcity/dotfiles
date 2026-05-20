@@ -28,8 +28,30 @@ return {
     opts.scroll.enabled = false
     local ascii = require("ascii")
     local header = table.concat(ascii.art.text.neovim.sharp, "\n")
+    local org_header = table.concat({
+      " ██████╗ ██████╗  ██████╗ ",
+      "██╔═══██╗██╔══██╗██╔════╝ ",
+      "██║   ██║██████╔╝██║  ███╗",
+      "██║   ██║██╔══██╗██║   ██║",
+      "╚██████╔╝██║  ██║╚██████╔╝",
+      " ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ",
+    }, "\n")
 
     -- Set custom header
+    if vim.env.NVIM_ORG_POPUP == "1" then
+      opts.dashboard.preset = opts.dashboard.preset or {}
+      opts.dashboard.preset.header = org_header
+      opts.dashboard.preset.keys = {}
+      opts.dashboard.sections = {
+        { section = "header" },
+      }
+      return opts
+    end
+
+    if vim.env.NVIM_NO_DASHBOARD == "1" then
+      opts.dashboard.enabled = false
+      return opts
+    end
     opts.dashboard.preset = opts.dashboard.preset or {}
     opts.dashboard.preset.header = header
 
