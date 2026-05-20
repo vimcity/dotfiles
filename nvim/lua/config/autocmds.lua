@@ -7,6 +7,14 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
+if vim.env.NVIM_ORG_POPUP == "1" then
+  vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function(args)
+      vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = args.buf, silent = true })
+    end,
+  })
+end
+
 -- Enable word wrapping for org files
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "org",

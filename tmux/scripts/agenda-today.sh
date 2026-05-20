@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-exec nvim '+lua require("orgmode").action("agenda.prompt")'
+exec env NVIM_ORG_POPUP=1 nvim '+lua require("orgmode").agenda:open_by_key("a")'
