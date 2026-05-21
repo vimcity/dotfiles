@@ -328,6 +328,7 @@ alias sp='~/dotfiles/tmux/scripts/session-picker.sh'
 alias vimz="nvim ~/.zshrc"
 alias vimzz="nvim ~/.zshrc"
 alias cur='cursor-agent'
+alias co='codex'
 alias vim=nvim
 export EDITOR="nvim"
 export VISUAL="nvim"
