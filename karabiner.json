@@ -638,35 +638,6 @@
                                 "type": "basic"
                             }
                         ]
-                    },
-                    {
-                        "description": "Enter -> Enter (tap) / tmux prefix (hold)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "spacebar",
-                                        "modifiers": [
-                                            "right_control"
-                                        ]
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "return_or_enter"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
                     }
                 ]
             },
