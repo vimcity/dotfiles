@@ -280,14 +280,20 @@
                                 "from": {
                                     "key_code": "escape",
                                     "modifiers": {
-                                        "mandatory": ["left_control"],
-                                        "optional": ["any"]
+                                        "mandatory": [
+                                            "left_control"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
                                     }
                                 },
                                 "to": [
                                     {
                                         "key_code": "left_shift",
-                                        "modifiers": ["left_control"]
+                                        "modifiers": [
+                                            "left_control"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -301,20 +307,28 @@
                                 "from": {
                                     "key_code": "return_or_enter",
                                     "modifiers": {
-                                        "mandatory": ["left_command"],
-                                        "optional": ["any"]
+                                        "mandatory": [
+                                            "left_command"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
                                     }
                                 },
                                 "to_if_alone": [
                                     {
                                         "key_code": "return_or_enter",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
                                         "key_code": "left_control",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -328,20 +342,28 @@
                                 "from": {
                                     "key_code": "tab",
                                     "modifiers": {
-                                        "mandatory": ["left_command"],
-                                        "optional": ["any"]
+                                        "mandatory": [
+                                            "left_command"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
                                     }
                                 },
                                 "to_if_alone": [
                                     {
                                         "key_code": "tab",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
                                         "key_code": "left_option",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -355,20 +377,28 @@
                                 "from": {
                                     "key_code": "escape",
                                     "modifiers": {
-                                        "mandatory": ["left_command"],
-                                        "optional": ["any"]
+                                        "mandatory": [
+                                            "left_command"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
                                     }
                                 },
                                 "to_if_alone": [
                                     {
                                         "key_code": "escape",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
                                         "key_code": "left_shift",
-                                        "modifiers": ["left_command"]
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -379,11 +409,15 @@
                         "description": "~/` flip",
                         "manipulators": [
                             {
-                                "from": { "key_code": "grave_accent_and_tilde" },
+                                "from": {
+                                    "key_code": "grave_accent_and_tilde"
+                                },
                                 "to": [
                                     {
                                         "key_code": "grave_accent_and_tilde",
-                                        "modifiers": ["shift"]
+                                        "modifiers": [
+                                            "shift"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -391,9 +425,17 @@
                             {
                                 "from": {
                                     "key_code": "grave_accent_and_tilde",
-                                    "modifiers": { "mandatory": ["shift"] }
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "shift"
+                                        ]
+                                    }
                                 },
-                                "to": [{ "key_code": "grave_accent_and_tilde" }],
+                                "to": [
+                                    {
+                                        "key_code": "grave_accent_and_tilde"
+                                    }
+                                ],
                                 "type": "basic"
                             }
                         ]
@@ -472,9 +514,171 @@
                         "vendor_id": 18003
                     },
                     "ignore": false
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true
+                    },
+                    "ignore": true
                 }
             ],
             "name": "corne",
+            "virtual_hid_keyboard": {
+                "keyboard_type_v2": "ansi"
+            }
+        },
+        {
+            "complex_modifications": {
+                "parameters": {
+                    "basic.to_if_alone_timeout_milliseconds": 150,
+                    "basic.to_if_held_down_threshold_milliseconds": 100
+                },
+                "rules": [
+                    {
+                        "description": "~/` flip",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "grave_accent_and_tilde"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "grave_accent_and_tilde",
+                                        "modifiers": [
+                                            "shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "grave_accent_and_tilde",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "grave_accent_and_tilde"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "flip quotes",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "quote"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "quote",
+                                        "modifiers": [
+                                            "shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "quote",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "quote"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "|/\\ flip",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "backslash"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "backslash",
+                                        "modifiers": [
+                                            "shift"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "backslash",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "backslash"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "right Control -> tmux prefix on tap, Control when held",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "right_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "spacebar",
+                                        "modifiers": [
+                                            "right_control"
+                                        ]
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "right_control"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_keyboard": true
+                    },
+                    "ignore": true
+                }
+            ],
+            "name": "glove",
             "selected": true,
             "virtual_hid_keyboard": {
                 "keyboard_type_v2": "ansi"
