@@ -27,5 +27,5 @@ snacks-diffview/*
 **/__pycache__/**
 *.ruff_cache**
 ./luai.nvim/**
-./ytui-config/**
+ytui-config/**
 
