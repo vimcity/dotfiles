@@ -52,6 +52,7 @@ return {
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
         org_agenda_span = "day",
+        org_deadline_warning_days = 5,
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
         org_todo_keyword_faces = {
           TODO = ":foreground " .. colors.red .. ":weight bold",
