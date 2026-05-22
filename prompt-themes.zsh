@@ -7,6 +7,7 @@
 export PROMPT_THEME="${PROMPT_THEME:-catppuccin-rose}"
 
 # Define theme colors and styles
+# Neovim (lualine) mirrors these in nvim/lua/config/dotfiles_prompt_colors.lua — keep in sync.
 declare -A THEME_COLORS
 
 define_catppuccin_rose_theme() {
