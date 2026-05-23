@@ -788,4 +788,9 @@ alias lstat="$HOME/.local/bin/lstat"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# opencode completions
+if command -v opencode >/dev/null 2>&1; then
+    eval "$(opencode completion 2>/dev/null)"
+fi
 # zprof
