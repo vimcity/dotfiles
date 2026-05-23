@@ -780,6 +780,12 @@ export PI_TELEMETRY=0
 export PI_OFFLINE=1
 export PI_SKIP_VERSION_CHECK=1
 
+export ANONYMIZE_OLLAMA_MODEL='gemma4:e2b'
+alias org='nvim $HOME/Documents/org/todos.org'
+export ORG_PATH="$HOME/Documents/org"
+export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml,$HOME/.lazygit-local.yml"
+alias vimlocal='vim $HOME/.zshrc.local'
+
 # toofan
 export PATH="$HOME/.local/bin:$PATH"
 
