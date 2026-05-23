@@ -10,6 +10,7 @@ c.session.lazy_restore = True
 c.window.hide_decoration = True
 c.tabs.last_close = "close"
 
+config.set("zoom.default", "120%")
 # Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
@@ -141,33 +142,15 @@ config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
 config.bind("x", "tab-close")
-config.bind("d", "cmd-run-with-count 10 scroll down")
-config.bind("u", "cmd-run-with-count 10 scroll up")
+config.bind("d", "cmd-run-with-count 20 scroll down")
+config.bind("u", "cmd-run-with-count 20 scroll up")
 config.bind("X", "undo")
 config.bind(",r", "config-source")
-# config.bind("X", "tab-close -o")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
 config.bind(",M", "cmd-set-text -s :quickmark-load -t ")
 
-# Launch YouTube in mpv (yt-dlp backend) instead of in-browser playback
-config.bind(
-    ",ym",
-    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {url}",
-)
-config.bind(
-    ",yl",
-    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes --loop-file=inf --keep-open=yes {url}",
-)
-config.bind(
-    ",yM",
-    "hint links spawn --detach /opt/homebrew/bin/mpv --ytdl=yes {hint-url}",
-)
-config.bind(
-    ",yl",
-    "spawn --detach /opt/homebrew/bin/mpv --ytdl=yes --loop-file=inf {url}",
-)
 config.bind(",h", "config-cycle tabs.show never multiple")
 
 # Allow clicking links with custom URI schemes (e.g. slack://) to open in macOS default app
