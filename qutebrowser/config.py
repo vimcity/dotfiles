@@ -2,6 +2,7 @@
 # pyright: reportUndefinedVariable=false, reportGeneralTypeIssues=false
 config.load_autoconfig()
 
+
 c.scrolling.smooth = True
 # Minimal session-first workflow
 c.auto_save.session = True
@@ -36,15 +37,15 @@ c.editor.command = ["/opt/homebrew/bin/nvim", "{file}"]
 
 # UI sizing
 c.fonts.default_size = "14pt"
-c.fonts.default_family = "CommitMono"
-c.fonts.completion.entry = "15pt CommitMono"
-c.fonts.completion.category = "bold 15pt CommitMono"
-c.fonts.tabs.selected = "bold 14pt CommitMono"
-c.fonts.tabs.unselected = "14pt CommitMono"
-c.fonts.statusbar = "14pt CommitMono"
-c.fonts.keyhint = "14pt CommitMono"
-c.fonts.hints = "bold 14pt CommitMono"
-c.fonts.prompts = "14pt CommitMono"
+c.fonts.default_family = "JetBrains Mono"
+c.fonts.completion.entry = "18pt JetBrains Mono"
+c.fonts.completion.category = "bold 18pt JetBrains Mono"
+c.fonts.tabs.selected = "bold 14pt JetBrains Mono"
+c.fonts.tabs.unselected = "14pt JetBrains Mono"
+c.fonts.statusbar = "18pt JetBrains Mono"
+c.fonts.keyhint = "18pt JetBrains Mono"
+c.fonts.hints = "bold 18pt JetBrains Mono"
+c.fonts.prompts = "18pt JetBrains Mono"
 c.completion.height = "45%"
 c.tabs.padding = {"top": 6, "bottom": 6, "left": 10, "right": 10}
 c.tabs.indicator.width = 3
