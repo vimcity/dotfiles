@@ -142,6 +142,7 @@ config.bind(",bu", "spawn --userscript bw-copy username")
 config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
+config.unbind("<Ctrl-t>")
 config.bind("x", "tab-close")
 config.bind("d", "cmd-run-with-count 20 scroll down")
 config.bind("u", "cmd-run-with-count 20 scroll up")
