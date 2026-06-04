@@ -341,13 +341,14 @@ alias sdf="source ~/.zshrc"
 alias asdf="source ~/.zshrc | head -10"
 
 alias zo="cd \$(zoxide query -i)"
-alias lsa="eza --icons=always -s=time -la"
+alias ls="eza --icons=always -s=time -la"
 alias yz=yazi
 alias lz=lazygit
 alias lzz=lazygit
 alias lzd=lazydocker
 alias ghb='gh browse'
 
+export TLDR_AUTO_UPDATE_DISABLED=1
 # Ensure lazygit loads dotfiles-managed config on macOS
 if [ -f "$HOME/.lazygit-local.yml" ]; then
     export LG_CONFIG_FILE="$HOME/dotfiles/lazygit-config.yml,$HOME/.lazygit-local.yml"

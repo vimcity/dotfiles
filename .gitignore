@@ -20,6 +20,7 @@ atuin/key
 .zshrc.local
 .claude
 .lazygit-local.yml
+qutebrowser/local.py
 
 # Neovim package manager lock file
 nvim/lazy-lock.json

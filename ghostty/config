@@ -2,7 +2,10 @@
 # ==================================================
 
 theme = "catppuccin-rose"
-
+# macos-icon = retro
+# macos-icon = glass
+# macos-icon = holographic
+macos-icon = xray
 # Launch maximized
 window-decoration = false
 macos-titlebar-style = hidden
