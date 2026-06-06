@@ -134,8 +134,6 @@ c.aliases["qma"] = "quickmark-add"
 c.aliases["ss"] = "session-save"
 c.aliases["sl"] = "session-load"
 c.aliases["g"] = "open -t  https://google.com"
-config.bind(",bu", "spawn --userscript bw-copy username")
-config.bind(",bp", "spawn --userscript bw-copy password")
 
 # Tab close/reopen ergonomics
 config.unbind("<Ctrl-t>")
@@ -158,6 +156,7 @@ c.content.unknown_url_scheme_policy = "allow-all"
 config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="normal")
 config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="insert")
 
+c.aliases["gpt"] = "open -t  https://chatgpt.com"
 config.set(
     "content.headers.user_agent",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
