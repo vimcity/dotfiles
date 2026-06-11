@@ -138,7 +138,7 @@ download_and_play() {
     local outfile="$outdir/%(title)s.%(ext)s"
     info "Downloading $url to $outdir ..."
     local downloaded
-    downloaded=$(yt-dlp --loop --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" --merge-output-format mp4 --output "$outfile" --print after_move:filepath "$url" 2>/dev/null)
+    downloaded=$(yt-dlp --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" --merge-output-format mp4 --output "$outfile" --print after_move:filepath "$url" 2>/dev/null)
     if [[ -n "$downloaded" && -f "$downloaded" ]]; then
         ok "Downloaded: $downloaded"
         mpv --no-terminal "$downloaded" &

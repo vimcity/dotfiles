@@ -37,7 +37,6 @@ require("lazy").setup({
 
     -- Coding enhancements
     { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- Edit surrounding characters
-    { import = "lazyvim.plugins.extras.coding.yanky" }, -- Yank history
 
     -- UI enhancements
     { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- Show current function/class at top
