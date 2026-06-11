@@ -20,8 +20,8 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "org",
   callback = function()
     vim.opt_local.wrap = true
-    vim.opt_local.linebreak = true        -- Break at word boundaries, not mid-word
-    vim.opt_local.breakindent = true      -- Indent wrapped lines to match indentation
+    vim.opt_local.linebreak = true -- Break at word boundaries, not mid-word
+    vim.opt_local.breakindent = true -- Indent wrapped lines to match indentation
   end,
 })
 vim.api.nvim_create_autocmd("FileType", {
@@ -50,7 +50,7 @@ vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
 
 -- Auto-format Java files on save using jdtls (LSP)
 -- Toggle with :JavaFormatToggle
-vim.g.java_autoformat = true
+vim.g.java_autoformat = false
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.java",
