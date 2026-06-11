@@ -67,23 +67,6 @@ vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +10<cr>", { desc = "Incre
 vim.keymap.set("c", "<M-Left>", "<S-Left>", { noremap = true }) -- back a word
 vim.keymap.set("c", "<M-Right>", "<S-Right>", { noremap = true }) -- forward a word
 
--- Delete/change/cut to black hole register (don't pollute clipboard).
--- Keep this out of operator-pending mode: mapping `o` mode for `d`/`c`
--- breaks doubled operators like `dd` and `cc`.
-vim.keymap.set("n", "d", '"_d', { noremap = true })
-vim.keymap.set("n", "D", '"_D', { noremap = true })
-vim.keymap.set("n", "c", '"_c', { noremap = true })
-vim.keymap.set("n", "C", '"_C', { noremap = true })
-vim.keymap.set("n", "x", '"_x', { noremap = true })
-vim.keymap.set("n", "X", '"_X', { noremap = true })
-
-vim.keymap.set("v", "d", '"_d', { noremap = true })
-vim.keymap.set("v", "D", '"_D', { noremap = true })
-vim.keymap.set("v", "c", '"_c', { noremap = true })
-vim.keymap.set("v", "C", '"_C', { noremap = true })
-vim.keymap.set("v", "x", '"_x', { noremap = true })
-vim.keymap.set("v", "X", '"_X', { noremap = true })
-
 -- Format all Java files in project directory
 vim.api.nvim_create_user_command("FormatProject", function()
   local cwd = vim.fn.getcwd()

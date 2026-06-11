@@ -22,21 +22,24 @@ autocmd VimLeave * silent !echo -ne "\e[2 q"
 " ===========================================
 " Clipboard Integration
 " ===========================================
-" Enable system clipboard for yank/paste operations
-set clipboard=unnamed     " Use system clipboard on macOS
-" Alternative: set clipboard=unnamedplus  " Use this on Linux 
-                          
-" Delete/change without yanking into the default register.
-" Keep these in normal/visual modes only; operator-pending maps break `dd`.
-nnoremap d "_d
-nnoremap D "_D
+" Keep system clipboard only for explicit yank/paste mappings.
+" Sync clipboard only after yank. Delete/change won't overwrite it.
+set clipboard=
+
+augroup YankToClipboard
+  autocmd!
+  autocmd TextYankPost * if v:event.operator ==# 'y' | call setreg('+', getreg('0')) | endif
+augroup END
+
+nnoremap p "+p
+xnoremap p "+p
+
+" Keep change/cut operations out of clipboard.
 nnoremap c "_c
 nnoremap C "_C
 nnoremap x "_x
 nnoremap X "_X
 
-xnoremap d "_d
-xnoremap D "_D
 xnoremap c "_c
 xnoremap C "_C
 xnoremap x "_x
