@@ -5,7 +5,7 @@ theme = "catppuccin-rose"
 # macos-icon = retro
 # macos-icon = glass
 # macos-icon = holographic
-macos-icon = xray
+# macos-icon = xray
 # Launch maximized
 window-decoration = false
 macos-titlebar-style = hidden
@@ -19,7 +19,7 @@ window-save-state = always
 # adjust-cell-height = 40%
 font-family = "JetBrains Mono NF"
 adjust-cell-height = 20%
-font-size = 14
+font-size = 18
 
 # Background
 # background-image = ~/dotfiles/ghostty/ghostty-bg.png

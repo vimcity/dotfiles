@@ -65,3 +65,12 @@ vim.api.nvim_create_user_command("JavaFormatToggle", function()
   vim.g.java_autoformat = not vim.g.java_autoformat
   vim.notify("Java autoformat: " .. (vim.g.java_autoformat and "ON" or "OFF"))
 end, { desc = "Toggle Java format on save" })
+
+-- Ghostty config filetype detection
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*/ghostty/config",
+  callback = function()
+    vim.bo.filetype = "conf"
+    vim.opt_local.commentstring = "# %s"
+  end,
+})
