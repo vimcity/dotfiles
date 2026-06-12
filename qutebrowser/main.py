@@ -9,7 +9,7 @@ c.session.lazy_restore = True
 c.window.hide_decoration = True
 c.tabs.last_close = "close"
 
-config.set("zoom.default", "100%")
+config.set("zoom.default", "120%")
 # Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
@@ -144,6 +144,7 @@ c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 c.url.searchengines = {
     "DEFAULT": "https://duckduckgo.com/search?q={}",
     "ytm": "https://music.youtube.com/search?q={}",
+    "gh": "https://github.com/search?q={}",
     "yt": "https://www.youtube.com/watch?q={}",
     "blog": "https://www.indiehackers.com/search?q={}",
     "wiki": "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}",

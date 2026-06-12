@@ -17,9 +17,8 @@ window-save-state = always
 # adjust-cell-height = 40%
 # font-family = "FiraCode Nerd Font"
 # adjust-cell-height = 40%
-font-family = "JetBrains Mono NF"
-adjust-cell-height = 20%
-font-size = 18
+adjust-cell-height = 10%
+font-size = 20
 
 # Background
 # background-image = ~/dotfiles/ghostty/ghostty-bg.png
