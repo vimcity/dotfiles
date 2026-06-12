@@ -51,6 +51,7 @@ return {
         org_agenda_files = org_path .. "/**/*",
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
+        org_agenda_sorting_strategy = { "priority-down", "todo-state-up" }, -- See all options available on org_agenda_sorting_strategy
         org_agenda_span = "day",
         org_deadline_warning_days = 5,
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
