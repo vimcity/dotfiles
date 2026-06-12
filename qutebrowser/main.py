@@ -9,7 +9,7 @@ c.session.lazy_restore = True
 c.window.hide_decoration = True
 c.tabs.last_close = "close"
 
-config.set("zoom.default", "120%")
+config.set("zoom.default", "100%")
 # Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
@@ -49,61 +49,84 @@ c.tabs.padding = {"top": 6, "bottom": 6, "left": 10, "right": 10}
 c.tabs.indicator.width = 3
 c.tabs.min_width = 180
 
-# Rosé Pine Moon theme (browser UI)
-c.colors.completion.fg = "#e0def4"
-c.colors.completion.odd.bg = "#2a273f"
-c.colors.completion.even.bg = "#232136"
-c.colors.completion.category.bg = "#232136"
-c.colors.completion.category.fg = "#c4a7e7"
-c.colors.completion.item.selected.bg = "#393552"
-c.colors.completion.item.selected.fg = "#e0def4"
-c.colors.completion.match.fg = "#9ccfd8"
-c.colors.completion.item.selected.match.fg = "#9ccfd8"
-c.colors.completion.scrollbar.bg = "#232136"
-c.colors.completion.scrollbar.fg = "#6e6a86"
+# Catppuccin Cool Blue Monarchy Theme
+# Muted blues, purples, pinks - no grey, no green, cohesive palette
 
-c.colors.statusbar.normal.bg = "#232136"
-c.colors.statusbar.normal.fg = "#e0def4"
-c.colors.statusbar.command.bg = "#232136"
-c.colors.statusbar.command.fg = "#c4a7e7"
-c.colors.statusbar.insert.bg = "#232136"
-c.colors.statusbar.insert.fg = "#9ccfd8"
-c.colors.statusbar.passthrough.bg = "#232136"
-c.colors.statusbar.passthrough.fg = "#f6c177"
-c.colors.statusbar.url.fg = "#e0def4"
-c.colors.statusbar.url.success.https.fg = "#9ccfd8"
-c.colors.statusbar.url.success.http.fg = "#f6c177"
-c.colors.statusbar.url.warn.fg = "#ea9a97"
-c.colors.statusbar.url.error.fg = "#eb6f92"
+# Tabs
+c.colors.tabs.bar.bg = "#16141f"
+c.colors.tabs.odd.bg = "#221e35"
+c.colors.tabs.even.bg = "#221e35"
+c.colors.tabs.odd.fg = "#a896d3"
+c.colors.tabs.even.fg = "#a896d3"
+# Deep purple selected
+c.colors.tabs.selected.odd.bg = "#89b4fa"
+c.colors.tabs.selected.even.bg = "#89b4fa"
+c.colors.tabs.selected.odd.fg = "#1e1e2e"
+c.colors.tabs.selected.even.fg = "#1e1e2e"
+# Blue to purple gradient
+c.colors.tabs.indicator.start = "#89b4fa"
+c.colors.tabs.indicator.stop = "#cba6f7"
+c.colors.tabs.indicator.error = "#f5c2e7"
 
-c.colors.tabs.bar.bg = "#232136"
-c.colors.tabs.odd.bg = "#2a273f"
-c.colors.tabs.even.bg = "#2a273f"
-c.colors.tabs.odd.fg = "#908caa"
-c.colors.tabs.even.fg = "#908caa"
-c.colors.tabs.selected.odd.bg = "#c4a7e7"
-c.colors.tabs.selected.even.bg = "#c4a7e7"
-c.colors.tabs.selected.odd.fg = "#232136"
-c.colors.tabs.selected.even.fg = "#232136"
-c.colors.tabs.indicator.start = "#c4a7e7"
-c.colors.tabs.indicator.stop = "#9ccfd8"
-c.colors.tabs.indicator.error = "#eb6f92"
+# Status bar
+c.colors.statusbar.normal.bg = "#16141f"
+c.colors.statusbar.normal.fg = "#cdd6f4"
 
-c.colors.messages.info.bg = "#232136"
-c.colors.messages.info.fg = "#c4a7e7"
-c.colors.messages.warning.bg = "#232136"
-c.colors.messages.warning.fg = "#f6c177"
-c.colors.messages.error.bg = "#232136"
-c.colors.messages.error.fg = "#eb6f92"
+# Insert mode - muted blue
+c.colors.statusbar.insert.bg = "#89b4fa"
+c.colors.statusbar.insert.fg = "#1e1e2e"
 
-c.colors.prompts.bg = "#232136"
-c.colors.prompts.fg = "#e0def4"
+# Visual/Caret mode - muted purple
+c.colors.statusbar.caret.bg = "#cba6f7"
+c.colors.statusbar.caret.fg = "#1e1e2e"
 
-c.colors.statusbar.progress.bg = "#c4a7e7"
+# Visual selection - muted pink
+c.colors.statusbar.caret.selection.bg = "#f5c2e7"
+c.colors.statusbar.caret.selection.fg = "#1e1e2e"
 
-c.colors.hints.bg = "#f6c177"
-c.colors.hints.fg = "#232136"
-c.colors.hints.match.fg = "#eb6f92"
+# Command mode - cool blue
+c.colors.statusbar.command.bg = "#1e1e2e"
+c.colors.statusbar.command.fg = "#cdd6f4"
+
+# Passthrough mode - muted pink
+c.colors.statusbar.passthrough.bg = "#1e1e2e"
+c.colors.statusbar.passthrough.fg = "#f5c2e7"
+
+# URL colors - black in bright modes, light in normal
+c.colors.statusbar.url.fg = "#000000"
+c.colors.statusbar.url.success.https.fg = "#89b4fa"
+c.colors.statusbar.url.success.http.fg = "#cba6f7"
+c.colors.statusbar.url.warn.fg = "#f5c2e7"
+c.colors.statusbar.url.error.fg = "#eba0ac"
+
+# Completion menu
+c.colors.completion.fg = "#cdd6f4"
+c.colors.completion.odd.bg = "#221e35"
+c.colors.completion.even.bg = "#16141f"
+c.colors.completion.category.bg = "#16141f"
+c.colors.completion.category.fg = "#cba6f7"
+c.colors.completion.item.selected.bg = "#2d2b5f"
+c.colors.completion.item.selected.fg = "#cdd6f4"
+c.colors.completion.match.fg = "#89b4fa"
+c.colors.completion.item.selected.match.fg = "#89b4fa"
+c.colors.completion.scrollbar.bg = "#16141f"
+c.colors.completion.scrollbar.fg = "#89b4fa"
+
+# Messages
+c.colors.messages.info.bg = "#1e1e2e"
+c.colors.messages.info.fg = "#89b4fa"
+c.colors.messages.warning.bg = "#1e1e2e"
+c.colors.messages.warning.fg = "#f5c2e7"
+c.colors.messages.error.bg = "#1e1e2e"
+c.colors.messages.error.fg = "#eba0ac"
+
+# Prompts & hints
+c.colors.prompts.bg = "#1e1e2e"
+c.colors.prompts.fg = "#cdd6f4"
+c.colors.hints.bg = "#f5b041"
+c.colors.hints.fg = "#1e1e2e"
+c.colors.hints.match.fg = "#eba0ac"
+c.colors.statusbar.progress.bg = "#89b4fa"
 
 # Make hinting pick up more form controls (checkbox/radio/labels).
 c.hints.selectors["all"].append("input[type='checkbox']")
@@ -133,7 +156,9 @@ c.aliases["qmt"] = "quickmark-load -t"
 c.aliases["qma"] = "quickmark-add"
 c.aliases["ss"] = "session-save"
 c.aliases["sl"] = "session-load"
+c.aliases["sb"] = "session-save --backup"
 c.aliases["g"] = "open -t  https://google.com"
+c.aliases["t"] = "tab-focus"
 
 # Tab close/reopen ergonomics
 config.unbind("<Ctrl-t>")

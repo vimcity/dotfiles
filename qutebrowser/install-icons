@@ -1,0 +1,42 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+SCRIPT_DIR=${0:A:h}
+ICON_DIR="$SCRIPT_DIR/icons"
+APP_PATH=${1:-/Applications/qutebrowser.app}
+RESOURCE_DIR="$APP_PATH/Contents/Resources"
+ICON_RESOURCE_DIR="$RESOURCE_DIR/qutebrowser/icons"
+ROOT_ICON_SRC="$ICON_DIR/qutebrowser-root.icns"
+
+if [[ ! -d "$APP_PATH" ]]; then
+  print -u2 "qutebrowser app not found: $APP_PATH"
+  exit 1
+fi
+
+if [[ ! -d "$ICON_DIR" ]]; then
+  print -u2 "icon bundle missing: $ICON_DIR"
+  exit 1
+fi
+
+mkdir -p "$ICON_RESOURCE_DIR"
+
+cp "$ICON_DIR/qutebrowser-16x16.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-24x24.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-32x32.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-48x48.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-64x64.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-96x96.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-128x128.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-256x256.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser-512x512.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser.png" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser.ico" "$ICON_RESOURCE_DIR/"
+cp "$ICON_DIR/qutebrowser.icns" "$ICON_RESOURCE_DIR/"
+cp "$ROOT_ICON_SRC" "$RESOURCE_DIR/qutebrowser.icns"
+
+touch "$APP_PATH"
+rm -rf "$HOME/Library/Caches/com.apple.iconservices.store"
+killall Finder >/dev/null 2>&1 || true
+
+print "Installed qutebrowser icons to $APP_PATH"

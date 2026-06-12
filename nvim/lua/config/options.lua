@@ -71,4 +71,4 @@ elseif is_ssh_session or is_tmux_session then
   }
 end
 
-vim.g.autoformat = true
+vim.g.autoformat = false
