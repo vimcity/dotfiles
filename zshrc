@@ -629,8 +629,7 @@ alias gwp='git worktree prune'
 gwab() { git worktree add -b "$1" "../$1"; }  # new branch
 gwa() { git worktree add "../$1" "$1"; }      # existing branch
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:$HOME/.lmstudio/bin"
+export PATH="$HOME/Projects/jenk-cli:$PATH"
 export PATH="$PATH:$HOME/.local/scripts"
 
 alias vimlocal="nvim ~/.zshrc.local"
@@ -685,6 +684,139 @@ olm() {
 olh() {
     ollama run 'gemma4:31b' "Answer the following quetion as precisely as you can: $@";
 }
+
+# ===========================================
+# oMLX Model Helpers
+# ===========================================
+export OMLX_BASE_DIR="${OMLX_BASE_DIR:-$HOME/.omlx}"
+export OMLX_MODEL_DIR="${OMLX_MODEL_DIR:-$OMLX_BASE_DIR/models}"
+
+_omlx_model_list() {
+    [[ -d "$OMLX_MODEL_DIR" ]] || return 1
+    command ls -1 "$OMLX_MODEL_DIR" 2>/dev/null | sort
+}
+
+_omlx_current_model() {
+    if [[ -n "$OMLX_DEFAULT_MODEL" && -d "$OMLX_MODEL_DIR/$OMLX_DEFAULT_MODEL" ]]; then
+        print -r -- "$OMLX_DEFAULT_MODEL"
+        return 0
+    fi
+
+    _omlx_model_list | head -n 1
+}
+
+omlx-models() {
+    _omlx_model_list
+}
+
+omlx-model() {
+    local selected="$1"
+
+    if [[ -z "$selected" ]]; then
+        if command -v fzf >/dev/null 2>&1; then
+            selected="$(_omlx_model_list | fzf --prompt='oMLX model> ' --height=40%)"
+        else
+            _omlx_model_list
+            return 0
+        fi
+    fi
+
+    [[ -n "$selected" ]] || return 1
+
+    if [[ ! -d "$OMLX_MODEL_DIR/$selected" ]]; then
+        print "Model not installed: $selected"
+        return 1
+    fi
+
+    export OMLX_DEFAULT_MODEL="$selected"
+    print "Current oMLX model: $OMLX_DEFAULT_MODEL"
+}
+
+omlx-hot() {
+    hf models ls --author mlx-community --sort trending_score --limit "${1:-20}" --expand downloads,likes,lastModified
+}
+
+omlx-search() {
+    local query="$*"
+
+    if [[ -z "$query" ]]; then
+        print "Usage: omlx-search <query>"
+        return 1
+    fi
+
+    hf models ls --author mlx-community --search "$query" --sort trending_score --limit 30 --expand downloads,likes,lastModified
+}
+
+omlx-install() {
+    local repo="$1"
+    local local_name="$2"
+
+    if [[ -z "$repo" ]]; then
+        print "Usage: omlx-install <hf-repo> [local-name]"
+        return 1
+    fi
+
+    if [[ "$repo" != */* ]]; then
+        repo="mlx-community/$repo"
+    fi
+
+    if [[ -z "$local_name" ]]; then
+        local_name="${repo##*/}"
+    fi
+
+    mkdir -p "$OMLX_MODEL_DIR" || return 1
+    hf download "$repo" --local-dir "$OMLX_MODEL_DIR/$local_name"
+}
+
+omlx-pick-install() {
+    local query="${*:-Instruct 4bit}"
+    local repo
+
+    if ! command -v fzf >/dev/null 2>&1; then
+        print "fzf required for omlx-pick-install"
+        return 1
+    fi
+
+    repo="$(hf models ls --author mlx-community --search "$query" --sort trending_score --limit 50 -q | fzf --prompt='HF mlx model> ' --height=50%)"
+    [[ -n "$repo" ]] || return 1
+
+    omlx-install "$repo"
+}
+
+omlx-codex() {
+    omlx launch codex --model "${1:-$(_omlx_current_model)}"
+}
+
+omlx-opencode() {
+    omlx launch opencode --model "${1:-$(_omlx_current_model)}"
+}
+
+omlx-claude() {
+    omlx launch claude --model "${1:-$(_omlx_current_model)}"
+}
+
+omlx-app() {
+    local model
+    model="$(_omlx_current_model)"
+    [[ -n "$model" ]] || {
+        print "No local oMLX models found in $OMLX_MODEL_DIR"
+        return 1
+    }
+
+    omlx launch codex_app --model "$model"
+}
+
+alias omodel='omlx-model'
+alias omodels='omlx-models'
+alias osearch='omlx-search'
+alias ohot='omlx-hot'
+alias oinstall='omlx-install'
+alias opick='omlx-pick-install'
+alias ocodex='omlx-codex'
+alias oopencode='omlx-opencode'
+alias oclaude='omlx-claude'
+alias oapp='omlx-app'
+
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"

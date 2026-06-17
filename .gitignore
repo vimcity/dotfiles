@@ -20,6 +20,7 @@ atuin/key
 .zshrc.local
 .claude
 .lazygit-local.yml
+.ghprs-repos.local
 qutebrowser/local.py
 
 # Neovim package manager lock file
@@ -29,4 +30,3 @@ snacks-diffview/*
 *.ruff_cache**
 ./luai.nvim/**
 ytui-config/**
-

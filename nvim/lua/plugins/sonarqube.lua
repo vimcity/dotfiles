@@ -9,7 +9,10 @@ end
 return {
   "iamkarasik/sonarqube.nvim",
   cond = not is_personal_machine(),
-  event = "VeryLazy",
+  cmd = {
+    "SonarQubeListAllRules",
+    "SonarQubeShowConfig",
+  },
   config = function()
     -- Path to Mason-installed sonarlint-language-server
     local mason_path = vim.fn.stdpath("data") .. "/mason/packages/sonarlint-language-server"

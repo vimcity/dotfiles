@@ -1,13 +1,23 @@
 return {
   {
     "olimorris/codecompanion.nvim",
-    enabled = false,
+    cmd = {
+      "CodeCompanion",
+      "CodeCompanionActions",
+      "CodeCompanionChat",
+    },
+    keys = {
+      { "<leader>aa", "<cmd>CodeCompanionActions<CR>", desc = "AI Actions" },
+      { "<leader>ac", "<cmd>CodeCompanionChat Toggle<CR>", desc = "AI Chat" },
+      { "<leader>ap", ":CodeCompanion ", desc = "AI Prompt" },
+      { "<leader>ai", ":CodeCompanion ", mode = "v", desc = "AI Inline Prompt" },
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
     },
-    config = function()
-      require("codecompanion").setup({
+    opts = function()
+      return {
         adapters = {
           http = {
             ollama = function()
@@ -15,30 +25,45 @@ return {
                 env = {
                   url = "http://localhost:11434",
                 },
+                schema = {
+                  model = {
+                    default = "gemma4:e4b",
+                  },
+                },
               })
             end,
           },
         },
-        interactions = {
+        strategies = {
           chat = {
             adapter = {
               name = "ollama",
-              model = "gemma3:1b",
+              model = "gemma4:e4b",
             },
           },
           inline = {
             adapter = {
               name = "ollama",
-              model = "gemma3:1b",
+              model = "gemma4:e4b",
+            },
+          },
+          cmd = {
+            adapter = {
+              name = "ollama",
+              model = "gemma4:e4b",
             },
           },
         },
-      })
-
-      -- Keybindings
-      vim.keymap.set("n", "<leader>ac", "<cmd>CodeCompanionChat<CR>", { noremap = true, desc = "AI Chat" })
-      vim.keymap.set("n", "<leader>aa", "<cmd>CodeCompanionActions<CR>", { noremap = true, desc = "AI Actions" })
-      vim.keymap.set("v", "<leader>aa", "<cmd>CodeCompanionActions<CR>", { noremap = true, desc = "AI Actions" })
+        display = {
+          chat = {
+            show_header_separator = false,
+            auto_scroll = true,
+          },
+        },
+        opts = {
+          log_level = "ERROR",
+        },
+      }
     end,
   },
 }
