@@ -1,155 +1,158 @@
 #!/usr/bin/env bash
-# ghprs — fzf PR picker for GitHub Enterprise
-#
-# Modes:
-#   (default) open PRs authored by you
-#   review    open PRs where you're requested for review OR you've already reviewed
-#   project   open PRs in a specific repo (picked interactively)
-#
-# Config (set in your shell rc):
-#   GH_ORG       GitHub org to search
-#   GH_HOST      GitHub Enterprise hostname
-#   PROJECTS_DIR Local projects root (default: ~/Projects)
-#
-# Usage:
-#   ghprs               (your authored PRs)
-#   ghprs review        (PRs you're assigned to review)
-#   ghprs project       (pick a repo from org list)
-#   ghprs here          (PRs for the repo in the current directory)
+# ghprs - fzf PR picker for GitHub Enterprise
 
 set -euo pipefail
 
-GH_HOST="${GH_HOST}"
-GH_ORG="${GH_ORG}"
 PROJECTS_DIR="${PROJECTS_DIR:-$HOME/Projects}"
-MODE="${1:-mine}"
-
-# ── colours (ANSI) ────────────────────────────────────────────────────────────
-RESET='\033[0m'
-
-# Catppuccin Mocha-ish palette
-C_BLUE='\033[38;5;111m'     # sapphire  — repo name
-C_MAUVE='\033[38;5;183m'    # mauve     — PR number
-C_GREEN='\033[38;5;114m'    # green     — approved / fresh
-C_YELLOW='\033[38;5;229m'   # yellow    — changes requested / 1-7d old
-C_RED='\033[38;5;210m'      # peach     — needs review / stale
-C_FLAMINGO='\033[38;5;217m' # flamingo  — author name
-C_OVERLAY='\033[38;5;244m'  # overlay1  — dim metadata
-
-# ── helpers ───────────────────────────────────────────────────────────────────
+GHPRS_REPOS_FILE="${GHPRS_REPOS_FILE:-$HOME/dotfiles/.ghprs-repos.local}"
+MODE="${1:-}"
 
 die() {
-    echo "ghprs: $*" >&2
+    printf 'ghprs: %s\n' "$*" >&2
     exit 1
+}
+
+usage() {
+    cat <<EOF
+Usage:
+  ghprs              Show open PRs for the current repo, or focus repos outside a repo
+  ghprs review       Show open PRs requesting your review, scoped the same way
+  ghprs mine         Show open PRs authored by you, scoped the same way
+  ghprs here         Show all open PRs for the current repo
+  ghprs focus        Show all open PRs for the configured focus repo list
+  ghprs repos        Print the configured focus repo list
+  ghprs project      Pick a repo from GH_ORG and show its open PRs (legacy)
+
+Focus repos:
+  Read from GHPRS_REPOS_FILE, defaulting to:
+  $GHPRS_REPOS_FILE
+  Use one owner/repo per line. Blank lines and # comments are ignored.
+
+Actions:
+  enter              Open selected PR in nvim gh-review when repo exists locally
+  ctrl-o             Open selected PR in browser
+  ctrl-y             Copy PR URL
+  ctrl-a             Assign yourself as reviewer
+EOF
+}
+
+list_focus_repos() {
+    if [[ ! -f "$GHPRS_REPOS_FILE" ]]; then
+        die "focus repo file not found: $GHPRS_REPOS_FILE"
+    fi
+
+    sed -E 's/[[:space:]]+#.*$//; /^[[:space:]]*(#|$)/d; s/^[[:space:]]+//; s/[[:space:]]+$//' "$GHPRS_REPOS_FILE"
 }
 
 require() {
     for cmd in "$@"; do
-        command -v "$cmd" &>/dev/null || die "required command not found: $cmd"
+        command -v "$cmd" >/dev/null 2>&1 || die "required command not found: $cmd"
     done
 }
 
+case "$MODE" in
+-h | --help | help)
+    usage
+    exit 0
+    ;;
+repos | focus-repos)
+    printf 'Focus repo file: %s\n\n' "$GHPRS_REPOS_FILE"
+    list_focus_repos
+    exit 0
+    ;;
+esac
+
+GH_HOST="${GH_HOST:?GH_HOST is required}"
+GH_ORG="${GH_ORG:?GH_ORG is required}"
+
 require gh fzf jq
 
-# Format a JSON array of PRs → one "URL\tDISPLAY_LINE" per PR.
-# Single jq invocation: no python3, no per-PR subshells.
-format_all() {
-    jq -r '
-    def reset:    "\u001b[0m";
-    def blue:     "\u001b[38;5;111m";
-    def mauve:    "\u001b[38;5;183m";
-    def green:    "\u001b[38;5;114m";
-    def yellow:   "\u001b[38;5;229m";
-    def red:      "\u001b[38;5;210m";
-    def flamingo: "\u001b[38;5;217m";
-    def overlay:  "\u001b[38;5;244m";
+FIELDS="number,title,repository,author,updatedAt,isDraft,url"
+REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,reviewRequests"
 
-    # Right-pad string to n chars (no subshell needed)
-    def rpad(n): . + (" " * n) | .[0:n];
-
-    def rel_time:
-      now as $now | (. | fromdate) as $ep | ($now - $ep) as $d |
-      if $d < 3600    then "\($d / 60    | floor)m"
-      elif $d < 86400 then "\($d / 3600  | floor)h"
-      elif $d < 604800 then "\($d / 86400 | floor)d"
-      else                  "\($d / 604800 | floor)w"
-      end;
-
-    def age_col:
-      now as $now | (. | fromdate) as $ep | ($now - $ep) as $d |
-      if $d < 86400   then green
-      elif $d < 604800 then yellow
-      else red
-      end;
-
-    def status($draft; $decision):
-      if $draft                              then [overlay, "◌ draft   "]
-      elif $decision == "APPROVED"           then [green,   "✓ approved"]
-      elif $decision == "CHANGES_REQUESTED"  then [yellow,  "✗ changes "]
-      elif $decision == "REVIEW_REQUIRED"    then [red,     "● review  "]
-      else                                        [overlay, "· open    "]
-      end;
-
-    .[] |
-    (.updatedAt | rel_time) as $age |
-    (.updatedAt | age_col)  as $acol |
-    status(.isDraft; (.reviewDecision // "")) as [$scol, $sglyph] |
-    (.title | if length > 60 then .[0:60] + "…" else . end) as $t |
-
-    "\(.url)\t" +
-    (blue     + (.repository.name          | rpad(25)) + reset) + " " +
-    (mauve    + ("#" + (.number | tostring) | rpad(6))  + reset) + " " +
-    ($scol    + $sglyph                                 + reset) + "  " +
-    ($t       | rpad(62))                                        + " " +
-    (flamingo + (.author.login             | rpad(12)) + reset) + " " +
-    ($acol    + ($age                      | rpad(4))  + reset)
-  ' <<<"$1"
+current_repo() {
+    GH_HOST="$GH_HOST" gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || true
 }
 
-# ── fetch functions ────────────────────────────────────────────────────────────
+repo_name_from_nwo() {
+    printf '%s' "${1##*/}"
+}
 
-FIELDS="number,title,repository,author,updatedAt,isDraft,url"
+inject_repo() {
+    local repo="$1"
+    local repo_name
+    repo_name=$(repo_name_from_nwo "$repo")
+    jq --arg name "$repo_name" --arg nwo "$repo" 'map(. + {repository: {name: $name, nameWithOwner: $nwo}})'
+}
 
-fetch_mine() {
+fetch_repo_all() {
+    local repo="$1"
+    GH_HOST="$GH_HOST" gh pr list \
+        --repo "$repo" \
+        --state=open \
+        --limit=100 \
+        --json "$REPO_FIELDS" |
+        inject_repo "$repo"
+}
+
+fetch_repo_mine() {
+    local repo="$1"
     GH_HOST="$GH_HOST" gh search prs \
+        --repo "$repo" \
         --author=@me \
-        --owner="$GH_ORG" \
         --state=open \
         --limit=100 \
         --json "$FIELDS"
 }
 
-fetch_review() {
-    local tmpdir requested_file reviewed_file
+fetch_repo_review() {
+    local repo="$1"
+    GH_HOST="$GH_HOST" gh search prs \
+        --repo "$repo" \
+        --review-requested=@me \
+        --state=open \
+        --limit=100 \
+        --json "$FIELDS"
+}
+
+fetch_focus() {
+    local filter="${1:-all}"
+    local tmpdir
+    local repos=()
+    local focus_repo
+    while IFS= read -r focus_repo; do
+        repos+=("$focus_repo")
+    done < <(list_focus_repos)
+    [[ "${#repos[@]}" -gt 0 ]] || die "focus repo file has no repos: $GHPRS_REPOS_FILE"
+
     tmpdir=$(mktemp -d)
-    requested_file="$tmpdir/requested.json"
-    reviewed_file="$tmpdir/reviewed.json"
     trap 'rm -rf "$tmpdir"' RETURN
 
-    GH_HOST="$GH_HOST" gh search prs \
-        --review-requested=@me \
-        --owner="$GH_ORG" \
-        --state=open \
-        --limit=100 \
-        --json "$FIELDS" \
-        -- -review:approved >"$requested_file" &
-    local requested_pid=$!
+    local pids=()
+    local index=0
+    local repo
+    for repo in "${repos[@]}"; do
+        case "$filter" in
+        all)
+            fetch_repo_all "$repo" >"$tmpdir/$index.json" &
+            ;;
+        mine)
+            fetch_repo_mine "$repo" >"$tmpdir/$index.json" &
+            ;;
+        review)
+            fetch_repo_review "$repo" >"$tmpdir/$index.json" &
+            ;;
+        esac
+        pids+=("$!")
+        index=$((index + 1))
+    done
 
-    GH_HOST="$GH_HOST" gh search prs \
-        --reviewed-by=@me \
-        --owner="$GH_ORG" \
-        --state=open \
-        --limit=100 \
-        --json "$FIELDS" \
-        -- -review:approved >"$reviewed_file" &
-    local reviewed_pid=$!
+    local pid
+    for pid in "${pids[@]}"; do
+        wait "$pid"
+    done
 
-    wait "$requested_pid"
-    wait "$reviewed_pid"
-
-    # Merge, dedup by url, sort newest-updated first
-    jq -s '(.[0] + .[1]) | unique_by(.url) | sort_by(.updatedAt) | reverse' \
-        "$requested_file" "$reviewed_file"
+    jq -s '[ .[][] ] | unique_by(.url) | sort_by(.updatedAt) | reverse' "$tmpdir"/*.json
 }
 
 fetch_project() {
@@ -164,166 +167,190 @@ fetch_project() {
             --reverse \
             --header="Pick a repository (ESC to cancel)") || return 1
 
-    local repo_name="${repo##*/}"
-
-    # gh pr list lacks a `repository` field — inject it so format_all works uniformly.
-    GH_HOST="$GH_HOST" gh pr list \
-        --repo "$repo" \
-        --state=open \
-        --limit=100 \
-        --json "number,title,author,updatedAt,isDraft,url,reviewDecision" |
-        jq --arg name "$repo_name" --arg nwo "$repo" \
-            'map(. + {repository: {name: $name, nameWithOwner: $nwo}})'
+    fetch_repo_all "$repo"
 }
 
-fetch_here() {
-    # Use the repo for the current working directory.
-    local repo repo_name
-    repo=$(GH_HOST="$GH_HOST" gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null) ||
-        {
-            echo "ghprs: not inside a GitHub repo (or gh not authenticated)" >&2
-            return 1
-        }
-    repo_name="${repo##*/}"
+format_all() {
+    jq -r '
+    def reset:    "\u001b[0m";
+    def blue:     "\u001b[38;5;111m";
+    def mauve:    "\u001b[38;5;183m";
+    def green:    "\u001b[38;5;114m";
+    def yellow:   "\u001b[38;5;229m";
+    def red:      "\u001b[38;5;210m";
+    def flamingo: "\u001b[38;5;217m";
+    def overlay:  "\u001b[38;5;244m";
+    def rpad(n): . + (" " * n) | .[0:n];
 
-    # gh pr list lacks a `repository` field — inject it so format_all works uniformly.
-    GH_HOST="$GH_HOST" gh pr list \
-        --repo "$repo" \
-        --state=open \
-        --limit=100 \
-        --json "number,title,author,updatedAt,isDraft,url,reviewDecision" |
-        jq --arg name "$repo_name" --arg nwo "$repo" \
-            'map(. + {repository: {name: $name, nameWithOwner: $nwo}})'
+    def rel_time:
+      now as $now | (. | fromdate) as $ep | ($now - $ep) as $d |
+      if $d < 3600 then "\($d / 60 | floor)m"
+      elif $d < 86400 then "\($d / 3600 | floor)h"
+      elif $d < 604800 then "\($d / 86400 | floor)d"
+      else "\($d / 604800 | floor)w"
+      end;
+
+    def age_col:
+      now as $now | (. | fromdate) as $ep | ($now - $ep) as $d |
+      if $d < 86400 then green
+      elif $d < 604800 then yellow
+      else red
+      end;
+
+    def status($draft; $decision):
+      if $draft then [overlay, "draft"]
+      elif $decision == "APPROVED" then [green, "approved"]
+      elif $decision == "CHANGES_REQUESTED" then [yellow, "changes"]
+      elif $decision == "REVIEW_REQUIRED" then [red, "review"]
+      else [overlay, "open"]
+      end;
+
+    .[] |
+    (.updatedAt | rel_time) as $age |
+    (.updatedAt | age_col) as $acol |
+    status(.isDraft; (.reviewDecision // "")) as [$scol, $status] |
+    (.title | if length > 60 then .[0:60] + "..." else . end) as $title |
+    "\(.url)\t" +
+    (blue + (.repository.name | rpad(25)) + reset) + " " +
+    (mauve + ("#" + (.number | tostring) | rpad(6)) + reset) + " " +
+    ($scol + ($status | rpad(8)) + reset) + "  " +
+    ($title | rpad(62)) + " " +
+    (flamingo + (.author.login | rpad(12)) + reset) + " " +
+    ($acol + ($age | rpad(4)) + reset)
+  ' <<<"$1"
 }
-
-# ── actions ───────────────────────────────────────────────────────────────────
 
 open_browser() {
     local url="$1"
     case "$(uname -s)" in
     Darwin) open "$url" ;;
-    Linux) xdg-open "$url" 2>/dev/null || true ;;
-    *) echo "$url" ;;
-    esac
-}
-
-copy_url() {
-    local url="$1"
-    case "$(uname -s)" in
-    Darwin) echo -n "$url" | pbcopy && echo "Copied: $url" ;;
-    Linux)
-        if command -v xclip &>/dev/null; then
-            echo -n "$url" | xclip -selection clipboard && echo "Copied: $url"
-        elif command -v xsel &>/dev/null; then
-            echo -n "$url" | xsel --clipboard --input && echo "Copied: $url"
-        fi
-        ;;
+    Linux) xdg-open "$url" >/dev/null 2>&1 || true ;;
+    *) printf '%s\n' "$url" ;;
     esac
 }
 
 open_in_nvim() {
     local url="$1"
-    # Extract owner/repo and number from URL
-    local full_repo number repo_name repo_path
-    full_repo=$(echo "$url" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|')
-    number=$(echo "$url" | grep -oE '[0-9]+$')
-    repo_name=$(echo "$full_repo" | cut -d/ -f2)
+    local full_repo number repo_name repo_path nvim_cmd
+    full_repo=$(printf '%s' "$url" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|')
+    number=$(printf '%s' "$url" | grep -oE '[0-9]+$')
+    repo_name=$(repo_name_from_nwo "$full_repo")
 
-    # Try flat name first, then org/name
     if [[ -d "$PROJECTS_DIR/$repo_name" ]]; then
         repo_path="$PROJECTS_DIR/$repo_name"
     elif [[ -d "$PROJECTS_DIR/$full_repo" ]]; then
         repo_path="$PROJECTS_DIR/$full_repo"
     else
-        echo "ghprs: repo not found locally (tried $PROJECTS_DIR/$repo_name). Opening browser." >&2
+        printf 'ghprs: repo not found locally (tried %s/%s). Opening browser.\n' "$PROJECTS_DIR" "$repo_name" >&2
         open_browser "$url"
         return
     fi
 
-    local nvim_cmd="nvim -c \"lua vim.defer_fn(function() require('gh-review').open_number(${number}) end, 200)\""
+    nvim_cmd="nvim -c \"lua vim.defer_fn(function() require('gh-review').open_number(${number}) end, 200)\""
 
     if [[ -n "${TMUX:-}" ]]; then
         tmux new-window -n "pr-${repo_name}-${number}" -c "$repo_path" "$nvim_cmd"
     else
-        cd "$repo_path" && eval "$nvim_cmd"
+        (cd "$repo_path" && eval "$nvim_cmd")
     fi
 }
 
-# ── main ───────────────────────────────────────────────────────────────────────
+select_pr() {
+    local mode="$1"
+    local header="$2"
+    local json="$3"
+    local count lines selected url
 
-main() {
-    local json header
-
-    case "$MODE" in
-    mine | "")
-        header="  PRs authored by you  [$GH_ORG]"
-        json=$(fetch_mine)
-        ;;
-    review)
-        header="  PRs to review (requested + reviewed)  [$GH_ORG]"
-        json=$(fetch_review)
-        ;;
-    project)
-        header="  PRs in repo  [$GH_ORG]"
-        json=$(fetch_project) || exit 0
-        ;;
-    here)
-        header="  PRs in current repo"
-        json=$(fetch_here) || exit 0
-        ;;
-    *)
-        die "unknown mode '$MODE'. Use: review | project | here"
-        ;;
-    esac
-
-    local count
     count=$(jq 'length' <<<"$json")
     if [[ "$count" -eq 0 ]]; then
-        echo "No open PRs found."
+        printf 'No open PRs found.\n'
         exit 0
     fi
 
-    local lines selected url
     lines=$(format_all "$json")
-
     selected=$(
-        echo "$lines" |
+        printf '%s\n' "$lines" |
             fzf \
                 --ansi \
                 --delimiter=$'\t' \
                 --with-nth='2..' \
-                --prompt="${MODE}> " \
+                --prompt="${mode}> " \
                 --header="${header}  (${count} PRs)
   enter:nvim  ctrl-o:browser  ctrl-y:copy url  ctrl-a:assign self" \
                 --reverse \
-                --height=40% \
-                --min-height=12 \
+                --height=50% \
+                --min-height=14 \
                 --no-preview \
-                --bind="ctrl-o:execute-silent(
-            url=\$(echo {} | cut -f1)
-            case \"\$(uname -s)\" in
-              Darwin) open \"\$url\" ;;
-              Linux)  xdg-open \"\$url\" 2>/dev/null ;;
-            esac
-          )" \
-                --bind="ctrl-y:execute-silent(
-            url=\$(echo {} | cut -f1)
-            echo -n \"\$url\" | pbcopy 2>/dev/null \
-              || echo -n \"\$url\" | xclip -selection clipboard 2>/dev/null \
-              || echo -n \"\$url\" | xsel --clipboard --input 2>/dev/null
-          )" \
-                --bind="ctrl-a:execute-silent(
-            url=\$(echo {} | cut -f1)
-            repo=\$(echo \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|')
-            number=\$(echo \"\$url\" | grep -oE '[0-9]+\$')
-            me=\$(GH_HOST=$GH_HOST gh api /user --jq '.login' 2>/dev/null)
-            GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"\$me\" 2>/dev/null
-          )+refresh-preview"
+                --bind="ctrl-o:execute-silent(url=\$(printf '%s' {} | cut -f1); open \"\$url\")" \
+                --bind="ctrl-y:execute-silent(url=\$(printf '%s' {} | cut -f1); printf '%s' \"\$url\" | pbcopy)" \
+                --bind="ctrl-a:execute-silent(url=\$(printf '%s' {} | cut -f1); repo=\$(printf '%s' \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|'); number=\$(printf '%s' \"\$url\" | grep -oE '[0-9]+$'); me=\$(GH_HOST=$GH_HOST gh api /user --jq '.login' 2>/dev/null); GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"\$me\" >/dev/null 2>&1)"
     ) || exit 0
 
     [[ -z "$selected" ]] && exit 0
-    url=$(echo "$selected" | cut -f1)
+    url=$(printf '%s' "$selected" | cut -f1)
     open_in_nvim "$url"
+}
+
+main() {
+    local repo json scope header filter
+    repo=$(current_repo)
+
+    case "$MODE" in
+    "" | all)
+        if [[ -n "$repo" ]]; then
+            json=$(fetch_repo_all "$repo")
+            header="  Open PRs in $repo"
+            scope="here"
+        else
+            json=$(fetch_focus all)
+            header="  Open PRs in focus repos"
+            scope="focus"
+        fi
+        ;;
+    here)
+        [[ -n "$repo" ]] || die "not inside a GitHub repo"
+        json=$(fetch_repo_all "$repo")
+        header="  Open PRs in $repo"
+        scope="here"
+        ;;
+    focus)
+        json=$(fetch_focus all)
+        header="  Open PRs in focus repos"
+        scope="focus"
+        ;;
+    mine | review)
+        filter="$MODE"
+        if [[ -n "$repo" ]]; then
+            if [[ "$filter" == "mine" ]]; then
+                json=$(fetch_repo_mine "$repo")
+                header="  PRs authored by you in $repo"
+            else
+                json=$(fetch_repo_review "$repo")
+                header="  PRs requesting your review in $repo"
+            fi
+            scope="$filter"
+        else
+            json=$(fetch_focus "$filter")
+            if [[ "$filter" == "mine" ]]; then
+                header="  PRs authored by you in focus repos"
+            else
+                header="  PRs requesting your review in focus repos"
+            fi
+            scope="$filter"
+        fi
+        ;;
+    project)
+        json=$(fetch_project) || exit 0
+        header="  Open PRs in selected repo"
+        scope="project"
+        ;;
+    *)
+        usage >&2
+        die "unknown mode '$MODE'"
+        ;;
+    esac
+
+    select_pr "$scope" "$header" "$json"
 }
 
 main

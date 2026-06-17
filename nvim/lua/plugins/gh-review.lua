@@ -6,6 +6,21 @@ local function is_personal_machine()
   return personal_env == nil or personal_env == "1"
 end
 
+local function read_inbox_repos()
+  local repo_file = os.getenv("GHPRS_REPOS_FILE") or vim.fn.expand("~/dotfiles/.ghprs-repos.local")
+  local lines = vim.fn.filereadable(repo_file) == 1 and vim.fn.readfile(repo_file) or {}
+  local repos = {}
+
+  for _, line in ipairs(lines) do
+    local repo = line:gsub("%s+#.*$", ""):gsub("^%s+", ""):gsub("%s+$", "")
+    if repo ~= "" and not repo:match("^#") then
+      table.insert(repos, repo)
+    end
+  end
+
+  return repos
+end
+
 return {
   dir = "~/Projects/gh-review.nvim",
   cond = not is_personal_machine(),
@@ -13,7 +28,11 @@ return {
   dependencies = { "sindrets/diffview.nvim" },
   event = "VeryLazy",
   opts = {
-    gh_host = "$GH_HOST",
+    gh_host = os.getenv("GH_HOST"),
+    inbox = {
+      repos = read_inbox_repos(),
+      limit = 100,
+    },
     keymaps = {
       add_comment = "pa",
       reply = "pr",
@@ -47,6 +66,7 @@ return {
       end,
       desc = "Open PR in DiffView",
     },
+    { "<leader>gi", "<cmd>GhReviewInbox<cr>", desc = "Open PR inbox" },
     { "<leader>gt", "<cmd>GhReviewThreads<cr>", desc = "Toggle PR thread list" },
     { "<leader>gs", "<cmd>GhReviewSubmit<cr>", desc = "Submit PR review" },
   },
