@@ -306,6 +306,63 @@ setopt HIST_REDUCE_BLANKS
 setopt HIST_SAVE_NO_DUPS
 setopt HIST_VERIFY
 
+# Vi mode in the shell; cursor color follows keymap (Ghostty OSC 12 + tmux passthrough)
+bindkey -v
+# Default 400ms feels laggy on Esc; 1 (10ms) is snappy in Ghostty+tmux (source ~/.zshrc to apply)
+KEYTIMEOUT=1
+
+typeset -g _GHOSTTY_CURSOR_MODE=''
+
+ghostty_cursor() {
+  local seq="$1"
+  if [[ -n "$TMUX" ]]; then
+    print -rn -- $'\033Ptmux;\033'"${seq}"$'\033\\'
+  else
+    print -rn -- "$seq"
+  fi
+}
+
+ghostty_cursor_apply() {
+  local mode="$1"
+  [[ "$mode" == "$_GHOSTTY_CURSOR_MODE" ]] && return
+  _GHOSTTY_CURSOR_MODE="$mode"
+
+  if [[ "$mode" == insert ]]; then
+    ghostty_cursor $'\033]12;#a6d189\007'
+  else
+    ghostty_cursor $'\033]12;#c6d0f5\007'
+  fi
+}
+
+ghostty_cursor_keymap() {
+  if [[ "$KEYMAP" == vicmd ]]; then
+    ghostty_cursor_apply normal
+  else
+    ghostty_cursor_apply insert
+  fi
+}
+
+# Explicit Esc widget: mode switch + cursor (don't rely on timeout alone)
+vi-cmd-mode-cursor() {
+  zle vi-cmd-mode
+  ghostty_cursor_apply normal
+}
+zle -N vi-cmd-mode-cursor
+bindkey -M viins '^[' vi-cmd-mode-cursor
+
+zle-keymap-select() {
+  ghostty_cursor_keymap
+}
+zle -N zle-keymap-select
+
+cursor_precmd() {
+  ghostty_cursor_keymap
+}
+add-zsh-hook precmd cursor_precmd
+
+# Readline-based CLIs (python input(), etc.)
+export INPUTRC="$HOME/dotfiles/inputrc"
+
 # ===========================================
 # Atuin Configuration (Ctrl+R only) - LAZY LOADED
 # ===========================================
@@ -324,14 +381,24 @@ alias ahl="atuin history list"
 alias cat=bat
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
-alias sp='~/dotfiles/tmux/scripts/session-picker.sh'
+alias sp='$HOME/dotfiles/tmux/scripts/tmux-sessionizer.sh'
 alias vimz="nvim ~/.zshrc"
 alias vimzz="nvim ~/.zshrc"
 alias cur='cursor-agent'
 alias co='codex'
+alias cow='codex --profile work'
+alias cor='codex --profile research'
+alias coa='codex --profile agent'
+alias cob='codex --profile browser'
+alias cos='codex --profile slack'
+alias col='codex --profile local'
+cocmt() { cd /Users/rgaur/Projects/CMT-Reboot && codex --profile work "$@"; }
+coagent() { cd /Users/rgaur/Projects && codex --profile agent "$@"; }
+coms() { cd /Users/rgaur/Projects && codex --profile research "$@"; }
 alias vim=nvim
 export EDITOR="nvim"
 export VISUAL="nvim"
+alias view='nvim -R'
 # Neovim cache management (for symlink/treesitter issues)
 alias nvclear="rm -rf ~/.cache/nvim ~/.local/share/nvim && echo '✓ Neovim caches cleared'"
 alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '✓ Neovim rebuilt'"
