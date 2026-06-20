@@ -9,7 +9,7 @@ foreground = #d0cbe0
 # Cursor
 cursor-color = #c6d0f5
 cursor-text = #29273f
-cursor-style = bar
+cursor-style = block
 
 # Selection
 selection-background = #393552

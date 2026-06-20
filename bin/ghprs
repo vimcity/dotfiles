@@ -64,14 +64,12 @@ esac
 
 GH_HOST="${GH_HOST:?GH_HOST is required}"
 GH_ORG="${GH_ORG:?GH_ORG is required}"
-GHPRS_ME="${GHPRS_ME:?GHPRS_ME is required}"
 
 require gh fzf jq
 
-FIELDS="number,title,repository,author,updatedAt,isDraft,url"
-REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,reviewRequests"
-REVIEW_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,latestReviews"
-REVIEW_SEARCH="review-requested:@me"
+FIELDS="number,title,repository,author,updatedAt,isDraft,url,headRefName"
+REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,reviewRequests,headRefName"
+REVIEW_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,latestReviews,headRefName"
 
 current_repo() {
     GH_HOST="$GH_HOST" gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || true
@@ -112,11 +110,11 @@ fetch_repo_review() {
     local repo="$1"
     GH_HOST="$GH_HOST" gh pr list \
         --repo "$repo" \
-        --search "$REVIEW_SEARCH" \
+        --search 'review-requested:@me OR reviewed-by:@me' \
         --state=open \
         --limit=100 \
         --json "$REVIEW_FIELDS" |
-        jq --arg me "$GHPRS_ME" --arg repo "$repo" '
+        jq --arg me "$USER" --arg repo "$repo" '
             map(
                 . + {
                     repository: {
@@ -221,9 +219,9 @@ format_all() {
 
     def status($draft; $decision; $mine):
       if $draft then [overlay, "draft"]
-      elif $mine == "APPROVED" then [green, "approved"]
-      elif $mine == "CHANGES_REQUESTED" then [yellow, "changes"]
-      elif $mine == "COMMENTED" then [overlay, "comment"]
+      elif $mine == "APPROVED" then [green, "approved by me"]
+      elif $mine == "CHANGES_REQUESTED" then [yellow, "changes by me"]
+      elif $mine == "COMMENTED" then [overlay, "commented"]
       elif $decision == "APPROVED" then [green, "approved"]
       elif $decision == "CHANGES_REQUESTED" then [yellow, "changes"]
       elif $decision == "REVIEW_REQUIRED" then [red, "review"]
@@ -234,12 +232,14 @@ format_all() {
     (.updatedAt | rel_time) as $age |
     (.updatedAt | age_col) as $acol |
     status(.isDraft; (.reviewDecision // ""); (.myReviewState // "")) as [$scol, $status] |
-    (.title | if length > 60 then .[0:60] + "..." else . end) as $title |
+    (.title | if length > 50 then .[0:50] + "..." else . end) as $title |
+    (.headRefName // "" | if length > 28 then .[0:28] + "..." else . end) as $branch |
     "\(.url)\t" +
     (blue + (.repository.name | rpad(25)) + reset) + " " +
     (mauve + ("#" + (.number | tostring) | rpad(6)) + reset) + " " +
     ($scol + ($status | rpad(8)) + reset) + "  " +
-    ($title | rpad(62)) + " " +
+    ($title | rpad(52)) + " " +
+    (overlay + ($branch | rpad(30)) + reset) + " " +
     (flamingo + (.author.login | rpad(12)) + reset) + " " +
     ($acol + ($age | rpad(4)) + reset)
   ' <<<"$1"
@@ -308,7 +308,7 @@ select_pr() {
                 --no-preview \
                 --bind="ctrl-o:execute-silent(url=\$(printf '%s' {} | cut -f1); open \"\$url\")" \
                 --bind="ctrl-y:execute-silent(url=\$(printf '%s' {} | cut -f1); printf '%s' \"\$url\" | pbcopy)" \
-                --bind="ctrl-a:execute-silent(url=\$(printf '%s' {} | cut -f1); repo=\$(printf '%s' \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|'); number=\$(printf '%s' \"\$url\" | grep -oE '[0-9]+$'); GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"$GHPRS_ME\" >/dev/null 2>&1)"
+                --bind="ctrl-a:execute-silent(url=\$(printf '%s' {} | cut -f1); repo=\$(printf '%s' \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|'); number=\$(printf '%s' \"\$url\" | grep -oE '[0-9]+$'); GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"$USER\" >/dev/null 2>&1)"
     ) || exit 0
 
     [[ -z "$selected" ]] && exit 0
