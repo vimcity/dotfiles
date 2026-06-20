@@ -73,7 +73,7 @@ c.colors.statusbar.normal.bg = "#16141f"
 c.colors.statusbar.normal.fg = "#cdd6f4"
 
 # Insert mode - muted blue
-c.colors.statusbar.insert.bg = "#89b4fa"
+c.colors.statusbar.insert.bg = "#a6d189"
 c.colors.statusbar.insert.fg = "#1e1e2e"
 
 # Visual/Caret mode - muted purple

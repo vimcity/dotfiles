@@ -11,15 +11,6 @@ set background=dark
 " colorscheme catppuccin_macchiato
 
 " ===========================================
-" Cursor Shape Configuration
-" ===========================================
-" Thin line cursor in insert mode, block in normal mode
-let &t_SI = "\e[6 q"  " Insert mode: thin line
-let &t_EI = "\e[2 q"  " Normal mode: block
-" Reset cursor on vim exit
-autocmd VimLeave * silent !echo -ne "\e[2 q"
-
-" ===========================================
 " Clipboard Integration
 " ===========================================
 " Keep system clipboard only for explicit yank/paste mappings.

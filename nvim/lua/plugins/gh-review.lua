@@ -67,6 +67,8 @@ return {
       desc = "Open PR in DiffView",
     },
     { "<leader>gi", "<cmd>GhReviewInbox<cr>", desc = "Open PR inbox" },
+    { "<leader>gL", "<cmd>GhReviewCycleLayout<cr>", desc = "Cycle PR diff layout" },
+    { "<leader>gF", "<cmd>GhReviewToggleFiles<cr>", desc = "Toggle PR file panel" },
     { "<leader>gt", "<cmd>GhReviewThreads<cr>", desc = "Toggle PR thread list" },
     { "<leader>gs", "<cmd>GhReviewSubmit<cr>", desc = "Submit PR review" },
   },
