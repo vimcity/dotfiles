@@ -31,6 +31,7 @@ font-size = 20
 
 # Cursor and selection (bluish-grey white)
 cursor-color = #c6d0f5
+cursor-style = block
 
 # Shell integration
 shell-integration = zsh

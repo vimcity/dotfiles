@@ -1,7 +1,6 @@
 return {
   {
     "nvim-orgmode/orgmode",
-    event = "VeryLazy",
     ft = { "org" },
     config = function()
       local colors = {
@@ -46,9 +45,15 @@ return {
           target = org_path .. "/journal/journal.org",
         },
       }
+      local org_agenda_files = {
+        org_path .. "/*.org",
+        org_path .. "/journal/**/*.org",
+        org_path .. "/projects/**/*.org",
+      }
+
       -- Setup orgmode
       require("orgmode").setup({
-        org_agenda_files = org_path .. "/**/*",
+        org_agenda_files = org_agenda_files,
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
         org_agenda_sorting_strategy = { "priority-down", "todo-state-up" }, -- See all options available on org_agenda_sorting_strategy
