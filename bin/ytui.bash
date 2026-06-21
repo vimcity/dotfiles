@@ -31,6 +31,7 @@ YTUI_THUMB_CACHE="$YTUI_CACHE_DIR/thumbnails"
 FEED_VIDEOS_PER_CHANNEL=15 # how many recent videos to fetch per channel on refresh
 SEARCH_RESULTS=30          # max search results
 CHANNEL_VIDEOS=50          # videos to show when browsing a channel
+YTUI_LOOP=1                # reopen same picker after playback/selection
 
 # Colors (for non-fzf output)
 RED='\033[0;31m'
@@ -541,9 +542,12 @@ run_picker() {
     local label="${2:-Videos}"
     [[ ! -f "$source_tsv" || ! -s "$source_tsv" ]] &&
         die "No videos to show. Run: ytui refresh"
-    local result
-    result=$(fzf_pick "$label" <"$source_tsv") || return 0
-    _handle_pick "$result"
+    while true; do
+        local result
+        result=$(fzf_pick "$label" <"$source_tsv") || return 0
+        _handle_pick "$result"
+        [[ "$YTUI_LOOP" != "1" ]] && return 0
+    done
 }
 
 # ---------------------------------------------------------------------------
@@ -705,6 +709,9 @@ Picker keys:
   Ctrl-O      open in browser
   Ctrl-D      download then play in mpv
   Ctrl-N      load more results (search/channel)
+
+Behavior:
+  Loop        return to same list after selection/playback
 
 Config:
   Subscriptions : $YTUI_SUBS_FILE
