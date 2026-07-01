@@ -197,6 +197,11 @@ ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 ln -sf "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
 ln -sf "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
 
+# llm CLI (datasette) config + templates
+if command -v llm >/dev/null 2>&1; then
+    bash "$DOTFILES_DIR/llm/setup.sh"
+fi
+
 if [ -d "$DOTFILES_DIR/yazi" ]; then
     echo "󰉋 Found yazi config in dotfiles, linking..."
     ln -sf "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
