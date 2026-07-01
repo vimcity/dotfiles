@@ -67,8 +67,8 @@ GH_ORG="${GH_ORG:?GH_ORG is required}"
 
 require gh fzf jq
 
-FIELDS="number,title,repository,author,updatedAt,isDraft,url,headRefName"
 REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,reviewRequests,headRefName"
+MINE_FIELDS="number,title,author,updatedAt,isDraft,url,headRefName"
 REVIEW_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,latestReviews,headRefName"
 
 current_repo() {
@@ -98,12 +98,13 @@ fetch_repo_all() {
 
 fetch_repo_mine() {
     local repo="$1"
-    GH_HOST="$GH_HOST" gh search prs \
+    GH_HOST="$GH_HOST" gh pr list \
         --repo "$repo" \
         --author=@me \
         --state=open \
         --limit=100 \
-        --json "$FIELDS"
+        --json "$MINE_FIELDS" |
+        inject_repo "$repo"
 }
 
 fetch_repo_review() {
