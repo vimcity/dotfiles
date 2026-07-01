@@ -58,8 +58,8 @@ float ease(float x) {
     return pow(1.0 - x, 3.0);
 }
 
-const vec4 TRAIL_COLOR = vec4(0.792, 0.620, 0.902, 1.0); // Catppuccin Mauve #ca9ee6
-const float DURATION = 0.5;
+const vec4 TRAIL_COLOR = vec4(0.494, 0.463, 0.588, 1.0); // muted purple-grey #7e7696
+const float DURATION = 0.11;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
