@@ -5,13 +5,26 @@
 # Force true color support (24-bit RGB) for tmux and neovim
 export COLORTERM=truecolor
 
+# ===========================================
+# OS / Machine Detection
+# ===========================================
+IS_MAC=0
+IS_LINUX=0
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    IS_MAC=1
+elif [[ "$(uname -s)" == "Linux" ]]; then
+    IS_LINUX=1
+fi
+
 # Homebrew - static exports avoid spawning `brew` on every shell startup
-export HOMEBREW_PREFIX="/opt/homebrew"
-export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
-export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
-export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
-export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
-export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
+if (( IS_MAC )); then
+    export HOMEBREW_PREFIX="/opt/homebrew"
+    export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+    export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
+    export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+    export MANPATH="$HOMEBREW_PREFIX/share/man${MANPATH+:$MANPATH}:"
+    export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
+fi
 
 
 # ===========================================
@@ -48,7 +61,7 @@ plugins=(
   git
   copypath
   zsh-autosuggestions
-  zsh-syntax-highlighting
+  fast-syntax-highlighting
 )
 
 # Load Oh My Zsh
