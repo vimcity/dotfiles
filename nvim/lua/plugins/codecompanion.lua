@@ -1,6 +1,9 @@
 return {
   {
     "olimorris/codecompanion.nvim",
+    cond = function()
+      return vim.fn.has("mac") == 1 or vim.g.is_homelab == false
+    end,
     cmd = {
       "CodeCompanion",
       "CodeCompanionActions",
