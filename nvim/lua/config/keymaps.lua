@@ -2,6 +2,38 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+-- Deletes → register "d" (paste with P), never system clipboard. Yanks still use unnamedplus.
+local delete_map_opts = { noremap = true, silent = true }
+local delete_maps = {
+  { "n", "d", '"_d' },
+  { "n", "D", '"_D' },
+  { "n", "x", '"_x' },
+  { "n", "X", '"_X' },
+  { "n", "c", '"_c' },
+  { "n", "C", '"_C' },
+  { "n", "s", '"_s' },
+  { "n", "S", '"_S' },
+  { "x", "d", '"_d' },
+  { "x", "D", '"_D' },
+  { "x", "c", '"_c' },
+  { "x", "s", '"_s' },
+}
+for _, spec in ipairs(delete_maps) do
+  vim.keymap.set(spec[1], spec[2], spec[3], delete_map_opts)
+end
+vim.keymap.set({ "n", "x" }, "P", '"dP', { noremap = true, silent = true, desc = "Paste deleted text" })
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function(event)
+    if event.regname ~= "_" then
+      return
+    end
+    if event.operator == "d" or event.operator == "c" then
+      vim.fn.setreg("d", event.regcontents, event.regtype)
+    end
+  end,
+})
+
 -- Move to start/end of line
 vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
