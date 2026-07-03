@@ -1,21 +1,50 @@
 #!/bin/bash
 # Dotfiles installation script
+# Supports macOS and Debian/Ubuntu server installs
 
 set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+OS="$(uname -s)"
+IS_MAC=0
+IS_LINUX=0
 
-if [ "$(uname -s)" = "Darwin" ]; then
+if [ "$OS" = "Darwin" ]; then
+    IS_MAC=1
+elif [ "$OS" = "Linux" ]; then
+    IS_LINUX=1
+    if [ ! -f /etc/os-release ]; then
+        echo "Cannot detect Linux distribution. Exiting."
+        exit 1
+    fi
+    source /etc/os-release
+    if [ "$ID" != "debian" ] && [ "$ID" != "ubuntu" ]; then
+        echo "Unsupported Linux: $PRETTY_NAME. Use Debian or Ubuntu."
+        exit 1
+    fi
+else
+    echo "Unsupported OS: $OS"
+    exit 1
+fi
+
+if [ "$IS_LINUX" -eq 1 ] && [ "$EUID" -ne 0 ] && [ -z "${SUDO_USER:-}" ]; then
+    echo "On Linux, run this script with sudo."
+    exit 1
+fi
+
+USER_NAME="${SUDO_USER:-$USER}"
+HOME_DIR="$(eval echo "~$USER_NAME")"
+
+if [ "$IS_MAC" -eq 1 ]; then
     QUTE_CONFIG_DIR="$HOME/.qutebrowser"
     QUTE_DATA_DIR="$HOME/Library/Application Support/qutebrowser"
 else
-    QUTE_CONFIG_DIR="$HOME/.config/qutebrowser"
-    QUTE_DATA_DIR="$HOME/.local/share/qutebrowser"
+    QUTE_CONFIG_DIR="$HOME_DIR/.config/qutebrowser"
+    QUTE_DATA_DIR="$HOME_DIR/.local/share/qutebrowser"
 fi
 
-echo "🔧 Installing dotfiles..."
+echo "🔧 Installing dotfiles on $OS..."
 
-# Remove existing configs before relinking
 remove_if_exists() {
     if [ -L "$1" ]; then
         echo "󰔌 Removing existing symlink $1"
@@ -26,205 +55,329 @@ remove_if_exists() {
     fi
 }
 
-# Install Oh My Zsh if not already installed
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "󰇚 Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended
-else
-    echo "󰄵 Oh My Zsh already installed"
-fi
+run_as_user() {
+    if [ "$IS_MAC" -eq 1 ]; then
+        "$@"
+    else
+        su - "$USER_NAME" -c "$*"
+    fi
+}
 
-# Install Oh My Zsh plugins
-echo "󰌶 Installing Oh My Zsh plugins..."
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+# ============================================================================
+# Oh My Zsh + plugins
+# ============================================================================
+install_ohmyzsh() {
+    local target_home="${1:-$HOME}"
+    if [ ! -d "$target_home/.oh-my-zsh" ]; then
+        echo "󰇚 Installing Oh My Zsh..."
+        if [ "$IS_LINUX" -eq 1 ]; then
+            su - "$USER_NAME" -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended'
+        else
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended
+        fi
+    else
+        echo "󰄵 Oh My Zsh already installed"
+    fi
+}
 
-# zsh-autosuggestions
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    echo "  󰌶 Installing zsh-autosuggestions..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-else
-    echo "  󰄵 zsh-autosuggestions already installed"
-fi
+install_ohmyzsh "$HOME_DIR"
 
-# fast-syntax-highlighting (replaces zsh-syntax-highlighting for faster typing)
-if [ ! -d "$ZSH_CUSTOM/plugins/fast-syntax-highlighting" ]; then
-    echo "  󰌶 Installing fast-syntax-highlighting..."
-    git clone https://github.com/zdharma-continuum/fast-syntax-highlighting "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
-else
-    echo "  󰄵 fast-syntax-highlighting already installed"
-fi
+ZSH_CUSTOM="$HOME_DIR/.oh-my-zsh/custom"
 
-# zsh-completions
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
-    echo "  󰌶 Installing zsh-completions..."
-    git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
-else
-    echo "  󰄵 zsh-completions already installed"
-fi
+install_omz_plugin() {
+    local repo="$1"
+    local dest="$2"
+    if [ ! -d "$dest" ]; then
+        echo "  󰌶 Installing $(basename "$dest")..."
+        run_as_user git clone --depth=1 "https://github.com/$repo" "$dest"
+    else
+        echo "  󰄵 $(basename "$dest") already installed"
+    fi
+}
 
-# Install TPM (Tmux Plugin Manager)
-if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+install_omz_plugin "zsh-users/zsh-autosuggestions" "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+install_omz_plugin "zsh-users/zsh-completions" "$ZSH_CUSTOM/plugins/zsh-completions"
+install_omz_plugin "zdharma-continuum/fast-syntax-highlighting" "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
+
+# ============================================================================
+# TPM
+# ============================================================================
+if [ ! -d "$HOME_DIR/.tmux/plugins/tpm" ]; then
     echo "󰌶 Installing TPM (Tmux Plugin Manager)..."
-    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+    run_as_user git clone --depth=1 https://github.com/tmux-plugins/tpm "$HOME_DIR/.tmux/plugins/tpm"
 else
     echo "󰄵 TPM already installed"
 fi
 
-# Install tools via brew
-for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
-    if brew list "$formula" &>/dev/null; then
-        echo "󰄵 $formula already installed"
-    else
-        echo "󰌶 Installing $formula..."
-        brew install "$formula"
+# ============================================================================
+# OS-specific package installation
+# ============================================================================
+if [ "$IS_MAC" -eq 1 ]; then
+    echo "󰌶 Installing macOS tools via Homebrew..."
+    for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
+        if brew list "$formula" &>/dev/null; then
+            echo "󰄵 $formula already installed"
+        else
+            echo "󰌶 Installing $formula..."
+            brew install "$formula"
+        fi
+    done
+else
+    echo "󰌶 Updating system..."
+    apt-get update
+    apt-get upgrade -y
+
+    echo "󰌶 Installing base server packages..."
+    BASE_PACKAGES=(
+        openssh-server
+        curl
+        wget
+        git
+        zsh
+        tmux
+        neovim
+        htop
+        btop
+        ncdu
+        rsync
+        syncthing
+        build-essential
+        python3
+        python3-pip
+        python3-venv
+        nodejs
+        npm
+        unzip
+        jq
+        ca-certificates
+        gnupg
+        lsb-release
+        software-properties-common
+        apt-transport-https
+        file
+        xclip
+    )
+
+    if [ "$ID" = "ubuntu" ]; then
+        add-apt-repository -y universe
     fi
-done
 
-# Install casks for ytui (kitten binary for kitty graphics protocol)
-# if brew list --cask kitty &>/dev/null; then
-#     echo "󰄵 kitty already installed"
-# else
-#     echo "󰌶 Installing kitty (for kitten icat thumbnails)..."
-#     brew install --cask kitty
-# fi
-#
-# # Install tools from custom taps
-# echo "󰌶 Installing tools from custom taps..."
-#
-# # taproom from gromgit/brewtils
-# if brew list "taproom" &>/dev/null; then
-#     echo "󰄵 taproom already installed"
-# else
-#     echo "  󰌶 Installing taproom..."
-#     brew install gromgit/brewtils/taproom
-# fi
-#
-# if brew list "tailspin" &>/dev/null; then
-#     echo "󰄵 tailspin already installed"
-# else
-#     echo "  󰌶 Installing tailspin..."
-#     brew install tailspin
-# fi
-#
-# if brew list "reddix" &>/dev/null; then
-#     echo "󰄵 reddix already installed"
-# else
-#     echo "  󰌶 Installing reddix..."
-#     brew install reddix
-# fi
-#
-# if brew list "slides" &>/dev/null; then
-#     echo "󰄵 slides already installed"
-# else
-#     echo "  󰌶 Installing slides..."
-#     brew install slides
-# fi
-# # llmfit from AlexsJones/llmfit
-# if brew list "llmfit" &>/dev/null; then
-#     echo "󰄵 llmfit already installed"
-# else
-#     echo "  󰌶 Installing llmfit..."
-#     brew tap AlexsJones/llmfit
-#     brew install llmfit
-# fi
-#
-# models from arimxyer/tap
-# if brew list "models" &>/dev/null; then
-#     echo "󰄵 models already installed"
-# else
-#     echo "  󰌶 Installing models..."
-#     brew tap arimxyer/tap
-#     brew install models
-# fi
+    apt-get update
+    apt-get install -y "${BASE_PACKAGES[@]}"
 
-# if command -v lexy &>/dev/null; then
-#     echo "Lexy already installed"
-# else
-#     echo "  󰌶 Installing models..."
-#     uv tool install git+https://github.com/antoniorodr/lexy
-# fi
+    echo "󰌶 Installing modern CLI tools..."
+    MODERN_TOOLS=(
+        aria2
+        atuin
+        bat
+        btop
+        eza
+        fastfetch
+        fd-find
+        fzf
+        git-delta
+        htop
+        jq
+        lazygit
+        lazydocker
+        ripgrep
+        shellcheck
+        syncthing
+        zoxide
+    )
 
-# Remove existing files
-remove_if_exists "$HOME/.config/ghostty"
-remove_if_exists "$HOME/.config/atuin"
-remove_if_exists "$HOME/.config/mpv"
-remove_if_exists "$HOME/.config/ytui"
-remove_if_exists "$HOME/.config/btop/themes/catppuccin-rose"
-remove_if_exists "$HOME/.config/opencode/themes"
-remove_if_exists "$HOME/.vimrc"
-remove_if_exists "$HOME/.zshrc"
-remove_if_exists "$HOME/.tmux.conf"
-remove_if_exists "$HOME/.fdignore"
-remove_if_exists "$HOME/.config/lazygit/config.yml"
-remove_if_exists "$HOME/Library/Application Support/lazygit/config.yml"
-remove_if_exists "$QUTE_CONFIG_DIR/config.py"
-remove_if_exists "$QUTE_CONFIG_DIR/greasemonkey"
-remove_if_exists "$QUTE_CONFIG_DIR/quickmarks"
-remove_if_exists "$QUTE_DATA_DIR/userscripts/bw-copy"
+    missing_tools=()
+    for pkg in "${MODERN_TOOLS[@]}"; do
+        if apt-cache show "$pkg" >/dev/null 2>&1; then
+            apt-get install -y "$pkg"
+        else
+            missing_tools+=("$pkg")
+            echo "  $pkg not available in apt, skipping"
+        fi
+    done
 
-if [ -d "$DOTFILES_DIR/yazi" ]; then
-    remove_if_exists "$HOME/.config/yazi"
+    if [ ${#missing_tools[@]} -gt 0 ]; then
+        echo ""
+        echo "Missing tools: ${missing_tools[*]}"
+    fi
+
+    echo "󰌶 Installing Docker..."
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL "https://download.docker.com/linux/$ID/gpg" \
+        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/$ID $VERSION_CODENAME stable" \
+        > /etc/apt/sources.list.d/docker.list
+    apt-get update
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    usermod -aG docker "$USER_NAME"
+
+    echo "󰌶 Setting up Linux clipboard wrappers..."
+    mkdir -p "$HOME_DIR/.local/bin"
+    if ! command -v pbcopy >/dev/null 2>&1; then
+        cat > "$HOME_DIR/.local/bin/pbcopy" <<'EOF'
+#!/bin/sh
+xclip -selection clipboard
+EOF
+        chmod +x "$HOME_DIR/.local/bin/pbcopy"
+    fi
+    if ! command -v pbpaste >/dev/null 2>&1; then
+        cat > "$HOME_DIR/.local/bin/pbpaste" <<'EOF'
+#!/bin/sh
+xclip -selection clipboard -o
+EOF
+        chmod +x "$HOME_DIR/.local/bin/pbpaste"
+    fi
+    chown -R "$USER_NAME:$USER_NAME" "$HOME_DIR/.local"
 fi
 
-# Create .config directory if it doesn't exist
-mkdir -p "$HOME/.config"
-mkdir -p "$HOME/.config/lazygit"
-mkdir -p "$HOME/Library/Application Support/lazygit"
-mkdir -p "$HOME/.config/btop/themes"
-mkdir -p "$HOME/.config/opencode"
-mkdir -p "$QUTE_CONFIG_DIR"
-mkdir -p "$QUTE_DATA_DIR/userscripts"
-
-# Create symlinks
+# ============================================================================
+# Common dotfile symlinks
+# ============================================================================
 echo "󰔌 Creating symlinks..."
-ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
-ln -sf "$DOTFILES_DIR/atuin" "$HOME/.config/atuin"
-ln -sf "$DOTFILES_DIR/mpv" "$HOME/.config/mpv"
-ln -sf "$DOTFILES_DIR/lazygit-config.yml" "$HOME/.config/lazygit/config.yml"
-ln -sf "$DOTFILES_DIR/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
-ln -sf "$DOTFILES_DIR/vimrc" "$HOME/.vimrc"
-ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
-ln -sf "$DOTFILES_DIR/tmux/tmux.conf" "$HOME/.tmux.conf"
-ln -sf "$DOTFILES_DIR/fdignore" "$HOME/.fdignore"
-ln -sf "$DOTFILES_DIR/bin" "$HOME/.local/scripts"
-ln -sf "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
-ln -sf "$DOTFILES_DIR/ytui-config" "$HOME/.config/ytui"
-ln -sf "$DOTFILES_DIR/tmux-cht-languages" "$HOME/.tmux-cht-languages"
-ln -sf "$DOTFILES_DIR/tmux-cht-commands" "$HOME/.tmux-cht-commands"
-ln -sf "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME/.config/btop/themes/catppuccin-rose"
-ln -sf "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
-ln -sf "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
-ln -sf "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
-ln -sf "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
 
-# llm CLI (datasette) config + templates
-if command -v llm >/dev/null 2>&1; then
-    bash "$DOTFILES_DIR/llm/setup.sh"
+mkdir -p "$HOME_DIR/.config"
+mkdir -p "$HOME_DIR/.config/lazygit"
+mkdir -p "$HOME_DIR/.config/btop/themes"
+
+if [ "$IS_MAC" -eq 1 ]; then
+    mkdir -p "$HOME/Library/Application Support/lazygit"
+    mkdir -p "$HOME/.config/opencode"
+    mkdir -p "$QUTE_CONFIG_DIR"
+    mkdir -p "$QUTE_DATA_DIR/userscripts"
 fi
 
-if [ -d "$DOTFILES_DIR/yazi" ]; then
-    echo "󰉋 Found yazi config in dotfiles, linking..."
-    ln -sf "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
+if [ "$IS_LINUX" -eq 1 ]; then
+    chown -R "$USER_NAME:$USER_NAME" "$HOME_DIR/.config" "$HOME_DIR/.local" 2>/dev/null || true
 fi
 
-# qutebrowser (config + userscripts + greasemonkey + quickmarks)
-ln -sf "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
-ln -sf "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
-ln -sf "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
-ln -sf "$DOTFILES_DIR/qutebrowser/userscripts/bw-copy" "$QUTE_DATA_DIR/userscripts/bw-copy"
+link_dotfile() {
+    local src="$1"
+    local dest="$2"
+    if [ ! -e "$src" ]; then
+        echo "  Source missing, skipping: $src"
+        return
+    fi
+    remove_if_exists "$dest"
+    run_as_user ln -sf "$src" "$dest"
+}
+
+link_dotfile "$DOTFILES_DIR/zshrc" "$HOME_DIR/.zshrc"
+link_dotfile "$DOTFILES_DIR/vimrc" "$HOME_DIR/.vimrc"
+link_dotfile "$DOTFILES_DIR/tmux/tmux.conf" "$HOME_DIR/.tmux.conf"
+link_dotfile "$DOTFILES_DIR/tmux-cht-languages" "$HOME_DIR/.tmux-cht-languages"
+link_dotfile "$DOTFILES_DIR/tmux-cht-commands" "$HOME_DIR/.tmux-cht-commands"
+link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/config.yml"
+link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
+link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
+link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME_DIR/.config/btop/themes/catppuccin-rose"
+
+if [ -d "$DOTFILES_DIR/nvim" ]; then
+    remove_if_exists "$HOME_DIR/.config/nvim"
+    link_dotfile "$DOTFILES_DIR/nvim" "$HOME_DIR/.config/nvim"
+fi
+
+if [ -d "$DOTFILES_DIR/atuin" ]; then
+    remove_if_exists "$HOME_DIR/.config/atuin"
+    link_dotfile "$DOTFILES_DIR/atuin" "$HOME_DIR/.config/atuin"
+fi
+
+if [ -d "$DOTFILES_DIR/fastfetch" ]; then
+    remove_if_exists "$HOME_DIR/.config/fastfetch"
+    link_dotfile "$DOTFILES_DIR/fastfetch" "$HOME_DIR/.config/fastfetch"
+fi
+
+# ============================================================================
+# macOS-only symlinks
+# ============================================================================
+if [ "$IS_MAC" -eq 1 ]; then
+    link_dotfile "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
+    link_dotfile "$DOTFILES_DIR/mpv" "$HOME/.config/mpv"
+    link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
+    link_dotfile "$DOTFILES_DIR/ytui-config" "$HOME/.config/ytui"
+    link_dotfile "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
+    link_dotfile "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
+    link_dotfile "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
+    link_dotfile "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
+    link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
+    link_dotfile "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
+    link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
+    link_dotfile "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
+    link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/bw-copy" "$QUTE_DATA_DIR/userscripts/bw-copy"
+
+    if [ -d "$DOTFILES_DIR/yazi" ]; then
+        remove_if_exists "$HOME/.config/yazi"
+        link_dotfile "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
+    fi
+
+    if command -v llm >/dev/null 2>&1; then
+        bash "$DOTFILES_DIR/llm/setup.sh"
+    fi
+fi
+
+# ============================================================================
+# Linux server-only setup
+# ============================================================================
+if [ "$IS_LINUX" -eq 1 ]; then
+    LOCAL_ZSHRC="$HOME_DIR/.zshrc.local"
+    if [ ! -f "$LOCAL_ZSHRC" ]; then
+        echo "󰌶 Creating $LOCAL_ZSHRC with Linux overrides..."
+        cat > "$LOCAL_ZSHRC" <<'EOF'
+# Server / Linux overrides for macOS dotfiles
+
+export PATH="$HOME/.local/bin:$HOME/.local/scripts:$PATH"
+
+if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+    alias bat=batcat
+fi
+if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    alias fd=fdfind
+fi
+
+unalias qt 2>/dev/null || true
+unalias qtr 2>/dev/null || true
+unalias shellmaster 2>/dev/null || true
+
+unset OMLX_BASE_DIR OMLX_MODEL_DIR OMLX_DEFAULT_MODEL
+
+alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias dcu='docker compose up -d'
+alias dcd='docker compose down'
+alias dcl='docker compose logs -f'
+EOF
+        chown "$USER_NAME:$USER_NAME" "$LOCAL_ZSHRC"
+    fi
+
+    SSHD_CONFIG="/etc/ssh/sshd_config.d/99-hardening.conf"
+    if [ ! -f "$SSHD_CONFIG" ]; then
+        echo "󰌶 Writing SSH hardening stub to $SSHD_CONFIG..."
+        cat > "$SSHD_CONFIG" <<'EOF'
+# Hardening applied by install.sh
+# PasswordAuthentication no
+# PermitRootLogin no
+# PubkeyAuthentication yes
+EOF
+        echo "Uncomment the lines in $SSHD_CONFIG and run: systemctl restart ssh"
+    fi
+
+    if [ "$SHELL" != *"zsh" ]; then
+        echo "󰌶 Changing default shell to zsh for $USER_NAME..."
+        chsh -s "$(command -v zsh)" "$USER_NAME"
+    fi
+fi
 
 echo "󰸞 Dotfiles installed successfully!"
 echo ""
-echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs:"
-echo "   - Work-specific environment variables and paths"
-echo "   - API keys and authentication tokens"
-echo "   - Company-specific tooling and aliases"
-echo "   - Machine-specific performance tweaks"
-echo ""
-echo "   This file will be automatically sourced by .zshrc if it exists."
-echo ""
-echo "󰔌 To install Tmux plugins:"
-echo "   1. Start tmux: tmux"
-echo "   2. Press: Ctrl+Space then Shift+I (capital i)"
-echo "   3. Wait for plugins to install"
+if [ "$IS_MAC" -eq 1 ]; then
+    echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs."
+    echo "󰔌 To install Tmux plugins: start tmux, press Ctrl+Space then Shift+I"
+else
+    echo "Next steps:"
+    echo "  1. Log out and back in to pick up the docker group."
+    echo "  2. Start tmux and install plugins: Ctrl+Space then Shift+I"
+    echo "  3. Open nvim and run :Lazy! sync"
+    echo "  4. Review $HOME_DIR/.zshrc.local for Linux-specific overrides."
+    echo "  5. Edit /etc/ssh/sshd_config.d/99-hardening.conf, enable key-only auth, restart ssh."
+fi
 echo ""

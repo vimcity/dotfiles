@@ -15,9 +15,14 @@ vim.opt.autoindent = true -- Copy indent from current line when starting a new l
 -- Clipboard provider overrides for different environments
 vim.opt.clipboard = "unnamedplus"
 
+local is_mac = vim.fn.has("mac") == 1
+local is_linux = vim.fn.has("linux") == 1
 local is_ssh_session = vim.env.SSH_TTY or vim.env.SSH_CONNECTION
 local is_tmux_session = vim.env.TMUX
 local is_personal = vim.env.PERSONAL == "1"
+local is_homelab = is_linux and (is_ssh_session or is_tmux_session)
+
+vim.g.is_homelab = is_homelab
 
 -- Termux: use termux-clipboard-set/get (for tablet SSH usage)
 if
@@ -36,7 +41,7 @@ then
     cache_enabled = 0,
   }
 -- macOS: use pbcopy/pbpaste for local usage
-elseif vim.fn.has("mac") == 1 and not is_ssh_session then
+elseif is_mac and not is_ssh_session then
   vim.g.clipboard = {
     copy = {
       ["+"] = "pbcopy",
