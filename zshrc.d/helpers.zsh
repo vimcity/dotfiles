@@ -57,12 +57,13 @@ usage: col [mcp|keyword...] [codex flags/options] [-- prompt...]
   col serena                       enable Serena for this session
   col github jira                  enable named MCPs for this session
   col github resume --last         resume last chat with github MCP
+  col playwright                   enable Playwright MCP for this session
   col browser devtools             enable browser plugins/devtools MCP
   col -- -m model "prompt"         pass normal Codex flags/prompt
 
 Keywords: browser, devtools, outlook
-MCP names: github, jira, confluence, slack, context7, datadog, serena,
-           service-now, chrome-devtools, headroom
+MCP names: playwright, github, jira, confluence, slack, context7, datadog,
+           serena, service-now, chrome-devtools, headroom
 EOF
         else
           command cat <<'EOF'
@@ -74,12 +75,13 @@ usage: co [mcp|keyword...] [codex flags/options] [-- prompt...]
   co slack                         slack MCP
   co slack resume --last           resume last chat with slack MCP
   co outlook                       outlook-email plugin
+  co playwright resume --last      resume last chat with Playwright MCP loaded
   co browser devtools github       combine keywords and MCPs
   co -- -m gpt-5.5 "prompt"        pass normal Codex flags/prompt
 
 Keywords: browser, devtools, outlook, noserena
-MCP names: github, jira, confluence, slack, context7, datadog, serena,
-           service-now, chrome-devtools, headroom
+MCP names: playwright, github, jira, confluence, slack, context7, datadog,
+           serena, service-now, chrome-devtools, headroom
 EOF
         fi
         return 0

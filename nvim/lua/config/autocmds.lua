@@ -19,7 +19,7 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "*",
   callback = function()
-    vim.opt_local.wrap = true
+    vim.opt_local.wrap = false
     vim.opt_local.linebreak = true -- Break at word boundaries, not mid-word
     vim.opt_local.breakindent = true -- Indent wrapped lines to match indentation
   end,

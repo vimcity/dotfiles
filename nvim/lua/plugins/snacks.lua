@@ -78,6 +78,10 @@ return {
             "application/**/*.js.map",
           },
         },
+        -- Case-insensitive todo pattern: matches TODO, todo, Todo etc. with or without colon
+        todo = {
+          pattern = "[Tt][Oo][Dd][Oo]:?",
+        },
       },
     })
 
