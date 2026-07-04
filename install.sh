@@ -156,6 +156,7 @@ else
         apt-transport-https
         file
         xclip
+        ntfs-3g
     )
 
     if [ "$ID" = "ubuntu" ]; then
@@ -183,6 +184,7 @@ else
         ripgrep
         shellcheck
         syncthing
+        yazi
         zoxide
     )
 
@@ -289,6 +291,11 @@ if [ -d "$DOTFILES_DIR/fastfetch" ]; then
 fi
 
 # ============================================================================
+if [ -d "$DOTFILES_DIR/yazi" ]; then
+    remove_if_exists "$HOME_DIR/.config/yazi"
+    link_dotfile "$DOTFILES_DIR/yazi" "$HOME_DIR/.config/yazi"
+fi
+
 # macOS-only symlinks
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
