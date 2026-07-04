@@ -73,7 +73,7 @@ install_ohmyzsh() {
         if [ "$IS_LINUX" -eq 1 ]; then
             su - "$USER_NAME" -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended'
         else
-            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/install.sh)" "" --unattended
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
         fi
     else
         echo "󰄵 Oh My Zsh already installed"
@@ -97,7 +97,7 @@ install_omz_plugin() {
 
 install_omz_plugin "zsh-users/zsh-autosuggestions" "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 install_omz_plugin "zsh-users/zsh-completions" "$ZSH_CUSTOM/plugins/zsh-completions"
-install_omz_plugin "zdharma-continuum/fast-syntax-highlighting" "$ZSH_CUSTOM/plugins/fast-syntax-highlighting"
+install_omz_plugin "zsh-users/zsh-syntax-highlighting" "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 
 # ============================================================================
 # TPM
