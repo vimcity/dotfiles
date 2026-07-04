@@ -61,7 +61,7 @@ plugins=(
   git
   copypath
   zsh-autosuggestions
-  fast-syntax-highlighting
+  zsh-syntax-highlighting
 )
 
 # Load Oh My Zsh
