@@ -18,8 +18,10 @@ prompt_segment() {
 }
 
 prompt_context_segment() {
-    if [[ -n "$SSH_CONNECTION" || "$EUID" -eq 0 ]]; then
-        # prompt_segment "${THEME_COLORS[user_bg]}" "${THEME_COLORS[user_fg]}" '%n'
+    if [[ -n "$SSH_CONNECTION" ]]; then
+        prompt_segment "#313244" "#89b4fa" "󰢹 %m"
+    elif [[ "$EUID" -eq 0 ]]; then
+        prompt_segment "#bf616a" "#f5f5f5" "󰚌 root"
     fi
 }
 
