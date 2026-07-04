@@ -19,7 +19,7 @@ prompt_segment() {
 
 prompt_context_segment() {
     if [[ -n "$SSH_CONNECTION" ]]; then
-        prompt_segment "#313244" "#89b4fa" "󰢹 %m"
+        prompt_segment "#313244" "#fab387" "󰢹 %m"
     elif [[ "$EUID" -eq 0 ]]; then
         prompt_segment "#bf616a" "#f5f5f5" "󰚌 root"
     fi
