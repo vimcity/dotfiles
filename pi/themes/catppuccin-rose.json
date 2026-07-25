@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
+  "name": "catppuccin-rose",
+  "vars": {
+    "base": "#29273f",
+    "surface": "#2a273f",
+    "overlay": "#393552",
+    "muted": "#6e6a86",
+    "subtle": "#908caa",
+    "text": "#d0cbe0",
+    "rose": "#f38ba8",
+    "pink": "#f4b8e4",
+    "mauve": "#ca9ee6",
+    "red": "#e78284",
+    "peach": "#ef9f76",
+    "yellow": "#e5c890",
+    "green": "#a6d189",
+    "teal": "#81c8be",
+    "sky": "#99d1db",
+    "blue": "#8caaee",
+    "lavender": "#babbf1",
+    "toolPending": "#313149",
+    "userMessage": "#35334d",
+    "toolSuccess": "#264542",
+    "toolError": "#3b2234"
+  },
+  "colors": {
+    "accent": "lavender", "border": "blue", "borderAccent": "lavender", "borderMuted": "overlay",
+    "success": "green", "error": "red", "warning": "yellow", "muted": "subtle", "dim": "muted", "text": "text", "thinkingText": "mauve",
+    "selectedBg": "overlay", "userMessageBg": "userMessage", "userMessageText": "#f2d5cf", "customMessageBg": "surface", "customMessageText": "text", "customMessageLabel": "pink",
+    "toolPendingBg": "toolPending", "toolSuccessBg": "toolSuccess", "toolErrorBg": "toolError", "toolTitle": "sky", "toolOutput": "subtle",
+    "mdHeading": "sky", "mdLink": "sky", "mdLinkUrl": "muted", "mdCode": "peach", "mdCodeBlock": "green", "mdCodeBlockBorder": "overlay", "mdQuote": "subtle", "mdQuoteBorder": "mauve", "mdHr": "overlay", "mdListBullet": "pink",
+    "toolDiffAdded": "green", "toolDiffRemoved": "red", "toolDiffContext": "subtle",
+    "syntaxComment": "muted", "syntaxKeyword": "mauve", "syntaxFunction": "blue", "syntaxVariable": "text", "syntaxString": "green", "syntaxNumber": "peach", "syntaxType": "yellow", "syntaxOperator": "sky", "syntaxPunctuation": "subtle",
+    "thinkingOff": "muted", "thinkingMinimal": "subtle", "thinkingLow": "sky", "thinkingMedium": "blue", "thinkingHigh": "mauve", "thinkingXhigh": "rose", "thinkingMax": "pink", "bashMode": "green"
+  },
+  "export": { "pageBg": "base", "cardBg": "surface", "infoBg": "overlay" }
+}
