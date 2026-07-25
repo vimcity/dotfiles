@@ -1,0 +1,36 @@
+{
+  "enableInstallTelemetry": false,
+  "enableAnalytics": false,
+  "showCacheMissNotices": true,
+  "defaultProjectTrust": "ask",
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 16000
+  },
+  "retry": {
+    "enabled": true,
+    "maxRetries": 2,
+    "baseDelayMs": 1000,
+    "provider": {
+      "timeoutMs": 120000,
+      "maxRetries": 0,
+      "maxRetryDelayMs": 15000
+    }
+  },
+  "lastChangelogVersion": "0.81.1",
+  "theme": "catppuccin-rose",
+  "outputPad": 1,
+  "defaultProvider": "openrouter",
+  "defaultModel": "auto",
+  "enabledModels": [
+    "openrouter/*"
+  ],
+  "defaultThinkingLevel": "low",
+  "editorPaddingX": 1,
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "hideThinkingBlock": false,
+  "showHardwareCursor": true
+}
