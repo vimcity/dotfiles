@@ -4,7 +4,7 @@
 
 # Base Colors
 background = #29273f
-foreground = #d0cbe0
+foreground = #c0bbce
 
 # Cursor
 cursor-color = #c6d0f5
@@ -13,7 +13,7 @@ cursor-style = block
 
 # Selection
 selection-background = #393552
-selection-foreground = #d0cbe0
+selection-foreground = #c0bbce
 
 # ANSI 16 Color Palette
 # Black
@@ -46,4 +46,4 @@ palette = 14=#9ccfd8
 
 # White
 palette = 7=#b5bfe2
-palette = 15=#d0cbe0
+palette = 15=#c0bbce

@@ -64,7 +64,7 @@ Use them only when relevant to the file you touched and when available in the en
 - Match the style already used in the file before introducing a new pattern
 - Keep comments sparse; add them only when the intent is not obvious
 - Preserve user-specific behavior and cross-machine setup assumptions
-- Never hardcode secrets, tokens, or work-only settings into tracked files
+- Never hardcode secrets, tokens, hardcoded paths with user or work-only settings into tracked files
 
 ### Shell (`zshrc`, `install.sh`, `tmux/scripts/*.sh`)
 - Use 4-space indentation in shell functions and conditionals

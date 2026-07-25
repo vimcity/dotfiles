@@ -1,0 +1,31 @@
+# Additive error/exception highlighting on top of tspin defaults.
+# Built-in groups (dates, URLs, severities, etc.) stay as-is.
+# Docs: https://github.com/bensadeh/tailspin#customizing-highlight-groups
+
+[[keywords]]
+words = [
+  'ERROR', 'error',
+  'FATAL', 'fatal',
+  'CRITICAL', 'critical',
+  'FAILURE', 'failure',
+  'FAILED', 'failed',
+  'Exception', 'exception',
+  'panic',
+]
+style = { fg = "red", bold = true }
+
+[[regexes]]
+regex = '\b([A-Za-z0-9_.$]+Exception)\b'
+style = { fg = "red", bold = true }
+
+[[regexes]]
+regex = '\b([A-Za-z0-9_.$]+Error)\b'
+style = { fg = "red", bold = true }
+
+[[regexes]]
+regex = '(Caused by:)'
+style = { fg = "red", bold = true }
+
+[[regexes]]
+regex = '(Traceback \(most recent call last\):)'
+style = { fg = "red", bold = true }
