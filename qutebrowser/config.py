@@ -3,6 +3,8 @@
 
 import os
 
+config_dir = os.path.dirname(os.path.realpath(__file__))
+
 config.load_autoconfig()
-config.source(os.path.join(os.path.dirname(__file__), "main.py"))
-config.source(os.path.join(os.path.dirname(__file__), "local.py"))
+config.source(os.path.join(config_dir, "main.py"))
+config.source(os.path.join(config_dir, "local.py"))

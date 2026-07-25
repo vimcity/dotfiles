@@ -11,14 +11,15 @@ window-decoration = false
 macos-titlebar-style = hidden
 window-step-resize = true
 window-save-state = always
+mouse-hide-while-typing = true
 
 # Font settings
 font-feature = -calt
 # font-family = "CommitMono"
-# adjust-cell-height = 40%
+adjust-cell-height = 10%
 # font-family = "FiraCode Nerd Font"
 # adjust-cell-height = 40%
-adjust-cell-height = 10%
+# adjust-cell-height = 10%
 font-size = 20
 
 # Background
@@ -30,11 +31,10 @@ font-size = 20
 # background-blur=true
 # background-opacity = 0.95
 
-# Cursor styling: mode-driven block/bar cursor with shader-based smear trail.
+# Cursor styling: mode-driven block/bar cursor.
 cursor-style = block
 adjust-cursor-thickness = 4
 custom-shader = shaders/cursor_smear_fade.glsl
-
 # Shell integration
 shell-integration = zsh
 
@@ -42,7 +42,7 @@ shell-integration = zsh
 copy-on-select = clipboard
 
 # Keybindings
-keybind = shift+enter=text:\x1b\r
+keybind = shift+enter=text:\x1b[13;2u
 
 # Disable Ctrl+Shift+P (conflicts with other tools)
 keybind = ctrl+shift+p=unbind

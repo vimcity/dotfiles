@@ -3,6 +3,9 @@
 *.swp
 *.swo
 *~
+*.pyc
+*.log
+*.tmp
 .DS_Store
 
 # Oh My Zsh is installed via install.sh, not tracked in dotfiles
@@ -15,6 +18,9 @@ atuin/key
 
 # Backup directory
 .dotfiles_backup_*
+
+# Generated local AI corpora and indexes
+.local-ai/
 
 # Machine-specific configs
 .zshrc.local
