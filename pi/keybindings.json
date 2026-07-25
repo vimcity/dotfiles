@@ -1,0 +1,5 @@
+{
+  "app.thinking.cycle": ["alt+r"],
+  "app.thinking.toggle": ["ctrl+shift+t"],
+  "app.session.rename": ["ctrl+r"]
+}

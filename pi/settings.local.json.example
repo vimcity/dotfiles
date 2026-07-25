@@ -1,0 +1,7 @@
+{
+  "defaultProvider": "openrouter",
+  "defaultModel": "auto",
+  "enabledModels": [
+    "openrouter/*"
+  ]
+}

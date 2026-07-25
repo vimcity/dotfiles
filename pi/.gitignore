@@ -1,0 +1,10 @@
+# Local Pi overrides, credentials, sessions, and runtime state
+settings.local.json
+auth.json
+models*.json
+trust.json
+sessions/
+plans/
+state/
+*.db
+*.sqlite
