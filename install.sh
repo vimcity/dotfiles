@@ -114,7 +114,7 @@ fi
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
     echo "󰌶 Installing macOS tools via Homebrew..."
-    for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa; do
+    for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw; do
         if brew list "$formula" &>/dev/null; then
             echo "󰄵 $formula already installed"
         else
@@ -122,6 +122,7 @@ if [ "$IS_MAC" -eq 1 ]; then
             brew install "$formula"
         fi
     done
+
 else
     echo "󰌶 Updating system..."
     apt-get update
@@ -242,6 +243,9 @@ echo "󰔌 Creating symlinks..."
 mkdir -p "$HOME_DIR/.config"
 mkdir -p "$HOME_DIR/.config/lazygit"
 mkdir -p "$HOME_DIR/.config/btop/themes"
+mkdir -p "$HOME_DIR/.config/herdr"
+mkdir -p "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr"
+mkdir -p "$HOME_DIR/.config/tailspin"
 
 if [ "$IS_MAC" -eq 1 ]; then
     mkdir -p "$HOME/Library/Application Support/lazygit"
@@ -290,6 +294,18 @@ if [ -d "$DOTFILES_DIR/fastfetch" ]; then
     link_dotfile "$DOTFILES_DIR/fastfetch" "$HOME_DIR/.config/fastfetch"
 fi
 
+if [ -f "$DOTFILES_DIR/herdr/config.toml" ]; then
+    link_dotfile "$DOTFILES_DIR/herdr/config.toml" "$HOME_DIR/.config/herdr/config.toml"
+fi
+
+if [ -f "$DOTFILES_DIR/herdr/reviewr.toml" ]; then
+    link_dotfile "$DOTFILES_DIR/herdr/reviewr.toml" "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr/config.toml"
+fi
+
+if [ -f "$DOTFILES_DIR/tailspin/theme.toml" ]; then
+    link_dotfile "$DOTFILES_DIR/tailspin/theme.toml" "$HOME_DIR/.config/tailspin/theme.toml"
+fi
+
 # ============================================================================
 if [ -d "$DOTFILES_DIR/yazi" ]; then
     remove_if_exists "$HOME_DIR/.config/yazi"
@@ -311,7 +327,10 @@ if [ "$IS_MAC" -eq 1 ]; then
     link_dotfile "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
     link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
     link_dotfile "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
-    link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/bw-copy" "$QUTE_DATA_DIR/userscripts/bw-copy"
+    for userscript in bw-copy rbw-autofill _rbw-common.sh; do
+        link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" "$QUTE_DATA_DIR/userscripts/$userscript"
+        chmod +x "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" 2>/dev/null || true
+    done
 
     if [ -d "$DOTFILES_DIR/yazi" ]; then
         remove_if_exists "$HOME/.config/yazi"
@@ -320,6 +339,10 @@ if [ "$IS_MAC" -eq 1 ]; then
 
     if command -v llm >/dev/null 2>&1; then
         bash "$DOTFILES_DIR/llm/setup.sh"
+    fi
+
+    if command -v rbw >/dev/null 2>&1 && [ -f "$DOTFILES_DIR/rbw/configure.sh" ]; then
+        bash "$DOTFILES_DIR/rbw/configure.sh"
     fi
 fi
 
