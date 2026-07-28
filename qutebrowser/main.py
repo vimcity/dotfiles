@@ -175,6 +175,15 @@ config.bind(",M", "cmd-set-text -s :quickmark-load -t ")
 
 config.bind(",h", "config-cycle tabs.show never multiple")
 
+# rbw password helpers (insert mode on login forms)
+config.bind(",pw", "spawn --userscript rbw-autofill both", mode="insert")
+config.bind(",pu", "spawn --userscript rbw-autofill username", mode="insert")
+config.bind(",pp", "spawn --userscript rbw-autofill password", mode="insert")
+config.bind(",pt", "spawn --userscript rbw-autofill totp", mode="insert")
+config.bind(",Pc", "spawn --userscript bw-copy password")
+config.bind(",Pu", "spawn --userscript bw-copy username")
+config.bind(",Pt", "spawn --userscript bw-copy totp")
+
 # Allow clicking links with custom URI schemes (e.g. slack://) to open in macOS default app
 c.content.unknown_url_scheme_policy = "allow-all"
 
