@@ -11,7 +11,8 @@ return {
       require("diffview").setup(opts)
 
       vim.api.nvim_create_user_command("DiffviewMain", function()
-        vim.cmd("DiffviewOpen origin/main...HEAD")
+        -- --imply-local: right side (HEAD) uses working-tree files so you can edit as you review
+        vim.cmd("DiffviewOpen origin/main...HEAD --imply-local")
       end, { desc = "Open diff against origin/main" })
     end,
     keys = {

@@ -19,6 +19,7 @@ local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
 local is_ssh_session = vim.env.SSH_TTY or vim.env.SSH_CONNECTION
 local is_tmux_session = vim.env.TMUX
+local is_herdr_session = vim.env.HERDR_ENV == "1"
 local is_personal = vim.env.PERSONAL == "1"
 local is_homelab = is_linux and (is_ssh_session or is_tmux_session)
 
@@ -40,8 +41,8 @@ then
     },
     cache_enabled = 0,
   }
--- macOS: use pbcopy/pbpaste for local usage
-elseif is_mac and not is_ssh_session then
+-- macOS: use pbcopy/pbpaste only outside remote multiplexers.
+elseif is_mac and not is_ssh_session and not is_herdr_session then
   vim.g.clipboard = {
     copy = {
       ["+"] = "pbcopy",
@@ -52,12 +53,15 @@ elseif is_mac and not is_ssh_session then
       ["*"] = "pbpaste",
     },
   }
--- SSH/Tmux remote: write to tmux buffer (cross-pane paste) AND fire OSC 52 (local Mac clipboard)
-elseif is_ssh_session or is_tmux_session then
+-- Remote multiplexer: update tmux's buffer when present and use OSC 52 for the client clipboard.
+-- Herdr panes have HERDR_ENV=1 but may not inherit SSH_* from a persistent server process.
+elseif is_ssh_session and ( is_tmux_session or is_herdr_session ) then
   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
   local function tmux_osc52_copy(reg)
     return function(lines, regtype)
-      vim.fn.system("tmux load-buffer -", table.concat(lines, "\n"))
+      if is_tmux_session then
+        vim.fn.system("tmux load-buffer -", table.concat(lines, "\n"))
+      end
       if ok then
         osc52.copy(reg)(lines, regtype)
       end
@@ -70,8 +74,8 @@ elseif is_ssh_session or is_tmux_session then
       ["*"] = tmux_osc52_copy("*"),
     },
     paste = {
-      ["+"] = { "tmux", "show-buffer" },
-      ["*"] = { "tmux", "show-buffer" },
+      ["+"] = is_tmux_session and { "tmux", "show-buffer" } or osc52.paste("+"),
+      ["*"] = is_tmux_session and { "tmux", "show-buffer" } or osc52.paste("*"),
     },
   }
 end
