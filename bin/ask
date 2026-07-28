@@ -1,0 +1,379 @@
+#!/usr/bin/env bash
+# Quick one-shot LLM ask via `llm` CLI.
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+LLM_LOCAL_MODEL="${LLM_LOCAL_MODEL:-qwen3.5:9b}"
+LLM_REMOTE_MODEL="${LLM_REMOTE_MODEL:-gpt-4o-mini}"
+LLM_OLLAMA_MODEL="${LLM_OLLAMA_MODEL:-qwen3.5:9b}"
+LLM_OMLX_MODEL="${LLM_OMLX_MODEL:-omlx-qwen}"
+ASK_PANE_LINES="${ASK_PANE_LINES:-80}"
+ASK_CONTEXT_LINES="${ASK_CONTEXT_LINES:-220}"
+ASK_CONTEXT_BYTES="${ASK_CONTEXT_BYTES:-30000}"
+FABRIC_BIN="${FABRIC_BIN:-fabric-ai}"
+FABRIC_MODEL="${FABRIC_MODEL:-qwen3.5:9b}"
+FABRIC_VENDOR="${FABRIC_VENDOR:-Ollama}"
+FABRIC_TEMPERATURE="${FABRIC_TEMPERATURE:-0.2}"
+ASK_CONTEXT_BIN="${ASK_CONTEXT_BIN:-$HOME/dotfiles/bin/ask-context}"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  ask "question"                 Fast local model via Ollama
+  ask -r "question"              Remote/cloud model
+  ask -o "question"              Explicit Ollama model
+  ask --omlx "question"          oMLX model
+  ask -t TEMPLATE "question"     Use llm template (shell-help, vim-help, error-diagnose, prompt-clean)
+  ask --pattern PATTERN "text"   Run a Fabric pattern with the local model
+  ask -f FILE "question"         Include file as fragment
+  ask -d "question"              Ask AIChat with the devdocs RAG
+  ask --help-for rg "question"   Ground the answer in `rg --help`
+  ask --man rsync "question"     Ground the answer in a man page
+  ask --nvim-help diagnostic "question"
+                                  Ground the answer in Neovim help
+  printf 'text' | ask --stdin "question"
+                                  Include piped text as context
+  ask --show-context ...          Print collected documentation without asking a model
+  ask --build-devdocs            Build curated local docs corpus for AIChat RAG
+  ask --init-devdocs             Build corpus and start AIChat RAG initialization
+  ask -c                         Read question from clipboard
+  ask -p                         Capture recent tmux pane output + question
+  ask -l TERM                    Search llm logs
+
+Env:
+  LLM_LOCAL_MODEL   default: qwen3.5:9b
+  LLM_REMOTE_MODEL  default: gpt-4o-mini
+  LLM_OLLAMA_MODEL  default: qwen3.5:9b
+  LLM_OMLX_MODEL    default: omlx-qwen
+  FABRIC_MODEL      default: qwen3.5:9b
+  FABRIC_VENDOR     default: Ollama
+  FABRIC_TEMPERATURE default: 0.2
+EOF
+}
+
+ensure_ollama() {
+    if curl -sf --max-time 2 "http://127.0.0.1:11434/api/tags" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if [[ -d "/Applications/Ollama.app" ]]; then
+        open -gja Ollama >/dev/null 2>&1 || true
+        sleep 2
+    fi
+
+    curl -sf --max-time 5 "http://127.0.0.1:11434/api/tags" >/dev/null 2>&1
+}
+
+ensure_omlx() {
+    if curl -sf --max-time 2 "http://127.0.0.1:8000/v1/models" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if command -v omlx >/dev/null 2>&1; then
+        omlx start >/dev/null 2>&1 || true
+        sleep 2
+        curl -sf --max-time 5 "http://127.0.0.1:8000/v1/models" >/dev/null 2>&1
+    fi
+}
+
+run_fabric_pattern() {
+    local pattern="$1"
+    local input="$2"
+    local pattern_dir="$HOME/.config/fabric/patterns/$pattern"
+
+    [[ "$pattern" =~ ^[A-Za-z0-9_-]+$ ]] || {
+        printf 'ask: invalid Fabric pattern: %s\n' "$pattern" >&2
+        return 1
+    }
+    command -v "$FABRIC_BIN" >/dev/null 2>&1 || {
+        printf 'ask: Fabric unavailable: %s\n' "$FABRIC_BIN" >&2
+        return 1
+    }
+    [[ -f "$pattern_dir/system.md" ]] || {
+        printf 'ask: Fabric pattern not found: %s\n' "$pattern" >&2
+        return 1
+    }
+    if [[ "$FABRIC_VENDOR" == "Ollama" ]]; then
+        ensure_ollama || {
+            printf 'ask: Ollama not reachable for Fabric\n' >&2
+            return 1
+        }
+    fi
+
+    printf '%s' "$input" | env LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
+        OLLAMA_API_URL="${OLLAMA_API_URL:-http://127.0.0.1:11434}" \
+        "$FABRIC_BIN" -p "$pattern" -V "$FABRIC_VENDOR" -m "$FABRIC_MODEL" \
+        -t "$FABRIC_TEMPERATURE" --thinking=off --suppress-think
+}
+
+ask_devdocs() {
+    local prompt="$1"
+    local docs_dir="${AI_DOCS_DIR:-$HOME/dotfiles/.local-ai/devdocs}"
+
+    command -v aichat >/dev/null 2>&1 || {
+        printf 'ask: aichat unavailable\n' >&2
+        exit 1
+    }
+
+    [[ -d "$docs_dir" ]] || {
+        printf 'ask: devdocs corpus missing; run `ask --build-devdocs` first\n' >&2
+        exit 1
+    }
+
+    ensure_omlx || true
+    aichat --rag devdocs "$prompt"
+}
+
+init_devdocs() {
+    local docs_dir="${AI_DOCS_DIR:-$HOME/dotfiles/.local-ai/devdocs}"
+
+    command -v aichat >/dev/null 2>&1 || {
+        printf 'ask: aichat unavailable\n' >&2
+        exit 1
+    }
+
+    ai-docs-build
+    printf '\nWhen AIChat asks "Add documents:", paste this path:\n\n'
+    printf '%s/\n\n' "$docs_dir"
+    printf 'RAG setup also requires an embedding model, for example ollama:nomic-embed-text.\n\n'
+    ensure_omlx || true
+    aichat --rag devdocs
+}
+
+main() {
+    local model="$LLM_LOCAL_MODEL"
+    local template=""
+    local fragment=""
+    local use_clipboard=0
+    local use_pane=0
+    local log_search=""
+    local use_devdocs=0
+    local use_stdin=0
+    local context_kind=""
+    local context_target=""
+    local show_context=0
+    local fabric_pattern=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h | --help)
+                usage
+                exit 0
+                ;;
+            -r | --remote)
+                model="$LLM_REMOTE_MODEL"
+                shift
+                ;;
+            -o | --ollama)
+                model="$LLM_OLLAMA_MODEL"
+                shift
+                ;;
+            --omlx)
+                model="$LLM_OMLX_MODEL"
+                shift
+                ;;
+            -m | --model)
+                model="${2:?model required}"
+                shift 2
+                ;;
+            -t | --template)
+                template="${2:?template required}"
+                shift 2
+                ;;
+            --pattern)
+                fabric_pattern="${2:?Fabric pattern required}"
+                shift 2
+                ;;
+            -f | --file)
+                fragment="${2:?file required}"
+                shift 2
+                ;;
+            -d | --devdocs)
+                use_devdocs=1
+                shift
+                ;;
+            --help-for)
+                context_kind="command"
+                context_target="${2:?command required}"
+                shift 2
+                ;;
+            --man)
+                context_kind="man"
+                context_target="${2:?man topic required}"
+                shift 2
+                ;;
+            --nvim-help)
+                context_kind="nvim"
+                context_target="${2:?Neovim help topic required}"
+                shift 2
+                ;;
+            --show-context)
+                show_context=1
+                shift
+                ;;
+            --build-devdocs)
+                ai-docs-build
+                exit 0
+                ;;
+            --init-devdocs)
+                init_devdocs
+                exit 0
+                ;;
+            -c | --clipboard)
+                use_clipboard=1
+                shift
+                ;;
+            --stdin)
+                use_stdin=1
+                shift
+                ;;
+            -p | --pane)
+                use_pane=1
+                shift
+                ;;
+            -l | --logs)
+                log_search="${2:-}"
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                printf 'ask: unknown option: %s\n' "$1" >&2
+                usage >&2
+                exit 1
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    if [[ -n "$log_search" ]]; then
+        if [[ -n "$log_search" ]]; then
+            llm logs -s "$log_search"
+        else
+            llm logs -n 20
+        fi
+        exit 0
+    fi
+
+    local prompt="${*:-}"
+    if [[ -z "$prompt" && "$use_clipboard" -eq 0 && "$use_pane" -eq 0 && "$use_stdin" -eq 0 && -z "$context_kind" ]]; then
+        usage >&2
+        exit 1
+    fi
+
+    if [[ "$model" == "$LLM_OMLX_MODEL" || "$model" == omlx-* ]]; then
+        ensure_omlx || {
+            printf 'ask: oMLX not reachable; falling back to %s\n' "$LLM_OLLAMA_MODEL" >&2
+            model="$LLM_OLLAMA_MODEL"
+        }
+    fi
+    if [[ "$model" == "$LLM_LOCAL_MODEL" || "$model" == "$LLM_OLLAMA_MODEL" ]] ||
+        ollama list 2>/dev/null | awk 'NR > 1 { print $1 }' | grep -Fxq "$model"; then
+        ensure_ollama || {
+            printf 'ask: Ollama not reachable\n' >&2
+            exit 1
+        }
+    fi
+
+    local llm_args=(-m "$model")
+    local input=""
+
+    if [[ "$use_clipboard" -eq 1 ]]; then
+        if ! command -v pbpaste >/dev/null 2>&1; then
+            printf 'ask: pbpaste unavailable\n' >&2
+            exit 1
+        fi
+        input="$(pbpaste)"
+        [[ -n "$input" ]] || {
+            printf 'ask: clipboard empty\n' >&2
+            exit 1
+        }
+    fi
+
+    if [[ "$use_stdin" -eq 1 ]]; then
+        local stdin_text
+        stdin_text="$(cat)"
+        [[ -n "$stdin_text" ]] || {
+            printf 'ask: stdin empty\n' >&2
+            exit 1
+        }
+        input="${input:+$input
+
+}$stdin_text"
+    fi
+
+    if [[ "$use_pane" -eq 1 ]]; then
+        local pane_output
+        pane_output="$(tmux capture-pane -p -S "-$ASK_PANE_LINES" 2>/dev/null || true)"
+        if [[ -n "$pane_output" ]]; then
+            input="${input:+$input
+
+}Recent terminal output:
+${pane_output}"
+        fi
+    fi
+
+    if [[ -n "$prompt" && -z "$input" ]]; then
+        input="$prompt"
+    elif [[ -n "$prompt" && -n "$input" ]]; then
+        input="${input}
+
+Question: ${prompt}"
+    fi
+
+    if [[ "$use_devdocs" -eq 1 ]]; then
+        ask_devdocs "$input"
+        exit 0
+    fi
+
+    if [[ -n "$context_kind" ]]; then
+        local context=""
+        local source_label=""
+        local question="${input:-Explain the most useful parts of this documentation.}"
+        case "$context_kind" in
+            command)
+                context="$("$ASK_CONTEXT_BIN" --help-for "$context_target" -- "$question")"
+                source_label="Command help: $context_target --help"
+                ;;
+            man)
+                context="$("$ASK_CONTEXT_BIN" --man "$context_target" -- "$question")"
+                source_label="Man page: $context_target"
+                ;;
+            nvim)
+                context="$("$ASK_CONTEXT_BIN" --nvim-help "$context_target" -- "$question")"
+                source_label="Neovim help: $context_target"
+                ;;
+        esac
+        if [[ "$show_context" -eq 1 ]]; then
+            printf '%s\n' "$context"
+            exit 0
+        fi
+        printf -v input 'Question:\n%s\n\nSource: %s\n\nDocumentation:\n%s' "$question" "$source_label" "$context"
+        [[ -n "$template" ]] || template="doc-help"
+    elif [[ "$show_context" -eq 1 ]]; then
+        printf 'ask: --show-context requires --help-for, --man, or --nvim-help\n' >&2
+        exit 1
+    fi
+
+    if [[ -n "$fabric_pattern" ]]; then
+        run_fabric_pattern "$fabric_pattern" "$input"
+        exit 0
+    fi
+
+    if [[ -n "$fragment" ]]; then
+        llm_args+=(-f "$fragment")
+    fi
+
+    if [[ -n "$template" ]]; then
+        llm "${llm_args[@]}" -t "$template" "$input"
+    else
+        llm "${llm_args[@]}" "$input"
+    fi
+}
+
+main "$@"

@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Build a small, explicit local-doc corpus for AIChat/LLM workflows.
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+OUT_DIR="${AI_DOCS_DIR:-$DOTFILES_DIR/.local-ai/devdocs}"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  ai-docs-build
+
+Builds a curated docs corpus at:
+  ~/dotfiles/.local-ai/devdocs
+
+The corpus includes selected dotfiles docs/configs plus command help captures.
+It intentionally avoids env files, token files, SSH material, and broad home
+directory indexing.
+EOF
+}
+
+copy_doc() {
+    local src="$1"
+    [[ -f "$src" ]] || return 0
+
+    local rel="${src#$DOTFILES_DIR/}"
+    local dest="$OUT_DIR/files/$rel"
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+    printf '%s\n' "files/$rel" >>"$OUT_DIR/manifest.txt"
+}
+
+capture_help() {
+    local cmd="$1"
+    local dest="$OUT_DIR/commands/$cmd.txt"
+    mkdir -p "$(dirname "$dest")"
+
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf '%s\n' "$cmd: not installed" >"$dest"
+        printf '%s\n' "commands/$cmd.txt" >>"$OUT_DIR/manifest.txt"
+        return 0
+    fi
+
+    {
+        printf '# %s --help\n\n' "$cmd"
+        "$cmd" --help 2>&1 || true
+    } >"$dest"
+    printf '%s\n' "commands/$cmd.txt" >>"$OUT_DIR/manifest.txt"
+}
+
+main() {
+    if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+        usage
+        exit 0
+    fi
+
+    mkdir -p "$OUT_DIR/files" "$OUT_DIR/commands"
+    : >"$OUT_DIR/manifest.txt"
+
+    copy_doc "$DOTFILES_DIR/README.md"
+    copy_doc "$DOTFILES_DIR/tmux/TMUX_WORKFLOW.md"
+    copy_doc "$DOTFILES_DIR/bin/ask"
+    copy_doc "$DOTFILES_DIR/tmux/scripts/llm-ask.sh"
+    copy_doc "$DOTFILES_DIR/llm/extra-openai-models.yaml"
+    copy_doc "$DOTFILES_DIR/aichat/config.yaml"
+
+    while IFS= read -r file; do copy_doc "$file"; done < <(
+        find "$DOTFILES_DIR/llm/templates" -type f -name '*.yaml' 2>/dev/null | sort
+    )
+    while IFS= read -r file; do copy_doc "$file"; done < <(
+        find "$DOTFILES_DIR/tmux" -type f \( -name '*.conf' -o -name '*.tmux' \) 2>/dev/null | sort
+    )
+    while IFS= read -r file; do copy_doc "$file"; done < <(
+        find "$DOTFILES_DIR/nvim" -maxdepth 2 -type f \( -name '*.md' -o -name '*.lua' \) 2>/dev/null | sort
+    )
+
+    for cmd in rg fd fzf tmux llm aichat codex gh posting jq yq bat eza zoxide; do
+        capture_help "$cmd"
+    done
+
+    {
+        printf '# Local Devdocs Corpus\n\n'
+        printf 'Generated from a curated subset of dotfiles and command help.\n\n'
+        printf '## Files\n\n'
+        sed 's/^/- /' "$OUT_DIR/manifest.txt"
+        printf '\n## AIChat RAG setup\n\n'
+        printf 'In AIChat REPL, run `.rag devdocs` once and add this directory:\n\n'
+        printf '```text\n%s/\n```\n\n' "$OUT_DIR"
+        printf 'After docs/config changes, rebuild with:\n\n'
+        printf '```sh\nask --build-devdocs\nask --devdocs "your question"\n```\n'
+    } >"$OUT_DIR/index.md"
+
+    printf 'Built local docs corpus: %s\n' "$OUT_DIR"
+    printf 'Files listed in: %s\n' "$OUT_DIR/manifest.txt"
+}
+
+main "$@"
