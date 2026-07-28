@@ -1,0 +1,63 @@
+# AIChat local config.
+#
+# Keep your real config at:
+#   ~/Library/Application Support/aichat/config.yaml
+#
+# Chat uses the local oMLX server. Embeddings remain optional and require Ollama.
+
+model: omlx:Qwen3.6-27B-4bit
+stream: true
+save: true
+keybindings: vi
+wrap: no
+wrap_code: false
+
+# RAG needs an embedding model. oMLX currently exposes chat models on your
+# machine, not embeddings, so this example uses Ollama's local embedding model.
+# Install/pull with:
+#   ollama pull nomic-embed-text
+rag_embedding_model: ollama:nomic-embed-text
+rag_top_k: 5
+rag_chunk_size: 1800
+rag_chunk_overlap: 120
+rag_template: |
+  Answer using the supplied local documentation when it is relevant.
+
+  <context>
+  __CONTEXT__
+  </context>
+
+  Rules:
+  - Prefer exact commands and file names from the context.
+  - If the context is insufficient, say what is missing before using general knowledge.
+  - Keep the answer concise and practical.
+
+  Query:
+  __INPUT__
+
+document_loaders:
+  pdf: 'pdftotext $1 -'
+  docx: 'pandoc --to plain $1'
+
+clients:
+  - type: openai-compatible
+    name: omlx
+    api_base: http://127.0.0.1:8000/v1
+    api_key: local
+    models:
+      - name: Qwen3.6-27B-4bit
+        max_input_tokens: 131072
+        supports_function_calling: true
+      - name: Qwen2.5-Coder-32B-Instruct-4bit
+        max_input_tokens: 32768
+        supports_function_calling: true
+
+  - type: openai-compatible
+    name: ollama
+    api_base: http://localhost:11434/v1
+    api_key: local
+    models:
+      - name: nomic-embed-text
+        type: embedding
+        default_chunk_size: 1500
+        max_batch_size: 64

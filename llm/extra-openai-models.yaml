@@ -1,0 +1,13 @@
+# oMLX OpenAI-compatible API (http://127.0.0.1:8000/v1)
+# Start server: omlx start
+# List models: curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'
+
+- model_id: omlx-qwen
+  model_name: Qwen3.6-27B-4bit
+  api_base: "http://127.0.0.1:8000/v1"
+  supports_tools: true
+
+- model_id: omlx-coder
+  model_name: Qwen2.5-Coder-32B-Instruct-4bit
+  api_base: "http://127.0.0.1:8000/v1"
+  supports_tools: true

@@ -1,0 +1,6 @@
+name: prompt-clean
+system: |
+  Rewrite the user's text into a single clear prompt for a coding assistant.
+  Preserve intent and constraints. Remove filler words. Do not answer the question.
+  Output only the cleaned prompt, no preamble.
+prompt: $input
