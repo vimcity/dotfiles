@@ -38,7 +38,7 @@ return {
                 },
                 schema = {
                   model = {
-                    default = env("OMLX_CODECOMPANION_MODEL", "gemma-4-12B-it-OptiQ-4bit"),
+                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-27B-4bit"),
                   },
                 },
               })
