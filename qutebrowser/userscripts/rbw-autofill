@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODE="${1:-both}"  # both|username|password|totp
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_rbw-common.sh
+source "$SCRIPT_DIR/_rbw-common.sh"
+
+if [[ -z "${QUTE_FIFO:-}" ]]; then
+    echo "rbw-autofill: QUTE_FIFO is not set" >&2
+    exit 1
+fi
+
+HOST="$(rbw_host_from_url || true)"
+if [[ -z "$HOST" ]]; then
+    rbw_qute_msg message-error "No hostname in current URL"
+    exit 1
+fi
+
+if ! command -v rbw >/dev/null 2>&1; then
+    rbw_qute_msg message-error "rbw not installed. Run: brew install rbw"
+    exit 1
+fi
+
+selected="$(rbw_first_entry || true)"
+if [[ -z "$selected" ]]; then
+    rbw_qute_msg message-error "No rbw login found for ${HOST}"
+    exit 1
+fi
+
+IFS=$'\t' read -r username entry_name <<< "$selected"
+if [[ -z "$username" || -z "$entry_name" ]]; then
+    rbw_qute_msg message-error "Invalid rbw entry for ${HOST}"
+    exit 1
+fi
+
+password="$(rbw get "$entry_name" "$username" 2>/dev/null || true)"
+totp="$(rbw code "$entry_name" "$username" 2>/dev/null || true)"
+
+case "$MODE" in
+    username)
+        if [[ -z "$username" ]]; then
+            rbw_qute_msg message-error "No username for ${entry_name}"
+            exit 1
+        fi
+        rbw_fake_key "$username"
+        rbw_qute_msg message-info "Filled username for ${HOST}"
+        ;;
+    password)
+        if [[ -z "$password" ]]; then
+            rbw_qute_msg message-error "No password for ${entry_name}"
+            exit 1
+        fi
+        rbw_fake_key "$password"
+        if [[ -n "$totp" ]]; then
+            printf '%s' "$totp" | pbcopy
+            rbw_qute_msg message-info "Filled password for ${HOST}; TOTP copied"
+        else
+            rbw_qute_msg message-info "Filled password for ${HOST}"
+        fi
+        ;;
+    totp)
+        if [[ -z "$totp" ]]; then
+            rbw_qute_msg message-error "No TOTP for ${entry_name}"
+            exit 1
+        fi
+        rbw_fake_key "$totp"
+        rbw_qute_msg message-info "Filled TOTP for ${HOST}"
+        ;;
+    both)
+        if [[ -z "$username" || -z "$password" ]]; then
+            rbw_qute_msg message-error "Missing username or password for ${entry_name}"
+            exit 1
+        fi
+        rbw_fake_key "$username"
+        rbw_qute_cmd 'fake-key " "'
+        rbw_fake_key "$password"
+        rbw_qute_cmd "mode-enter insert"
+        if [[ -n "$totp" ]]; then
+            printf '%s' "$totp" | pbcopy
+            rbw_qute_msg message-info "Filled login for ${HOST}; TOTP copied"
+        else
+            rbw_qute_msg message-info "Filled login for ${HOST}"
+        fi
+        ;;
+    *)
+        rbw_qute_msg message-error "Unknown mode: ${MODE}"
+        exit 1
+        ;;
+esac

@@ -1,30 +1,55 @@
 #!/usr/bin/env bash
 set -euo pipefail
-MODE="${1:-password}"  # password|username
-HOST="$(python3 -c 'from urllib.parse import urlparse; import os; print(urlparse(os.environ.get("QUTE_URL","")).hostname or "")')"
-SESSION="${BW_SESSION:-}"
-if [[ -z "$SESSION" ]]; then
-  SESSION="$(launchctl getenv BW_SESSION 2>/dev/null || true)"
+
+MODE="${1:-password}"  # password|username|totp
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_rbw-common.sh
+source "$SCRIPT_DIR/_rbw-common.sh"
+
+if [[ -z "${QUTE_FIFO:-}" ]]; then
+    echo "bw-copy: QUTE_FIFO is not set" >&2
+    exit 1
 fi
 
-if [[ -z "$SESSION" ]]; then
-  echo "message-error 'BW_SESSION not set. Run: bwup'" >> "$QUTE_FIFO"
-  exit 1
+HOST="$(rbw_host_from_url || true)"
+if [[ -z "$HOST" ]]; then
+    rbw_qute_msg message-error "No hostname in current URL"
+    exit 1
 fi
-ITEM_JSON="$(bw list items --search "$HOST" --session "$SESSION" \
-  | jq -c 'map(select(.login and .login.password != null)) | .[0]')"
-if [[ "$ITEM_JSON" == "null" || -z "$ITEM_JSON" ]]; then
-  echo "message-error 'No Bitwarden login found for $HOST'" >> "$QUTE_FIFO"
-  exit 1
+
+if ! command -v rbw >/dev/null 2>&1; then
+    rbw_qute_msg message-error "rbw not installed. Run: brew install rbw"
+    exit 1
 fi
-if [[ "$MODE" == "username" ]]; then
-  VALUE="$(printf '%s' "$ITEM_JSON" | jq -r '.login.username // empty')"
-else
-  VALUE="$(printf '%s' "$ITEM_JSON" | jq -r '.login.password // empty')"
+
+selected="$(rbw_first_entry || true)"
+if [[ -z "$selected" ]]; then
+    rbw_qute_msg message-error "No rbw login found for ${HOST}"
+    exit 1
 fi
+
+IFS=$'\t' read -r username entry_name <<< "$selected"
+
+case "$MODE" in
+    username)
+        VALUE="$(rbw get "$entry_name" "$username" --field username 2>/dev/null || true)"
+        LABEL="username"
+        ;;
+    totp)
+        VALUE="$(rbw code "$entry_name" "$username" 2>/dev/null || true)"
+        LABEL="TOTP"
+        ;;
+    *)
+        VALUE="$(rbw get "$entry_name" "$username" 2>/dev/null || true)"
+        LABEL="password"
+        ;;
+esac
+
 if [[ -z "$VALUE" ]]; then
-  echo "message-error 'Requested field empty for $HOST'" >> "$QUTE_FIFO"
-  exit 1
+    rbw_qute_msg message-error "Requested ${LABEL} empty for ${HOST}"
+    exit 1
 fi
+
 printf '%s' "$VALUE" | pbcopy
-echo "message-info 'Bitwarden ${MODE} copied for $HOST'" >> "$QUTE_FIFO"
+rbw_qute_msg message-info "rbw ${LABEL} copied for ${HOST}"
