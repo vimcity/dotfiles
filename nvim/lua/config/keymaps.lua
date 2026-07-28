@@ -2,6 +2,38 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+-- Install pane navigation after LazyVim's defaults so there is one final owner.
+-- A running tmux server is irrelevant: TMUX is set only inside an attached client.
+local direct_herdr = vim.env.HERDR_ENV == "1" and (vim.env.TMUX == nil or vim.env.TMUX == "")
+local pane_directions = {
+  h = { herdr = "move_cursor_left", tmux = "TmuxNavigateLeft", desc = "Navigate left" },
+  j = { herdr = "move_cursor_down", tmux = "TmuxNavigateDown", desc = "Navigate down" },
+  k = { herdr = "move_cursor_up", tmux = "TmuxNavigateUp", desc = "Navigate up" },
+  l = { herdr = "move_cursor_right", tmux = "TmuxNavigateRight", desc = "Navigate right" },
+}
+
+for key, direction in pairs(pane_directions) do
+  if direct_herdr then
+    vim.keymap.set("n", "<C-" .. key .. ">", function()
+      require("herdr-splits")[direction.herdr]()
+    end, { silent = true, desc = direction.desc .. " (Herdr/split)" })
+  else
+    vim.keymap.set(
+      "n",
+      "<C-" .. key .. ">",
+      "<cmd><C-U>" .. direction.tmux .. "<cr>",
+      { silent = true, desc = direction.desc .. " (tmux/split)" }
+    )
+  end
+end
+
+if not direct_herdr then
+  vim.keymap.set("n", "<C-\\>", "<cmd>TmuxNavigatePrevious<cr>", {
+    silent = true,
+    desc = "Navigate previous (tmux/split)",
+  })
+end
+
 -- Deletes → register "d" (paste with P), never system clipboard. Yanks still use unnamedplus.
 local delete_map_opts = { noremap = true, silent = true }
 local delete_maps = {
@@ -38,10 +70,17 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
--- Snacks explorer
+-- File navigation: picker-first workflow with nvim-tree
+-- See NAVIGATION_WORKFLOW.md for full context and philosophy
+
+-- nvim-tree explorer
 vim.keymap.set("n", "<leader>e", function()
-  Snacks.explorer()
-end, { desc = "Open file explorer" })
+  vim.cmd("NvimTreeToggle")
+end, { desc = "Toggle file explorer" })
+
+vim.keymap.set("n", "<leader>E", function()
+  vim.cmd("NvimTreeFindFile")
+end, { desc = "Reveal current file" })
 
 -- Project management
 vim.keymap.set("n", "<leader>fp", function()
@@ -87,6 +126,44 @@ end, { desc = "Copy buffer path" })
 vim.keymap.set("n", "<leader>fr", function()
   Snacks.picker.recent()
 end, { desc = "Recent Files" })
+
+-- Read-only local assistant. File-changing work stays with coding agents.
+vim.keymap.set("n", "<leader>al", function()
+  require("config.local_assistant").ask()
+end, { desc = "Ask local assistant" })
+vim.keymap.set("x", "<leader>al", function()
+  require("config.local_assistant").ask_selection()
+end, { desc = "Ask local assistant about selection" })
+
+-- Picker-first workflow: fast file jumping (primary navigation)
+-- Use these for 90% of file navigation; avoid explorer for jumping
+local function buffer_dir()
+  local name = vim.api.nvim_buf_get_name(0)
+  if name == "" then
+    return vim.fn.getcwd()
+  end
+  return vim.fn.fnamemodify(name, ":p:h")
+end
+
+vim.keymap.set("n", "<leader>ff", function()
+  Snacks.picker.files()
+end, { desc = "Find Files (project/cwd)" })
+
+vim.keymap.set("n", "<leader>fF", function()
+  Snacks.picker.files({ cwd = buffer_dir() })
+end, { desc = "Find Files (buffer dir)" })
+
+vim.keymap.set("n", "<leader>fg", function()
+  Snacks.picker.grep()
+end, { desc = "Grep (project/cwd)" })
+
+vim.keymap.set("n", "<leader>fG", function()
+  Snacks.picker.grep({ cwd = buffer_dir() })
+end, { desc = "Grep (buffer dir)" })
+
+vim.keymap.set("n", "<leader>/", function()
+  Snacks.picker.grep({ cwd = buffer_dir() })
+end, { desc = "Grep (buffer dir)" })
 
 -- Resize windows with Ctrl + Arrow keys (10 rows/columns per press)
 vim.keymap.set("n", "<C-Up>", "<cmd>resize +10<cr>", { desc = "Increase window height" })
