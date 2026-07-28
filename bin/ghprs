@@ -63,11 +63,12 @@ repos | focus-repos)
 esac
 
 GH_HOST="${GH_HOST:?GH_HOST is required}"
-GH_ORG="${GH_ORG:?GH_ORG is required}"
 
 require gh fzf jq
 
-REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,reviewRequests,headRefName"
+GH_LOGIN=$(GH_HOST="$GH_HOST" gh api user --jq '.login') || die "could not determine GitHub login"
+
+REPO_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,headRefName"
 MINE_FIELDS="number,title,author,updatedAt,isDraft,url,headRefName"
 REVIEW_FIELDS="number,title,author,updatedAt,isDraft,url,reviewDecision,latestReviews,headRefName"
 
@@ -115,7 +116,7 @@ fetch_repo_review() {
         --state=open \
         --limit=100 \
         --json "$REVIEW_FIELDS" |
-        jq --arg me "$USER" --arg repo "$repo" '
+        jq --arg me "$GH_LOGIN" --arg repo "$repo" '
             map(
                 . + {
                     repository: {
@@ -177,8 +178,9 @@ fetch_focus() {
 }
 
 fetch_project() {
-    local repo
-    repo=$(GH_HOST="$GH_HOST" gh repo list "$GH_ORG" \
+    local org repo
+    org="${GH_ORG:?GH_ORG is required for project mode}"
+    repo=$(GH_HOST="$GH_HOST" gh repo list "$org" \
         --limit=200 \
         --json nameWithOwner \
         --jq '.[].nameWithOwner' |
@@ -238,7 +240,7 @@ format_all() {
     "\(.url)\t" +
     (blue + (.repository.name | rpad(25)) + reset) + " " +
     (mauve + ("#" + (.number | tostring) | rpad(6)) + reset) + " " +
-    ($scol + ($status | rpad(8)) + reset) + "  " +
+    ($scol + ($status | rpad(15)) + reset) + "  " +
     ($title | rpad(52)) + " " +
     (overlay + ($branch | rpad(30)) + reset) + " " +
     (flamingo + (.author.login | rpad(12)) + reset) + " " +
@@ -257,7 +259,7 @@ open_browser() {
 
 open_in_nvim() {
     local url="$1"
-    local full_repo number repo_name repo_path nvim_cmd
+    local full_repo number repo_name repo_path nvim_command
     full_repo=$(printf '%s' "$url" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|')
     number=$(printf '%s' "$url" | grep -oE '[0-9]+$')
     repo_name=$(repo_name_from_nwo "$full_repo")
@@ -272,12 +274,12 @@ open_in_nvim() {
         return
     fi
 
-    nvim_cmd="nvim -c \"lua vim.defer_fn(function() require('gh-review').open_number(${number}) end, 200)\""
+    nvim_command="lua vim.defer_fn(function() require('gh-review').open_number(${number}) end, 200)"
 
     if [[ -n "${TMUX:-}" ]]; then
-        tmux new-window -n "pr-${repo_name}-${number}" -c "$repo_path" "$nvim_cmd"
+        tmux new-window -n "pr-${repo_name}-${number}" -c "$repo_path" nvim -c "$nvim_command"
     else
-        (cd "$repo_path" && eval "$nvim_cmd")
+        (cd "$repo_path" && nvim -c "$nvim_command")
     fi
 }
 
@@ -309,7 +311,7 @@ select_pr() {
                 --no-preview \
                 --bind="ctrl-o:execute-silent(url=\$(printf '%s' {} | cut -f1); open \"\$url\")" \
                 --bind="ctrl-y:execute-silent(url=\$(printf '%s' {} | cut -f1); printf '%s' \"\$url\" | pbcopy)" \
-                --bind="ctrl-a:execute-silent(url=\$(printf '%s' {} | cut -f1); repo=\$(printf '%s' \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|'); number=\$(printf '%s' \"\$url\" | grep -oE '[0-9]+$'); GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"$USER\" >/dev/null 2>&1)"
+                --bind="ctrl-a:execute-silent(url=\$(printf '%s' {} | cut -f1); repo=\$(printf '%s' \"\$url\" | sed -E 's|https?://[^/]+/([^/]+/[^/]+)/pull/[0-9]+|\1|'); number=\$(printf '%s' \"\$url\" | grep -oE '[0-9]+$'); GH_HOST=$GH_HOST gh pr edit \"\$number\" --repo \"\$repo\" --add-reviewer \"$GH_LOGIN\" >/dev/null 2>&1)"
     ) || exit 0
 
     [[ -z "$selected" ]] && exit 0
