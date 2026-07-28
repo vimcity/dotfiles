@@ -1,0 +1,138 @@
+id = "herdr.tools"
+name = "Herdr Tools"
+version = "0.3.0"
+min_herdr_version = "0.7.0"
+description = "Local Herdr utilities: popup tools, overlays, and workflow launchers."
+platforms = ["macos"]
+
+[[actions]]
+id = "shell"
+title = "Open popup shell"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "shell"]
+
+[[actions]]
+id = "jira"
+title = "Open Jira TUI"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "jira"]
+
+[[actions]]
+id = "posting"
+title = "Open Posting"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "posting"]
+
+[[actions]]
+id = "btop"
+title = "Open btop"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "btop"]
+
+[[actions]]
+id = "yazi"
+title = "Open yazi"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "yazi"]
+
+[[actions]]
+id = "ghprs"
+title = "Open PR review picker"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "ghprs"]
+
+[[actions]]
+id = "quick_ask"
+title = "Open quick ask"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "quick-ask"]
+
+[[actions]]
+id = "org_task"
+title = "Open quick org task"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "org-task"]
+
+[[actions]]
+id = "agenda"
+title = "Open agenda"
+contexts = ["workspace", "tab", "pane"]
+command = ["bash", "open-tool.sh", "agenda"]
+
+[[actions]]
+id = "nav_left"
+title = "Navigate left"
+contexts = ["pane"]
+command = ["bash", "navigate.sh", "left"]
+
+[[actions]]
+id = "nav_down"
+title = "Navigate down"
+contexts = ["pane"]
+command = ["bash", "navigate.sh", "down"]
+
+[[actions]]
+id = "nav_up"
+title = "Navigate up"
+contexts = ["pane"]
+command = ["bash", "navigate.sh", "up"]
+
+[[actions]]
+id = "nav_right"
+title = "Navigate right"
+contexts = ["pane"]
+command = ["bash", "navigate.sh", "right"]
+
+[[panes]]
+id = "shell"
+title = " Shell"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" shell"]
+
+[[panes]]
+id = "jira"
+title = "󰌌 Jira"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" jira"]
+
+[[panes]]
+id = "posting"
+title = "󰆍 Posting"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" posting"]
+
+[[panes]]
+id = "btop"
+title = "󰍛 btop"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" btop"]
+
+[[panes]]
+id = "yazi"
+title = " yazi"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" yazi"]
+
+[[panes]]
+id = "ghprs"
+title = " Reviews"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" ghprs"]
+
+[[panes]]
+id = "quick-ask"
+title = "󰭻 Ask"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" quick-ask"]
+
+[[panes]]
+id = "org-task"
+title = "󰥔 Org Task"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" org-task"]
+
+[[panes]]
+id = "agenda"
+title = "󰃭 Agenda"
+placement = "overlay"
+command = ["bash", "-c", "exec \"$HERDR_PLUGIN_ROOT/tool-pane.sh\" agenda"]

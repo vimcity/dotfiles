@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""Plan and launch Org tasks with Pi in Herdr."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+ACTIVE = {"TODO", "PROGRESS"}
+HEADING = re.compile(r"^(?P<stars>\*+)\s+(?P<state>TODO|PROGRESS)\s+(?P<title>.+)$")
+PROPERTY = re.compile(r"^\s*:(?P<key>[A-Z_]+):\s*(?P<value>.*?)\s*$")
+FILE_LINK = re.compile(r"\[\[file:([^\]]+?)(?:\]\[[^\]]*\])?\]\]")
+TRAILING_TAGS = re.compile(r"\s+:[\w@#%:]+:\s*$")
+
+
+@dataclass(frozen=True)
+class Task:
+    line: int
+    end_line: int
+    level: int
+    state: str
+    title: str
+    subtree: tuple[str, ...]
+    properties: dict[str, str]
+    plan: Path | None
+
+
+def clean_title(value: str) -> str:
+    value = re.sub(r"^\[#[A-Z]\]\s+", "", value)
+    return TRAILING_TAGS.sub("", value).strip()
+
+
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return (slug[:72].rstrip("-") or "org-task")
+
+
+def parse_tasks(org_file: Path) -> tuple[list[str], list[Task]]:
+    lines = org_file.read_text().splitlines()
+    tasks: list[Task] = []
+    for index, line in enumerate(lines):
+        match = HEADING.match(line)
+        if not match:
+            continue
+        level = len(match.group("stars"))
+        end = len(lines)
+        for cursor in range(index + 1, len(lines)):
+            next_heading = re.match(r"^(\*+)\s+", lines[cursor])
+            if next_heading and len(next_heading.group(1)) <= level:
+                end = cursor
+                break
+        subtree = tuple(lines[index:end])
+        properties: dict[str, str] = {}
+        plan: Path | None = None
+        for child in subtree[1:]:
+            prop = PROPERTY.match(child)
+            if prop:
+                properties[prop.group("key")] = prop.group("value")
+            link = FILE_LINK.search(child)
+            if link and plan is None:
+                candidate = Path(os.path.expandvars(os.path.expanduser(link.group(1))))
+                plan = candidate if candidate.is_absolute() else org_file.parent / candidate
+        tasks.append(
+            Task(
+                line=index + 1,
+                end_line=end,
+                level=level,
+                state=match.group("state"),
+                title=clean_title(match.group("title")),
+                subtree=subtree,
+                properties=properties,
+                plan=plan.resolve() if plan else None,
+            )
+        )
+    return lines, tasks
+
+
+def select_task(tasks: list[Task], line: int | None) -> Task:
+    if line is not None:
+        for task in tasks:
+            if task.line == line or task.line <= line <= task.end_line:
+                return task
+        raise SystemExit(f"org-pi: no active task around line {line}")
+    if not tasks:
+        raise SystemExit("org-pi: no active TODO/PROGRESS tasks found")
+    if sys.stdin.isatty() and subprocess.run(["sh", "-c", "command -v fzf >/dev/null"], check=False).returncode == 0:
+        rows = "".join(f"{task.line}\t{task.state}\t{task.title}\n" for task in tasks)
+        picked = subprocess.run(
+            ["fzf", "--delimiter=\\t", "--with-nth=2,3", "--prompt=org-pi> "],
+            input=rows,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if picked.returncode != 0:
+            raise SystemExit(0)
+        selected = int(picked.stdout.split("\t", 1)[0])
+        return next(task for task in tasks if task.line == selected)
+    return tasks[0]
+
+
+def plan_path(org_file: Path, task: Task, plans_dir: Path | None) -> Path:
+    if task.plan:
+        return task.plan
+    root = plans_dir or Path(os.environ.get("ORG_PLANS_PATH", org_file.parent / "plans"))
+    return root.expanduser().resolve() / f"{slugify(task.title)}.md"
+
+
+def task_workdir(task: Task, plan: Path | None) -> Path:
+    configured = task.properties.get("DIR") or task.properties.get("WORKDIR")
+    if configured:
+        return Path(os.path.expandvars(os.path.expanduser(configured))).resolve()
+    if plan and plan.is_file():
+        for line in plan.read_text().splitlines()[:30]:
+            if line.startswith("Workdir:"):
+                return Path(os.path.expandvars(os.path.expanduser(line.split(":", 1)[1].strip()))).resolve()
+    return Path.cwd().resolve()
+
+
+def create_plan(org_file: Path, lines: list[str], task: Task, target: Path, dry_run: bool) -> None:
+    if target.exists():
+        print(target)
+        return
+    relative = os.path.relpath(target, org_file.parent)
+    body = "\n".join(task.subtree[1:]).strip()
+    content = f"""# {task.title}
+
+Status: planned
+Source: `{org_file}:{task.line}`
+Workdir: {task_workdir(task, None)}
+
+## Objective
+
+{body or 'Clarify the desired outcome before implementation.'}
+
+## Constraints
+
+- Keep changes small and reviewable.
+- Preserve durable decisions here; leave full conversation history in Pi.
+
+## Progress
+
+- Plan created from Org task.
+
+## Next Action
+
+- Review this plan and launch the task when ready.
+"""
+    if dry_run:
+        print(json.dumps({"org_file": str(org_file), "line": task.line, "plan": str(target), "link": relative}, indent=2))
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content)
+    link_line = " " * (task.level + 1) + f"[[file:{relative}][plan]]"
+    lines.insert(task.line, link_line)
+    org_file.write_text("\n".join(lines) + "\n")
+    print(target)
+
+
+def launch(org_file: Path, task: Task, target: Path | None, model: str | None, dry_run: bool) -> None:
+    workdir = task_workdir(task, target)
+    if not workdir.is_dir():
+        raise SystemExit(f"org-pi: workdir does not exist: {workdir}")
+    prompt = [
+        f"Work on Org task: {task.title}",
+        f"Source: {org_file}:{task.line}",
+        f"Working directory: {workdir}",
+    ]
+    if target and target.is_file():
+        prompt.append(f"Read and maintain the durable plan at: {target}")
+    prompt.extend(["", "Org context:", *task.subtree, "", "Make the smallest correct change. Keep durable decisions in the linked plan; leave detailed conversation history in this Pi session."])
+    pi_args = ["pi", "--name", task.title]
+    if model:
+        pi_args += ["--model", model]
+    pi_args.append("\n".join(prompt))
+    command = shlex.join(["exec", *pi_args])
+    preview = {"title": task.title, "workdir": str(workdir), "plan": str(target) if target else None, "command": command}
+    if dry_run:
+        print(json.dumps(preview, indent=2))
+        return
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    if not workspace:
+        raise SystemExit("org-pi: launch from Herdr or set HERDR_WORKSPACE_ID")
+    created = subprocess.run(
+        ["herdr", "tab", "create", "--workspace", workspace, "--cwd", str(workdir), "--label", f"pi:{slugify(task.title)[:30]}", "--focus"],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    payload = json.loads(created.stdout)
+    pane_id = payload["result"]["root_pane"]["pane_id"]
+    subprocess.run(["herdr", "pane", "run", pane_id, command], check=True)
+    print(json.dumps({**preview, "pane_id": pane_id}))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("list", "plan", "launch"))
+    parser.add_argument("--org-file", default=os.environ.get("AI_TASK_ORG_FILE", "~/Documents/org/todos.org"))
+    parser.add_argument("--line", type=int)
+    parser.add_argument("--plans-dir")
+    parser.add_argument("--model", default=os.environ.get("ORG_PI_MODEL"))
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    org_file = Path(args.org_file).expanduser().resolve()
+    if not org_file.is_file():
+        raise SystemExit(f"org-pi: org file not found: {org_file}")
+    lines, tasks = parse_tasks(org_file)
+    if args.command == "list":
+        for task in tasks:
+            print(f"{task.line}\t{task.state}\t{task.title}")
+        return 0
+    task = select_task(tasks, args.line)
+    target = plan_path(org_file, task, Path(args.plans_dir).expanduser() if args.plans_dir else None)
+    if args.command == "plan":
+        create_plan(org_file, lines, task, target, args.dry_run)
+    else:
+        launch(org_file, task, target if target.is_file() else None, args.model, args.dry_run)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

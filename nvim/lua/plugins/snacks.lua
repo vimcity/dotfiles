@@ -55,21 +55,42 @@ return {
     opts.dashboard.preset = opts.dashboard.preset or {}
     opts.dashboard.preset.header = header
 
-    -- Picker configuration
+    -- Picker configuration (primary navigation tool)
     opts.picker = vim.tbl_deep_extend("force", opts.picker or {}, {
       show_delay = 0,
+      win = {
+        input = {
+          keys = {
+            ["H"] = { "toggle_hidden", mode = { "n" } },
+          },
+        },
+        list = {
+          keys = {
+            ["H"] = "toggle_hidden",
+          },
+        },
+      },
       sources = {
         explorer = {
-          hidden = true,
-          ignored = true,
+          win = {
+            list = {
+              keys = {
+                ["H"] = "toggle_hidden",
+              },
+            },
+          },
         },
-        -- Exclude TS-compiled JS artifacts from file and grep pickers.
-        -- Only targets application/ where TS compilation outputs live;
-        -- intentional JS files (webpack configs, assets/lib, etc.) are unaffected.
         files = {
           exclude = {
             "application/**/*.js",
             "application/**/*.js.map",
+          },
+          win = {
+            input = {
+              keys = {
+                ["H"] = { "toggle_hidden", mode = { "n" } },
+              },
+            },
           },
         },
         grep = {
