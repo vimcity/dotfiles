@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Collect a bounded, relevant excerpt from installed local documentation."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+
+
+STOP_WORDS = {
+    "about", "after", "again", "also", "and", "answer", "can", "command",
+    "could", "directory", "does", "each", "explain", "file", "files", "flags",
+    "for", "from", "give", "have", "help", "how", "into", "only", "option",
+    "options", "pattern", "search", "should", "that", "the", "their", "then",
+    "these", "they", "this", "use", "using", "want", "what", "when", "where",
+    "which", "while", "with", "would", "your",
+}
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+SAFE_WORD_RE = re.compile(r"^[A-Za-z0-9_+.,:@%/-]+$")
+SAFE_TOPIC_RE = re.compile(r"^[A-Za-z0-9_.*:+#@/-]+$")
+
+
+def fail(message: str) -> None:
+    raise SystemExit(f"ask-context: {message}")
+
+
+def run(argv: list[str], *, env: dict[str, str] | None = None) -> str:
+    result = subprocess.run(argv, text=True, capture_output=True, env=env, check=False)
+    output = result.stdout or result.stderr
+    return ANSI_RE.sub("", output)
+
+
+def command_help(target: str) -> str:
+    words = shlex.split(target)
+    if not words or any(not SAFE_WORD_RE.fullmatch(word) for word in words):
+        fail(f"invalid command: {target}")
+    if shutil.which(words[0]) is None:
+        fail(f"command not found: {words[0]}")
+    output = run([*words, "--help"])
+    if not output.strip():
+        fail(f"no --help output from: {target}")
+    return output
+
+
+def man_page(topic: str) -> str:
+    if not SAFE_TOPIC_RE.fullmatch(topic) or shutil.which("man") is None:
+        fail(f"invalid or unavailable man topic: {topic}")
+    env = dict(os.environ, MANPAGER="cat")
+    output = run(["man", topic], env=env)
+    if not output.strip():
+        fail(f"man page not found: {topic}")
+    if shutil.which("col"):
+        result = subprocess.run(["col", "-b"], input=output, text=True, capture_output=True, check=False)
+        output = result.stdout or output
+    return output
+
+
+def nvim_help(topic: str) -> str:
+    if not SAFE_TOPIC_RE.fullmatch(topic) or shutil.which("nvim") is None:
+        fail(f"invalid or unavailable Neovim help topic: {topic}")
+    output = run(["nvim", "--clean", "--headless", f"+silent help {topic}", "+%print", "+qa"])
+    if not output.strip():
+        fail(f"Neovim help topic not found: {topic}")
+    return output
+
+
+def stems(question: str, content: str) -> list[str]:
+    lowered = content.lower()
+    selected: list[str] = []
+    for word in re.findall(r"[A-Za-z0-9_+-]+", question.lower()):
+        if word in STOP_WORDS:
+            continue
+        stem = word[:-3] if len(word) > 5 and word.endswith("ing") else word
+        stem = stem[:-2] if len(stem) > 4 and stem.endswith("ed") else stem
+        stem = stem[:-1] if len(stem) > 4 and stem.endswith("s") else stem
+        count = lowered.count(stem)
+        if len(stem) >= 3 and 0 < count <= 40 and stem not in selected:
+            selected.append(stem)
+    return selected[:16]
+
+
+def excerpt(content: str, question: str, max_lines: int, max_bytes: int) -> str:
+    lines = content.splitlines()
+    terms = stems(question, content)
+    indexes: set[int] = set()
+    for index, line in enumerate(lines):
+        if any(term in line.lower() for term in terms):
+            indexes.update(range(max(0, index - 5), min(len(lines), index + 6)))
+
+    chosen = sorted(indexes)[:max_lines] if indexes else list(range(min(len(lines), max_lines)))
+    output: list[str] = []
+    previous = -2
+    for index in chosen:
+        if previous >= 0 and index > previous + 1:
+            output.append("--")
+        output.append(lines[index])
+        previous = index
+    return "\n".join(output).encode()[:max_bytes].decode(errors="ignore")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--help-for")
+    source.add_argument("--man")
+    source.add_argument("--nvim-help")
+    parser.add_argument("question", nargs="*")
+    args = parser.parse_args()
+
+    question = " ".join(args.question)
+    if args.help_for:
+        content = command_help(args.help_for)
+    elif args.man:
+        content = man_page(args.man)
+    else:
+        content = nvim_help(args.nvim_help)
+
+    max_lines = int(os.environ.get("ASK_CONTEXT_LINES", "220"))
+    max_bytes = int(os.environ.get("ASK_CONTEXT_BYTES", "30000"))
+    print(excerpt(content, question, max_lines, max_bytes))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
