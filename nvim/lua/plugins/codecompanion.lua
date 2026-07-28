@@ -1,3 +1,8 @@
+local function env(name, default)
+  local value = os.getenv(name)
+  return value ~= nil and value ~= "" and value or default
+end
+
 return {
   {
     "olimorris/codecompanion.nvim",
@@ -13,7 +18,8 @@ return {
       { "<leader>aa", "<cmd>CodeCompanionActions<CR>", desc = "AI Actions" },
       { "<leader>ac", "<cmd>CodeCompanionChat Toggle<CR>", desc = "AI Chat" },
       { "<leader>ap", ":CodeCompanion ", desc = "AI Prompt" },
-      { "<leader>ai", ":CodeCompanion ", mode = "v", desc = "AI Inline Prompt" },
+      { "<leader>ar", ":CodeCompanion ", mode = { "n", "v" }, desc = "AI rewrite / transform" },
+      { "<leader>ai", ":CodeCompanion ", mode = "v", desc = "AI inline prompt" },
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -23,44 +29,53 @@ return {
       return {
         adapters = {
           http = {
-            ollama = function()
-              return require("codecompanion.adapters").extend("ollama", {
+            omlx = function()
+              return require("codecompanion.adapters").extend("openai_compatible", {
                 env = {
-                  url = "http://localhost:11434",
+                  url = env("OMLX_CODECOMPANION_URL", "http://127.0.0.1:8000"),
+                  chat_url = env("OMLX_CODECOMPANION_CHAT_URL", "/v1/chat/completions"),
+                  api_key = env("OMLX_CODECOMPANION_API_KEY_ENV", "TERM"),
                 },
                 schema = {
                   model = {
-                    default = "gemma4:e4b",
+                    default = env("OMLX_CODECOMPANION_MODEL", "gemma-4-12B-it-OptiQ-4bit"),
                   },
                 },
               })
             end,
           },
         },
-        strategies = {
-          chat = {
-            adapter = {
-              name = "ollama",
-              model = "gemma4:e4b",
-            },
-          },
-          inline = {
-            adapter = {
-              name = "ollama",
-              model = "gemma4:e4b",
-            },
-          },
-          cmd = {
-            adapter = {
-              name = "ollama",
-              model = "gemma4:e4b",
-            },
-          },
+        interactions = {
+          chat = { adapter = "omlx" },
+          inline = { adapter = "omlx" },
+          cmd = { adapter = "omlx" },
         },
         display = {
           chat = {
             show_header_separator = false,
             auto_scroll = true,
+          },
+        },
+        prompt_library = {
+          ["Org Rewrite"] = {
+            strategy = "inline",
+            description = "Rewrite selected text into cleaner org-mode structure.",
+            prompts = {
+              {
+                role = "system",
+                content = "Rewrite the selected text into concise, actionable org-mode content. Preserve meaning, remove filler, and keep headings and bullets practical.",
+              },
+            },
+          },
+          ["Task Shape"] = {
+            strategy = "inline",
+            description = "Turn rough thoughts into launchable AI workbench task text.",
+            prompts = {
+              {
+                role = "system",
+                content = "Turn the selected text into a concise top-level org TODO suitable for later :ai: execution. Include only useful notes and keep the result easy to scan.",
+              },
+            },
           },
         },
         opts = {

@@ -56,7 +56,7 @@ return {
         org_agenda_files = org_agenda_files,
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
-        org_agenda_sorting_strategy = { 'time-down', 'priority-down', "todo-state-up" },
+        org_agenda_sorting_strategy = { 'priority-down','time-down', "todo-state-up" },
         org_agenda_span = "day",
         org_deadline_warning_days = 5,
         org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
@@ -203,6 +203,12 @@ return {
 
       -- Set up keybinding for org-super-agenda
       vim.keymap.set("n", "<leader>os", "<cmd>OrgSuperAgenda<cr>", { desc = "open org super agenda" })
+      vim.keymap.set("n", "<leader>op", function()
+        require("config.org_ai").plan()
+      end, { desc = "Org AI plan" })
+      vim.keymap.set("n", "<leader>or", function()
+        require("config.org_ai").launch()
+      end, { desc = "Org AI launch with Pi" })
     end,
   },
   {

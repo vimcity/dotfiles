@@ -4,6 +4,10 @@ onboarding = false
 name = "catppuccin"
 
 auto_switch = false
+
+[session]
+resume_agents_on_restore = true
+
 [theme.custom]
 panel_bg = "#29273f"
 surface0 = "#2a273f"
@@ -49,15 +53,15 @@ close_pane = "prefix+x"
 zoom = "prefix+z"
 copy_mode = "prefix+b"
 
-# Vim-style pane focus and movement.
-focus_pane_left = "prefix+h"
-focus_pane_down = "prefix+j"
-focus_pane_up = "prefix+k"
-focus_pane_right = "prefix+l"
-swap_pane_left = "prefix+shift+h"
-swap_pane_down = "prefix+shift+j"
-swap_pane_up = "prefix+shift+k"
-swap_pane_right = "prefix+shift+l"
+# Pane focus is handled by the cross-pane Ctrl+h/j/k/l bindings below.
+focus_pane_left = ""
+focus_pane_down = ""
+focus_pane_up = ""
+focus_pane_right = ""
+swap_pane_left = ""
+swap_pane_down = ""
+swap_pane_up = ""
+swap_pane_right = ""
 cycle_pane_next = ""
 cycle_pane_previous = ""
 last_pane = "prefix+tab"
@@ -69,12 +73,6 @@ rename_workspace = "prefix+period"
 close_workspace = ""
 previous_workspace = "alt+k"
 next_workspace = "alt+j"
-
-[[keys.command]]
-key = "prefix+m"
-type = "plugin_action"
-command = "user.tools.cmt_dev"
-description = "open the CMT dev tab layout"
 
 [[keys.command]]
 key = "prefix+f"
@@ -95,12 +93,6 @@ key = "prefix+g"
 type = "plugin_action"
 command = "persiyanov.reviewr.toggle"
 description = "toggle the reviewr sidebar"
-
-[[keys.command]]
-key = "prefix+shift+x"
-type = "plugin_action"
-command = "rgaur.pane-tools.park"
-description = "park the current pane without stopping it"
 
 [[keys.command]]
 key = "prefix+t"
@@ -132,30 +124,6 @@ type = "shell"
 command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh right"
 description = "navigate right across Neovim splits and Herdr panes"
 
-[[keys.command]]
-key = "prefix+ctrl+left"
-type = "shell"
-command = "herdr pane resize --direction left --amount 0.04 --current"
-description = "resize pane left"
-
-[[keys.command]]
-key = "prefix+ctrl+down"
-type = "shell"
-command = "herdr pane resize --direction down --amount 0.04 --current"
-description = "resize pane down"
-
-[[keys.command]]
-key = "prefix+ctrl+up"
-type = "shell"
-command = "herdr pane resize --direction up --amount 0.04 --current"
-description = "resize pane up"
-
-[[keys.command]]
-key = "prefix+ctrl+right"
-type = "shell"
-command = "herdr pane resize --direction right --amount 0.04 --current"
-description = "resize pane right"
-
 # Native floating popups matching the tmux display-popup workflows.
 [[keys.command]]
 key = "prefix+shift+p"
@@ -182,22 +150,6 @@ height = "75%"
 description = "open temporary floating shell"
 
 [[keys.command]]
-key = "prefix+alt+a"
-type = "popup"
-command = "exec \"${AI_WORKBENCH_ROOT:-$HOME/Projects/ai-workbench}\"/tmux/scripts/ai-task.sh prompt"
-width = "60%"
-height = "50%"
-description = "open AI task prompt"
-
-[[keys.command]]
-key = "prefix+alt+w"
-type = "popup"
-command = "exec \"${AI_WORKBENCH_ROOT:-$HOME/Projects/ai-workbench}\"/tmux/scripts/ai-workbench-popup.sh"
-width = "72%"
-height = "70%"
-description = "open AI workbench"
-
-[[keys.command]]
 key = "prefix+alt+q"
 type = "popup"
 command = "exec $HOME/dotfiles/tmux/scripts/llm-ask.sh"
@@ -222,10 +174,10 @@ description = "open codex"
 [[keys.command]]
 key = "prefix+alt+r"
 type = "popup"
-command = "exec $HOME/dotfiles/bin/ai-task-resume"
+command = "exec $HOME/dotfiles/bin/org-pi launch"
 width = "72%"
 height = "70%"
-description = "resume an Org task in a floating popup"
+description = "select and launch an Org task with Pi"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
