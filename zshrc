@@ -100,3 +100,4 @@ source ~/dotfiles/prompt-themes.zsh
 # ===========================================
 source "$HOME/dotfiles/zshrc.d/session.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
+source "$HOME/dotfiles/zshrc.d/rbw.zsh"
