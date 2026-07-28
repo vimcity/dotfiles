@@ -71,7 +71,7 @@ vim.keymap.set({ "n", "v" }, "gh", "^", { desc = "Go to start of line" })
 vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 
 -- File navigation: picker-first workflow with nvim-tree
--- See NAVIGATION_WORKFLOW.md for full context and philosophy
+-- Picker-first workflow keeps navigation focused on fast file and buffer jumps.
 
 -- nvim-tree explorer
 vim.keymap.set("n", "<leader>e", function()

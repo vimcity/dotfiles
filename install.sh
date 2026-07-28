@@ -246,6 +246,7 @@ mkdir -p "$HOME_DIR/.config/btop/themes"
 mkdir -p "$HOME_DIR/.config/herdr"
 mkdir -p "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr"
 mkdir -p "$HOME_DIR/.config/tailspin"
+mkdir -p "$HOME_DIR/.pi/agent"
 
 if [ "$IS_MAC" -eq 1 ]; then
     mkdir -p "$HOME/Library/Application Support/lazygit"
@@ -278,6 +279,16 @@ link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/confi
 link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
 link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME_DIR/.config/btop/themes/catppuccin-rose"
+
+# Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
+if [ -d "$DOTFILES_DIR/pi" ]; then
+    mkdir -p "$HOME_DIR/.pi/agent"
+    link_dotfile "$DOTFILES_DIR/pi/extensions" "$HOME_DIR/.pi/agent/extensions"
+    link_dotfile "$DOTFILES_DIR/pi/themes" "$HOME_DIR/.pi/agent/themes"
+    link_dotfile "$DOTFILES_DIR/pi/keybindings.json" "$HOME_DIR/.pi/agent/keybindings.json"
+    link_dotfile "$DOTFILES_DIR/pi/settings.json" "$HOME_DIR/.pi/agent/settings.json"
+    link_dotfile "$DOTFILES_DIR/pi/SYSTEM.md" "$HOME_DIR/.pi/agent/SYSTEM.md"
+fi
 
 if [ -d "$DOTFILES_DIR/nvim" ]; then
     remove_if_exists "$HOME_DIR/.config/nvim"
