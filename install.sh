@@ -337,7 +337,6 @@ if [ "$IS_MAC" -eq 1 ]; then
 	link_dotfile "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
 	link_dotfile "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 	link_dotfile "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
-	link_dotfile "$DOTFILES_DIR/ghostty/themes" "$HOME/.config/ghostty/themes"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
@@ -362,21 +361,6 @@ if [ "$IS_MAC" -eq 1 ]; then
 
 	# Pi MCP config (macOS-specific — .pi agent dir handled in common section)
 	link_dotfile "$DOTFILES_DIR/pi/mcp.json" "$HOME/.pi/agent/mcp.json"
-
-	# Install context-mode and lean-ctx tooling
-	if ! command -v context-mode >/dev/null 2>&1; then
-		echo "  󰌶 Installing context-mode..."
-		npm install -g context-mode 2>/dev/null || echo "  󰅖 Failed to install context-mode"
-	else
-		echo "  󰄵 context-mode already installed"
-	fi
-
-	if ! command -v lean-ctx >/dev/null 2>&1; then
-		echo "  󰌶 Installing lean-ctx..."
-		curl -fsSL https://leanctx.com/install.sh | sh 2>/dev/null || echo "  󰅖 Failed to install lean-ctx"
-	else
-		echo "  󰄵 lean-ctx already installed"
-	fi
 
 	# Install npm dependencies for any extension that needs them
 	for pi_ext_dir in "$HOME/.pi/agent/extensions/"*/; do
