@@ -16,7 +16,7 @@ org-pi launch
 ```
 
 Neovim (in org buffers): `:OrgAiPlan`, `:OrgAiLaunch`  
-Herdr: `prefix+alt+r` runs `org-pi launch`
+Herdr: `prefix+shift+i` runs `org-pi launch`
 
 ## Flow
 
@@ -28,5 +28,5 @@ Herdr: `prefix+alt+r` runs `org-pi launch`
 
 - Requires Herdr context (`HERDR_WORKSPACE_ID` or launch from inside Herdr)
 - Keep durable decisions in the linked plan file
-- Use `agent-context add` for cross-agent preferences, not the plan file
-- For resuming old Pi/Codex chats, use the `sessions` skill instead
+- Use `note add` for cross-agent preferences, not the plan file
+- For resuming old Pi/Codex chats, use Pi `--resume` or Herdr agent sidebar

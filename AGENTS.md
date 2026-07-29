@@ -11,9 +11,10 @@ Primary areas:
 - `install.sh` - bootstrap script and symlink setup
 - `nvim/` - LazyVim-based Neovim config in Lua
 - `pi/` - Pi agent extensions, skills, themes, SYSTEM.md
-- `orchestrator/` - cross-provider session finder (`bin/ai`)
 - `bin/org-pi` - org task → plan → Pi in Herdr
-- `docs/ai-orchestrator.md` - session finder operator guide
+- `bin/note` - durable bullets → `~/Documents/org/notes.md`
+- `docs/herdr-workflow.md` - Herdr session restore + org-pi routing
+- `herdr/` - Herdr config (`resume_agents_on_restore = true`)
 - `tmux/` - modular tmux config plus helper scripts (optional; primary terminal flow is Herdr)
 - `ghostty/`, `atuin/`, `fastfetch/`, `yazi/`, `qutebrowser/` - tool-specific config
 - `opencode/themes/` - OpenCode TUI theme only
@@ -29,8 +30,7 @@ Run from repo root:
 ./install.sh                         # full install/bootstrap on a real machine
 bash -n install.sh                  # validate install script syntax
 zsh -n zshrc                        # validate zsh config syntax
-python3 bin/ai-test                 # orchestrator unit tests
-python3 bin/ai doctor               # orchestrator prerequisite check
+bash -n bin/note bin/org-pi         # shell script syntax
 python3 -m py_compile qutebrowser/config.py
 tmux -f tmux/tmux.conf new -d       # verify tmux config loads
 nvim -c "checkhealth"              # manual Neovim health check

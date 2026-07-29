@@ -172,12 +172,12 @@ command = "exec codex --yolo"
 description = "open codex"
 
 [[keys.command]]
-key = "prefix+alt+r"
+key = "prefix+shift+i"
 type = "popup"
 command = "exec $HOME/dotfiles/bin/org-pi launch"
 width = "72%"
 height = "70%"
-description = "select and launch an Org task with Pi"
+description = "org task → Pi (org-pi launch)"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
@@ -269,4 +269,5 @@ delivery = "herdr"
 [experimental]
 kitty_graphics = true
 switch_ascii_input_source_in_prefix = false
+
 
