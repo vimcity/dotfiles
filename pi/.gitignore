@@ -3,8 +3,9 @@ settings.local.json
 auth.json
 models*.json
 trust.json
-sessions/
-plans/
-state/
+/sessions/
+/plans/
+/state/
 *.db
 *.sqlite
+
