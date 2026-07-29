@@ -1,9 +1,5 @@
 return {
   {
-    "folke/which-key.nvim",
-    optional = true,
-  },
-  {
     event = "VeryLazy",
     config = function()
       vim.api.nvim_create_user_command("AiSessionPick", function(opts)

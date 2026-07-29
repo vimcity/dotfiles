@@ -108,9 +108,10 @@ This configuration emphasizes:
 > Highly extensible Vim-based editor with LSP, treesitter, and modern IDE features. LazyVim provides sensible defaults and plugin management
 
 - **Language Support**: TypeScript, Python, Java, JSON with full LSP (autocomplete, go-to-definition, refactoring)
-- **AI Integration**: 
+- **AI Integration**:
+  - **Orchestrator (`ai`)** — session pick/resume, org plans, Herdr launch
+  - **Pi + Herdr + oMLX** — primary agent stack
   - GitHub Copilot (code suggestions)
-  - CodeCompanion with Ollama (local AI using gemma3:1b model - disabled by default)
   - Fabric AI integration for command analysis
 - **Testing**: Neotest (modern test runner with UI for Java, TypeScript, and more)
 - **Debugging**: DAP (Debug Adapter Protocol) for in-editor debugging
@@ -165,13 +166,14 @@ Custom functions for fuzzy finding:
 - `gcof` / `gbdf` - Fuzzy git branch checkout/delete
 
 ### AI Integration
-- **OpenCode** - AI-assisted command workflow (CLI agent tool)
-- **OpenCode Theme** - Custom `catppuccin-rose` theme for the TUI, tracked in `opencode/themes/` and symlinked into config
-- **Fabric voice prompt cleanup** - `voice_to_clean_prompt` pattern for fixing spoken/transcribed prompts
-- **GitHub Copilot** - Code suggestions in Neovim
-- **CodeCompanion** - Local AI chat with Ollama integration (optional)
-- **Ollama** - Local LLM backend for CodeCompanion
-- Custom shell functions to pipe command output to AI for analysis
+- **Orchestrator (`ai`)** — `ai session pick --resume`, org plan create/launch; see `docs/ai-orchestrator.md`
+- **Pi + Herdr** — primary agent stack for coding and multi-agent layout
+- **Codex** — `co` (cloud) and `col` (local oMLX) via `zshrc.d/codex.zsh`
+- **oMLX** — local OpenAI-compatible LLM server (`zshrc.d/omlx.zsh`, `llm/extra-openai-models.yaml`)
+- **OpenCode Theme** — custom `catppuccin-rose` TUI theme in `opencode/themes/`
+- **Fabric voice prompt cleanup** — `voice_to_clean_prompt` pattern (oMLX-backed)
+- **GitHub Copilot** — code suggestions in Neovim
+- **`ask` / `llm`** — one-shot local questions and devdocs RAG
 
 ### Git Workflow
 - Extensive git aliases in zsh
@@ -243,5 +245,7 @@ The install script handles:
 - Config file symlinks to ~/.config/
 
 Note: The install script assumes the above tools are already installed via Homebrew.
+
+
 
 
