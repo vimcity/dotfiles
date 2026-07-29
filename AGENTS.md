@@ -7,12 +7,13 @@ This repo is a personal macOS dotfiles setup, not a compiled application.
 Most changes are configuration edits, shell functions, tmux scripts, or Neovim plugin specs.
 
 Primary areas:
-- `zshrc` - shell environment, aliases, functions, prompt logic
+- `zshrc` + `zshrc.d/` - shell environment split into modules (prompt, codex, omlx, herdr, helpers)
 - `install.sh` - bootstrap script and symlink setup
 - `nvim/` - LazyVim-based Neovim config in Lua
-- `tmux/` - modular tmux config plus helper scripts
+- `pi/` - Pi agent extensions, skills, themes, SYSTEM.md
+- `tmux/` - modular tmux config plus helper scripts (optional; primary terminal flow is Herdr)
 - `ghostty/`, `atuin/`, `fastfetch/`, `yazi/`, `qutebrowser/` - tool-specific config
-- `opencode/plugins/` - OpenCode plugin code in TypeScript
+- `opencode/themes/` - OpenCode TUI theme only
 
 ## Build, Lint, and Test Commands
 There is no repo-wide build pipeline, unit test suite, or CI command.
@@ -66,7 +67,7 @@ Use them only when relevant to the file you touched and when available in the en
 - Preserve user-specific behavior and cross-machine setup assumptions
 - Never hardcode secrets, tokens, hardcoded paths with user or work-only settings into tracked files
 
-### Shell (`zshrc`, `install.sh`, `tmux/scripts/*.sh`)
+### Shell (`zshrc`, `zshrc.d/*.zsh`, `install.sh`, `tmux/scripts/*.sh`)
 - Use 4-space indentation in shell functions and conditionals
 - Quote variable expansions: `"$var"`
 - Prefer `[[ ... ]]` in Bash/Zsh conditionals when practical
@@ -95,12 +96,12 @@ Use them only when relevant to the file you touched and when available in the en
 - Respect inline file directives such as `# ruff: noqa` and `# pyright: ...`
 - Prefer small grouped sections with short explanatory comments
 
-### TypeScript (`opencode/plugins/*.ts`)
+### TypeScript (`pi/extensions/*.ts`)
 - Use ESM syntax and explicit type imports when available
 - Keep functions small and side effects obvious
 - Annotate exported plugin objects/functions with concrete types
 - Prefer async helpers for shell interactions and wrap external calls in `try/catch`
-- Fail softly for environment-dependent integrations like tmux
+- Fail softly for environment-dependent integrations like Herdr
 
 ### Tmux (`tmux/*.conf`)
 - Keep config modular: main file should source focused files under `tmux/conf/`
