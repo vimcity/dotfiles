@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
-# Quick one-shot LLM ask via `llm` CLI.
+# Quick one-shot LLM ask via `llm` CLI (local default: oMLX).
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-LLM_LOCAL_MODEL="${LLM_LOCAL_MODEL:-qwen3.5:9b}"
+LLM_LOCAL_MODEL="${LLM_LOCAL_MODEL:-omlx-qwen}"
 LLM_REMOTE_MODEL="${LLM_REMOTE_MODEL:-gpt-4o-mini}"
-LLM_OLLAMA_MODEL="${LLM_OLLAMA_MODEL:-qwen3.5:9b}"
 LLM_OMLX_MODEL="${LLM_OMLX_MODEL:-omlx-qwen}"
 ASK_PANE_LINES="${ASK_PANE_LINES:-80}"
 ASK_CONTEXT_LINES="${ASK_CONTEXT_LINES:-220}"
 ASK_CONTEXT_BYTES="${ASK_CONTEXT_BYTES:-30000}"
 FABRIC_BIN="${FABRIC_BIN:-fabric-ai}"
-FABRIC_MODEL="${FABRIC_MODEL:-qwen3.5:9b}"
-FABRIC_VENDOR="${FABRIC_VENDOR:-Ollama}"
+FABRIC_MODEL="${FABRIC_MODEL:-Qwen2.5-Coder-32B-Instruct-4bit}"
+FABRIC_VENDOR="${FABRIC_VENDOR:-OpenAI}"
 FABRIC_TEMPERATURE="${FABRIC_TEMPERATURE:-0.2}"
+OMLX_API_BASE="${OMLX_API_BASE:-http://127.0.0.1:8000/v1}"
+OMLX_API_KEY="${OMLX_API_KEY:-local}"
 ASK_CONTEXT_BIN="${ASK_CONTEXT_BIN:-$HOME/dotfiles/bin/ask-context}"
 
 usage() {
     cat <<'EOF'
 Usage:
-  ask "question"                 Fast local model via Ollama
+  ask "question"                 Local model via oMLX (default)
   ask -r "question"              Remote/cloud model
-  ask -o "question"              Explicit Ollama model
-  ask --omlx "question"          oMLX model
+  ask --omlx "question"          Explicit oMLX model alias
   ask -t TEMPLATE "question"     Use llm template (shell-help, vim-help, error-diagnose, prompt-clean)
   ask --pattern PATTERN "text"   Run a Fabric pattern with the local model
   ask -f FILE "question"         Include file as fragment
@@ -42,38 +42,24 @@ Usage:
   ask -l TERM                    Search llm logs
 
 Env:
-  LLM_LOCAL_MODEL   default: qwen3.5:9b
+  LLM_LOCAL_MODEL   default: omlx-qwen
   LLM_REMOTE_MODEL  default: gpt-4o-mini
-  LLM_OLLAMA_MODEL  default: qwen3.5:9b
   LLM_OMLX_MODEL    default: omlx-qwen
-  FABRIC_MODEL      default: qwen3.5:9b
-  FABRIC_VENDOR     default: Ollama
-  FABRIC_TEMPERATURE default: 0.2
+  FABRIC_MODEL      default: Qwen2.5-Coder-32B-Instruct-4bit
+  FABRIC_VENDOR     default: OpenAI (oMLX via OPENAI_API_BASE)
+  OMLX_API_BASE     default: http://127.0.0.1:8000/v1
 EOF
 }
 
-ensure_ollama() {
-    if curl -sf --max-time 2 "http://127.0.0.1:11434/api/tags" >/dev/null 2>&1; then
-        return 0
-    fi
-
-    if [[ -d "/Applications/Ollama.app" ]]; then
-        open -gja Ollama >/dev/null 2>&1 || true
-        sleep 2
-    fi
-
-    curl -sf --max-time 5 "http://127.0.0.1:11434/api/tags" >/dev/null 2>&1
-}
-
 ensure_omlx() {
-    if curl -sf --max-time 2 "http://127.0.0.1:8000/v1/models" >/dev/null 2>&1; then
+    if curl -sf --max-time 2 "${OMLX_API_BASE%/}/models" >/dev/null 2>&1; then
         return 0
     fi
 
     if command -v omlx >/dev/null 2>&1; then
         omlx start >/dev/null 2>&1 || true
         sleep 2
-        curl -sf --max-time 5 "http://127.0.0.1:8000/v1/models" >/dev/null 2>&1
+        curl -sf --max-time 5 "${OMLX_API_BASE%/}/models" >/dev/null 2>&1
     fi
 }
 
@@ -94,15 +80,14 @@ run_fabric_pattern() {
         printf 'ask: Fabric pattern not found: %s\n' "$pattern" >&2
         return 1
     }
-    if [[ "$FABRIC_VENDOR" == "Ollama" ]]; then
-        ensure_ollama || {
-            printf 'ask: Ollama not reachable for Fabric\n' >&2
-            return 1
-        }
-    fi
+    ensure_omlx || {
+        printf 'ask: oMLX not reachable for Fabric\n' >&2
+        return 1
+    }
 
     printf '%s' "$input" | env LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
-        OLLAMA_API_URL="${OLLAMA_API_URL:-http://127.0.0.1:11434}" \
+        OPENAI_API_BASE="$OMLX_API_BASE" \
+        OPENAI_API_KEY="$OMLX_API_KEY" \
         "$FABRIC_BIN" -p "$pattern" -V "$FABRIC_VENDOR" -m "$FABRIC_MODEL" \
         -t "$FABRIC_TEMPERATURE" --thinking=off --suppress-think
 }
@@ -136,7 +121,7 @@ init_devdocs() {
     ai-docs-build
     printf '\nWhen AIChat asks "Add documents:", paste this path:\n\n'
     printf '%s/\n\n' "$docs_dir"
-    printf 'RAG setup also requires an embedding model, for example ollama:nomic-embed-text.\n\n'
+    printf 'RAG also needs an embedding model configured in aichat config.yaml.\n\n'
     ensure_omlx || true
     aichat --rag devdocs
 }
@@ -163,10 +148,6 @@ main() {
                 ;;
             -r | --remote)
                 model="$LLM_REMOTE_MODEL"
-                shift
-                ;;
-            -o | --ollama)
-                model="$LLM_OLLAMA_MODEL"
                 shift
                 ;;
             --omlx)
@@ -266,16 +247,9 @@ main() {
         exit 1
     fi
 
-    if [[ "$model" == "$LLM_OMLX_MODEL" || "$model" == omlx-* ]]; then
+    if [[ "$model" == "$LLM_LOCAL_MODEL" || "$model" == "$LLM_OMLX_MODEL" || "$model" == omlx-* ]]; then
         ensure_omlx || {
-            printf 'ask: oMLX not reachable; falling back to %s\n' "$LLM_OLLAMA_MODEL" >&2
-            model="$LLM_OLLAMA_MODEL"
-        }
-    fi
-    if [[ "$model" == "$LLM_LOCAL_MODEL" || "$model" == "$LLM_OLLAMA_MODEL" ]] ||
-        ollama list 2>/dev/null | awk 'NR > 1 { print $1 }' | grep -Fxq "$model"; then
-        ensure_ollama || {
-            printf 'ask: Ollama not reachable\n' >&2
+            printf 'ask: oMLX not reachable\n' >&2
             exit 1
         }
     fi

@@ -3,7 +3,8 @@
 # Keep your real config at:
 #   ~/Library/Application Support/aichat/config.yaml
 #
-# Chat uses the local oMLX server. Embeddings remain optional and require Ollama.
+# Chat uses the local oMLX server. RAG embeddings are optional — configure
+# rag_embedding_model separately if you add an embedding provider.
 
 model: omlx:Qwen3.6-27B-4bit
 stream: true
@@ -12,11 +13,7 @@ keybindings: vi
 wrap: no
 wrap_code: false
 
-# RAG needs an embedding model. oMLX currently exposes chat models on your
-# machine, not embeddings, so this example uses Ollama's local embedding model.
-# Install/pull with:
-#   ollama pull nomic-embed-text
-rag_embedding_model: ollama:nomic-embed-text
+# rag_embedding_model: provider:model-name
 rag_top_k: 5
 rag_chunk_size: 1800
 rag_chunk_overlap: 120
@@ -51,13 +48,3 @@ clients:
       - name: Qwen2.5-Coder-32B-Instruct-4bit
         max_input_tokens: 32768
         supports_function_calling: true
-
-  - type: openai-compatible
-    name: ollama
-    api_base: http://localhost:11434/v1
-    api_key: local
-    models:
-      - name: nomic-embed-text
-        type: embedding
-        default_chunk_size: 1500
-        max_batch_size: 64
