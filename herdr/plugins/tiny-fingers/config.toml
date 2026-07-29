@@ -1,0 +1,26 @@
+# herdr-tiny-fingers — tmux-fingers-style copy hints in Herdr
+# Keybinding: prefix+t (Ctrl+Space, then t)
+
+copy_toast = true
+
+enabled_builtin_patterns = [
+  "url",
+  "path",
+  "sha",
+  "uuid",
+  "ip",
+  "git-status",
+  "git-status-branch",
+  "diff",
+]
+
+[style]
+hint_fg = "black"
+hint_bg = "yellow"
+match_fg = "yellow"
+selected_hint_fg = "white"
+selected_hint_bg = "magenta"
+selected_match_fg = "white"
+selected_match_bg = "magenta"
+status_fg = "black"
+status_bg = "gray"
