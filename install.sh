@@ -426,11 +426,11 @@ echo "󰸞 Dotfiles installed successfully!"
 echo ""
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs."
-	echo "󰜎 Primary workflow: Herdr + Pi (see docs/herdr-workflow.md)."
+	echo "󰜎 Primary workflow: Herdr + Pi (see README.md)."
 	echo "󰔌 Optional tmux: start tmux, press Ctrl+Space then Shift+I to install plugins."
 else
 	echo "Next steps:"
-	echo "  1. Primary workflow: Herdr + Pi (see docs/herdr-workflow.md)."
+	echo "  1. Primary workflow: Herdr + Pi (see README.md)."
 	echo "  2. Optional tmux plugins: Ctrl+Space then Shift+I inside tmux."
 	echo "  3. Open nvim and run :Lazy! sync"
 	echo "  4. Review $HOME_DIR/.zshrc.local for Linux-specific overrides."
