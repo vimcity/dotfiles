@@ -205,6 +205,19 @@ autoload -Uz add-zsh-hook
 add-zsh-hook precmd prompt_precmd
 add-zsh-hook preexec prompt_preexec
 
+# A Herdr tab belongs to the shell process that owns it. Rename only that tab
+# when its shell changes directory; other tabs retain their own labels. The
+# helper remembers its own last label and stops updating after a manual rename.
+typeset -g HERDR_AUTO_RENAME_LAST_CWD=''
+herdr_auto_rename_current_tab() {
+    [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_TAB_ID:-}" ]] || return 0
+    [[ "$PWD" == "$HERDR_AUTO_RENAME_LAST_CWD" ]] && return 0
+    HERDR_AUTO_RENAME_LAST_CWD="$PWD"
+    "$HOME/dotfiles/bin/herdr-autorename-tab" "$PWD" >/dev/null 2>&1 &!
+}
+add-zsh-hook chpwd herdr_auto_rename_current_tab
+add-zsh-hook precmd herdr_auto_rename_current_tab
+
 PROMPT='$(prompt_build_left)'
 PROMPT+=$'\n''%F{${THEME_COLORS[prompt_char]}}$%f '
 
@@ -261,6 +274,17 @@ ghostty_cursor_keymap() {
         ghostty_cursor_apply insert
     fi
 }
+
+zle-line-init() {
+    ghostty_cursor_apply insert
+}
+
+zle-line-finish() {
+    ghostty_cursor_apply normal
+}
+
+zle -N zle-line-init
+zle -N zle-line-finish
 
 # Explicit Esc widget: mode switch + cursor (don't rely on timeout alone)
 vi-cmd-mode-cursor() {
