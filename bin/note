@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+note_file="${NOTE_FILE:-$HOME/Documents/org/notes.md}"
+
+case "${1:-}" in
+  add)
+    shift
+    [[ $# -gt 0 ]] || { echo "usage: note add <text>" >&2; exit 2; }
+    mkdir -p "$(dirname "$note_file")"
+    if [[ ! -f "$note_file" ]]; then
+      printf '# Notes\n\nDurable bullets for local agents. Read only when relevant.\n\n' > "$note_file"
+    fi
+    printf -- '- %s — %s\n' "$(date '+%Y-%m-%d %H:%M')" "$*" >> "$note_file"
+    printf '%s\n' "$note_file"
+    ;;
+  show)
+    [[ -f "$note_file" ]] && tail -n "${2:-80}" "$note_file" || true
+    ;;
+  *)
+    echo "usage: note {add <text>|show [lines]}" >&2
+    exit 2
+    ;;
+esac

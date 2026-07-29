@@ -181,8 +181,8 @@ Custom functions for fuzzy finding:
 
 ```
 dotfiles/
-├── orchestrator/       # Session finder library (Codex + Pi index)
-├── docs/               # ai-orchestrator.md (session finder guide)
+├── docs/               # herdr-workflow.md
+├── herdr/              # Herdr config + plugins
 ├── atuin/              # Shell history configuration
 ├── fastfetch/          # System info display config
 ├── ghostty/            # Terminal emulator config
@@ -243,6 +243,7 @@ The install script handles:
 - Config file symlinks to ~/.config/
 
 Note: The install script assumes the above tools are already installed via Homebrew.
+
 
 
 
