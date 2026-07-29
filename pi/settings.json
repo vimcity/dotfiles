@@ -24,14 +24,10 @@
     "npm:pi-subagents",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
-    "npm:pi-web-access",
-    "npm:pi-lean-ctx",
-    "npm:context-mode"
+    "npm:pi-web-access"
   ],
   "theme": "catppuccin-rose",
   "outputPad": 1,
-  "defaultProvider": "openrouter",
-  "defaultModel": "auto",
   "defaultThinkingLevel": "low",
   "editorPaddingX": 1,
   "terminal": {
