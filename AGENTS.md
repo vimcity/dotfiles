@@ -2,9 +2,21 @@
 
 Guidance for coding agents working in this dotfiles repository.
 
+## Daily stack
+
+| Layer | Tool | Notes |
+|-------|------|-------|
+| Multiplexer | **Herdr** | Primary terminal workflow; `herdr/`, `zshrc.d/herdr.zsh` |
+| Coding agent | **Pi** | Primary agent; config in `pi/`, skills, `SYSTEM.md` |
+| IDE agent | **Cursor Agent** | When user works in Cursor |
+| Optional CLI | **Codex** | `zshrc.d/codex.zsh`; secondary to Pi |
+| Legacy | **tmux** | Optional; `tmux/` kept for SSH/homelab and shared scripts |
+
+Herdr + Pi workflow is documented in **README.md** (session restore, org-pi, delegation). Do not reintroduce custom orchestrators, session indexes, or compression middleware.
+
 ## Repository Overview
 This repo is a personal macOS dotfiles setup, not a compiled application.
-Most changes are configuration edits, shell functions, tmux scripts, or Neovim plugin specs.
+Most changes are configuration edits, shell functions, Herdr/tmux scripts, or Neovim plugin specs.
 
 Primary areas:
 - `zshrc` + `zshrc.d/` - shell environment split into modules (prompt, codex, omlx, herdr, helpers)
@@ -13,9 +25,8 @@ Primary areas:
 - `pi/` - Pi agent extensions, skills, themes, SYSTEM.md
 - `bin/org-pi` - org task → plan → Pi in Herdr
 - `bin/note` - durable bullets → `~/Documents/org/notes.md`
-- `docs/herdr-workflow.md` - Herdr session restore + org-pi routing
-- `herdr/` - Herdr config (`resume_agents_on_restore = true`)
-- `tmux/` - modular tmux config plus helper scripts (optional; primary terminal flow is Herdr)
+- `herdr/` - Herdr config (`resume_agents_on_restore = true`); **primary multiplexer**
+- `tmux/` - modular tmux config plus helper scripts (**optional**; many scripts reused by Herdr)
 - `ghostty/`, `atuin/`, `fastfetch/`, `yazi/`, `qutebrowser/` - tool-specific config
 - `opencode/themes/` - OpenCode TUI theme only
 
