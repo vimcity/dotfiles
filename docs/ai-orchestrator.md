@@ -12,7 +12,7 @@ ai plan create
 ai plan launch
 ```
 
-Shell aliases: `ais`, `aisr`, `aip`, `aipl`, `aids`, `aid`.
+Shell aliases: `ais`, `aisr`, `aip`, `aipl`, `aips`, `aid`.
 
 ## Layout
 
@@ -36,3 +36,4 @@ dotfiles/
 - Herdr is the default launch backend; tmux workbench remains optional via `~/Projects/ai-workbench`.
 
 See also: `~/Documents/org/plans/ai-orchestrator-plan.md`.
+
