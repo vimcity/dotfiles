@@ -19,15 +19,24 @@
     }
   },
   "lastChangelogVersion": "0.81.1",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:pi-subagents",
+    "npm:pi-lens",
+    "npm:@ff-labs/pi-fff",
+    "npm:pi-web-access",
+    "npm:pi-lean-ctx",
+    "npm:context-mode"
+  ],
   "theme": "catppuccin-rose",
   "outputPad": 1,
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultProvider": "openrouter",
+  "defaultModel": "auto",
   "defaultThinkingLevel": "low",
   "editorPaddingX": 1,
   "terminal": {
     "showTerminalProgress": true
   },
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "showHardwareCursor": true
 }

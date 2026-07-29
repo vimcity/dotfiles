@@ -100,4 +100,13 @@ source ~/dotfiles/prompt-themes.zsh
 # ===========================================
 source "$HOME/dotfiles/zshrc.d/session.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
+
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
+
+# lean-ctx shell hook — begin
+if [ -f "$HOME/.config/lean-ctx/shell-hook.zsh" ]; then
+    . "$HOME/.config/lean-ctx/shell-hook.zsh"
+fi
+# lean-ctx shell hook — end
+
+
