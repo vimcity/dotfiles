@@ -1,0 +1,21 @@
+# Atuin AI twin — OpenAI-compatible local endpoint (oMLX)
+#
+# Copy to ~/.config/atuin/ai-server.toml and adjust model names.
+#
+#   cp ~/dotfiles/atuin/ai-server.toml.example ~/.config/atuin/ai-server.toml
+#
+# Requires oMLX at http://127.0.0.1:8000/v1
+
+[server]
+host = "127.0.0.1"
+port = 9090
+
+[llm]
+provider = "openai"
+api_base = "http://127.0.0.1:8000/v1"
+api_key = "local"
+model = "Qwen3.6-27B-4bit"
+temperature = 0.2
+
+[search]
+max_results = 20

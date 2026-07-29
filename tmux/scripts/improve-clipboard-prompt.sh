@@ -19,17 +19,19 @@ fi
 run_fabric_pattern() {
     if command -v fabric-ai >/dev/null 2>&1; then
         env LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
-            OLLAMA_API_URL="${OLLAMA_API_URL:-http://127.0.0.1:11434}" \
-            fabric-ai -p voice_to_clean_prompt -V Ollama \
-            -m "${FABRIC_MODEL:-qwen3.5:9b}" --thinking=off --suppress-think
+            OPENAI_API_BASE="${OPENAI_API_BASE:-http://127.0.0.1:8000/v1}" \
+            OPENAI_API_KEY="${OPENAI_API_KEY:-local}" \
+            fabric-ai -p voice_to_clean_prompt -V OpenAI \
+            -m "${FABRIC_MODEL:-Qwen2.5-Coder-32B-Instruct-4bit}" --thinking=off --suppress-think
         return
     fi
 
     if [[ -x "$HOME/.local/bin/fabric-ai" ]]; then
         env LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
-            OLLAMA_API_URL="${OLLAMA_API_URL:-http://127.0.0.1:11434}" \
-            "$HOME/.local/bin/fabric-ai" -p voice_to_clean_prompt -V Ollama \
-            -m "${FABRIC_MODEL:-qwen3.5:9b}" --thinking=off --suppress-think
+            OPENAI_API_BASE="${OPENAI_API_BASE:-http://127.0.0.1:8000/v1}" \
+            OPENAI_API_KEY="${OPENAI_API_KEY:-local}" \
+            "$HOME/.local/bin/fabric-ai" -p voice_to_clean_prompt -V OpenAI \
+            -m "${FABRIC_MODEL:-Qwen2.5-Coder-32B-Instruct-4bit}" --thinking=off --suppress-think
         return
     fi
 
@@ -50,3 +52,4 @@ printf '%s' "$cleaned_text" | pbcopy
 tmux set-buffer -- "$cleaned_text"
 
 tmux display-message "prompt clean: improved prompt copied to clipboard"
+

@@ -16,9 +16,10 @@ for template in "$DOTFILES_DIR/llm/templates/"*.yaml; do
 done
 
 if command -v llm >/dev/null 2>&1; then
-    llm aliases set local qwen3.5:9b 2>/dev/null || true
+    llm aliases set local omlx-qwen 2>/dev/null || true
     llm aliases set remote gpt-4o-mini 2>/dev/null || true
-    llm aliases set fast gemma4:e2b 2>/dev/null || true
+    llm aliases set fast omlx-coder 2>/dev/null || true
 fi
 
 printf 'llm config linked into %s\n' "$LLM_DIR"
+

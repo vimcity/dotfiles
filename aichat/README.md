@@ -2,7 +2,7 @@
 
 This is the local-docs assistant path. Keep Codex for repo edits;
 use `ask` for quick one-shot questions; use AIChat RAG when you want answers
-grounded in your dotfiles, tmux workflow, Neovim config, and CLI help captures.
+grounded in your dotfiles, Neovim config, and CLI help captures.
 
 ## Configure Models
 
@@ -13,14 +13,8 @@ link it to:
 ~/Library/Application Support/aichat/config.yaml
 ```
 
-It points chat traffic at oMLX and uses Ollama for optional local embeddings:
-
-```sh
-ollama pull nomic-embed-text
-```
-
-RAG will not work with only an oMLX chat model. AIChat needs an embedding model
-to index and search documents.
+Chat traffic uses oMLX. RAG embeddings are optional — configure
+`rag_embedding_model` in your local copy if you add an embedding provider.
 
 ## Build The Corpus
 
@@ -34,12 +28,7 @@ This writes a curated corpus to:
 ~/dotfiles/.local-ai/devdocs
 ```
 
-It includes selected dotfiles docs/configs and command help captures. It does
-not index your whole home directory.
-
 ## Initialize The RAG
-
-Run:
 
 ```sh
 ask --init-devdocs
@@ -51,16 +40,10 @@ When AIChat prompts for documents, paste:
 dotfiles/.local-ai/devdocs/
 ```
 
-After that, ask local-doc questions with:
+After that:
 
 ```sh
-ask --devdocs "what tmux binding opens the local AI popup?"
+ask --devdocs "what binding opens the local AI popup?"
 ```
 
-Re-run `ask --build-devdocs` after meaningful doc/config changes. If files have
-changed inside the existing RAG, run this in AIChat:
-
-```text
-.rag devdocs
-.rebuild rag
-```
+Re-run `ask --build-devdocs` after meaningful doc/config changes.
