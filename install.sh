@@ -98,6 +98,7 @@ install_omz_plugin() {
 install_omz_plugin "zsh-users/zsh-autosuggestions" "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 install_omz_plugin "zsh-users/zsh-completions" "$ZSH_CUSTOM/plugins/zsh-completions"
 install_omz_plugin "zsh-users/zsh-syntax-highlighting" "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 
 # ============================================================================
 # TPM
@@ -292,6 +293,16 @@ if [ -d "$DOTFILES_DIR/pi" ]; then
 		cp "$DOTFILES_DIR/pi/settings.json" "$HOME_DIR/.pi/agent/settings.json"
 	fi
 	link_dotfile "$DOTFILES_DIR/pi/SYSTEM.md" "$HOME_DIR/.pi/agent/SYSTEM.md"
+	if [ -d "$DOTFILES_DIR/pi/skills" ]; then
+		mkdir -p "$HOME_DIR/.pi/agent/skills"
+		for skill_dir in "$DOTFILES_DIR/pi/skills"/*; do
+			[ -d "$skill_dir" ] || continue
+			link_dotfile "$skill_dir" "$HOME_DIR/.pi/agent/skills/$(basename "$skill_dir")"
+		done
+	fi
+	if [ ! -f "$HOME_DIR/.pi/agent/settings.local.json" ] && [ -f "$DOTFILES_DIR/pi/settings.local.json.example" ]; then
+		cp "$DOTFILES_DIR/pi/settings.local.json.example" "$HOME_DIR/.pi/agent/settings.local.json"
+	fi
 fi
 
 if [ -d "$DOTFILES_DIR/nvim" ]; then
@@ -334,7 +345,6 @@ if [ "$IS_MAC" -eq 1 ]; then
 	link_dotfile "$DOTFILES_DIR/mpv" "$HOME/.config/mpv"
 	link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
 	link_dotfile "$DOTFILES_DIR/ytui-config" "$HOME/.config/ytui"
-	link_dotfile "$DOTFILES_DIR/opencode/plugins" "$HOME/.config/opencode/plugins"
 	link_dotfile "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
 	link_dotfile "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
