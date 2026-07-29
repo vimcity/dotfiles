@@ -61,7 +61,65 @@ return {
       local git_icon = " " -- nf-oct-git_branch
       local root_icon = "󱉭 " -- LazyVim lualine root_dir glyph (mdi folder-root)
 
+      local icons = LazyVim.config.icons
+
       opts.sections = opts.sections or {}
+
+      opts.sections.lualine_c = {
+        { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+        {
+          function()
+            return vim.fn.expand("%:p")
+          end,
+          cond = function()
+            return vim.fn.expand("%") ~= ""
+          end,
+        },
+        {
+          "diagnostics",
+          symbols = {
+            error = icons.diagnostics.Error,
+            warn = icons.diagnostics.Warn,
+            info = icons.diagnostics.Info,
+            hint = icons.diagnostics.Hint,
+          },
+        },
+      }
+
+      opts.sections.lualine_x = {
+        {
+          require("lazy.status").updates,
+          cond = require("lazy.status").has_updates,
+          color = function()
+            return { fg = Snacks.util.color("Special") }
+          end,
+        },
+        {
+          "diff",
+          symbols = {
+            added = icons.git.added,
+            modified = icons.git.modified,
+            removed = icons.git.removed,
+          },
+          source = function()
+            local gitsigns = vim.b.gitsigns_status_dict
+            if gitsigns then
+              return {
+                added = gitsigns.added,
+                modified = gitsigns.changed,
+                removed = gitsigns.removed,
+              }
+            end
+          end,
+        },
+      }
+
+      opts.sections.lualine_y = {
+        { "location", padding = { left = 1, right = 1 } },
+      }
+
+      opts.sections.lualine_z = {}
+
       opts.sections.lualine_b = {
         {
           function()
@@ -103,3 +161,4 @@ return {
     end,
   },
 }
+

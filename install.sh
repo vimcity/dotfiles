@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dotfiles installation script
-# Supports macOS and Debian/Ubuntu server installs
+# Supports macOS and Debian/Ubuntu Linux (dev machines)
 
 set -e
 
@@ -129,7 +129,7 @@ else
 	apt-get update
 	apt-get upgrade -y
 
-	echo "󰌶 Installing base server packages..."
+	echo "󰌶 Installing base packages..."
 	BASE_PACKAGES=(
 		openssh-server
 		curl
@@ -138,11 +138,9 @@ else
 		zsh
 		tmux
 		neovim
-		htop
 		btop
 		ncdu
 		rsync
-		syncthing
 		build-essential
 		python3
 		python3-pip
@@ -158,7 +156,6 @@ else
 		apt-transport-https
 		file
 		xclip
-		ntfs-3g
 	)
 
 	if [ "$ID" = "ubuntu" ]; then
@@ -170,7 +167,6 @@ else
 
 	echo "󰌶 Installing modern CLI tools..."
 	MODERN_TOOLS=(
-		aria2
 		atuin
 		bat
 		btop
@@ -179,13 +175,11 @@ else
 		fd-find
 		fzf
 		git-delta
-		htop
 		jq
 		lazygit
 		lazydocker
 		ripgrep
 		shellcheck
-		syncthing
 		yazi
 		zoxide
 	)
@@ -204,18 +198,6 @@ else
 		echo ""
 		echo "Missing tools: ${missing_tools[*]}"
 	fi
-
-	echo "󰌶 Installing Docker..."
-	install -m 0755 -d /etc/apt/keyrings
-	curl -fsSL "https://download.docker.com/linux/$ID/gpg" |
-		gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-	chmod a+r /etc/apt/keyrings/docker.gpg
-	echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-https://download.docker.com/linux/$ID $VERSION_CODENAME stable" \
-		>/etc/apt/sources.list.d/docker.list
-	apt-get update
-	apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-	usermod -aG docker "$USER_NAME"
 
 	echo "󰌶 Setting up Linux clipboard wrappers..."
 	mkdir -p "$HOME_DIR/.local/bin"
@@ -406,14 +388,14 @@ json.dump(s, open(path, 'w'), indent=2)
 fi
 
 # ============================================================================
-# Linux server-only setup
+# Linux-only setup
 # ============================================================================
 if [ "$IS_LINUX" -eq 1 ]; then
 	LOCAL_ZSHRC="$HOME_DIR/.zshrc.local"
 	if [ ! -f "$LOCAL_ZSHRC" ]; then
 		echo "󰌶 Creating $LOCAL_ZSHRC with Linux overrides..."
 		cat >"$LOCAL_ZSHRC" <<'EOF'
-# Server / Linux overrides for macOS dotfiles
+# Linux overrides for macOS-oriented dotfiles
 
 export PATH="$HOME/.local/bin:$HOME/.local/scripts:$PATH"
 
@@ -430,24 +412,8 @@ unalias shellmaster 2>/dev/null || true
 
 unset OMLX_BASE_DIR OMLX_MODEL_DIR OMLX_DEFAULT_MODEL
 
-alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
-alias dcu='docker compose up -d'
-alias dcd='docker compose down'
-alias dcl='docker compose logs -f'
 EOF
 		chown "$USER_NAME:$USER_NAME" "$LOCAL_ZSHRC"
-	fi
-
-	SSHD_CONFIG="/etc/ssh/sshd_config.d/99-hardening.conf"
-	if [ ! -f "$SSHD_CONFIG" ]; then
-		echo "󰌶 Writing SSH hardening stub to $SSHD_CONFIG..."
-		cat >"$SSHD_CONFIG" <<'EOF'
-# Hardening applied by install.sh
-# PasswordAuthentication no
-# PermitRootLogin no
-# PubkeyAuthentication yes
-EOF
-		echo "Uncomment the lines in $SSHD_CONFIG and run: systemctl restart ssh"
 	fi
 
 	if [[ "$SHELL" != *"zsh" ]]; then
@@ -460,13 +426,13 @@ echo "󰸞 Dotfiles installed successfully!"
 echo ""
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs."
-	echo "󰔌 To install Tmux plugins: start tmux, press Ctrl+Space then Shift+I"
+	echo "󰜎 Primary workflow: Herdr + Pi (see docs/herdr-workflow.md)."
+	echo "󰔌 Optional tmux: start tmux, press Ctrl+Space then Shift+I to install plugins."
 else
 	echo "Next steps:"
-	echo "  1. Log out and back in to pick up the docker group."
-	echo "  2. Start tmux and install plugins: Ctrl+Space then Shift+I"
+	echo "  1. Primary workflow: Herdr + Pi (see docs/herdr-workflow.md)."
+	echo "  2. Optional tmux plugins: Ctrl+Space then Shift+I inside tmux."
 	echo "  3. Open nvim and run :Lazy! sync"
 	echo "  4. Review $HOME_DIR/.zshrc.local for Linux-specific overrides."
-	echo "  5. Edit /etc/ssh/sshd_config.d/99-hardening.conf, enable key-only auth, restart ssh."
 fi
 echo ""

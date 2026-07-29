@@ -39,7 +39,6 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- Edit surrounding characters
 
     -- UI enhancements
-    { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- Show current function/class at top
     { import = "lazyvim.plugins.extras.ui.indent-blankline" }, -- Visual indentation guides
     { import = "lazyvim.plugins.extras.ui.mini-indentscope" }, -- Highlight current indentation scope
 
@@ -83,3 +82,4 @@ require("lazy").setup({
     enabled = true,
   },
 })
+

@@ -15,11 +15,10 @@ return {
       "CodeCompanionChat",
     },
     keys = {
-      { "<leader>aa", "<cmd>CodeCompanionActions<CR>", desc = "AI Actions" },
-      { "<leader>ac", "<cmd>CodeCompanionChat Toggle<CR>", desc = "AI Chat" },
-      { "<leader>ap", ":CodeCompanion ", desc = "AI Prompt" },
-      { "<leader>ar", ":CodeCompanion ", mode = { "n", "v" }, desc = "AI rewrite / transform" },
-      { "<leader>ai", ":CodeCompanion ", mode = "v", desc = "AI inline prompt" },
+      { "<leader>a", "", desc = "+ai", mode = { "n", "x" } },
+      { "<leader>aa", "<cmd>CodeCompanionActions<CR>", desc = "CodeCompanion actions" },
+      { "<leader>ac", "<cmd>CodeCompanionChat Toggle<CR>", desc = "CodeCompanion chat" },
+      { "<leader>ap", ":CodeCompanion ", desc = "CodeCompanion prompt", mode = { "n", "x" } },
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -85,3 +84,4 @@ return {
     end,
   },
 }
+
