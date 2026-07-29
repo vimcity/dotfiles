@@ -99,3 +99,6 @@ end
 -- end
 --
 vim.g.autoformat = false
+
+-- Class/symbol breadcrumbs in the statusline (trouble.nvim); prefer full file path instead.
+vim.g.trouble_lualine = false
