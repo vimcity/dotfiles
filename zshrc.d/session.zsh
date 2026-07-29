@@ -206,14 +206,15 @@ add-zsh-hook precmd prompt_precmd
 add-zsh-hook preexec prompt_preexec
 
 # A Herdr tab belongs to the shell process that owns it. Rename only that tab
-# when its shell changes directory; other tabs retain their own labels. The
-# helper remembers its own last label and stops updating after a manual rename.
+# when its shell changes directory; other tabs retain their own labels. Run the
+# helper in order: detached jobs can complete out of order after rapid `cd`s
+# and briefly restore a stale label.
 typeset -g HERDR_AUTO_RENAME_LAST_CWD=''
 herdr_auto_rename_current_tab() {
     [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_TAB_ID:-}" ]] || return 0
     [[ "$PWD" == "$HERDR_AUTO_RENAME_LAST_CWD" ]] && return 0
     HERDR_AUTO_RENAME_LAST_CWD="$PWD"
-    "$HOME/dotfiles/bin/herdr-autorename-tab" "$PWD" >/dev/null 2>&1 &!
+    "$HOME/dotfiles/bin/herdr-autorename-tab" "$PWD" >/dev/null 2>&1
 }
 add-zsh-hook chpwd herdr_auto_rename_current_tab
 add-zsh-hook precmd herdr_auto_rename_current_tab
