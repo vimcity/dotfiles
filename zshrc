@@ -2,7 +2,6 @@
 # ===========================================
 # Terminal & Color Support
 # ===========================================
-# Force true color support (24-bit RGB) for tmux and neovim
 export COLORTERM=truecolor
 
 # ===========================================
@@ -26,7 +25,6 @@ if (( IS_MAC )); then
     export INFOPATH="$HOMEBREW_PREFIX/share/info:${INFOPATH:-}"
 fi
 
-
 # ===========================================
 # Oh My Zsh Configuration
 # ===========================================
@@ -36,25 +34,18 @@ export ZSH_CACHE_DIR="$ZSH/cache"
 export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
 export ZSH_DISABLE_COMPFIX=true
-# Skip compaudit security checks (saves ~9ms, not needed on single-user system)
 export _CACHED_CHECK=true
 
-# Completion caching - AGGRESSIVE FAST PATH
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-policy _omz_cache_policy
 
-# ===========================================
-# Shell Behavior Toggles
-# ===========================================
 export CASE_SENSITIVE="false"
 export ENABLE_CORRECTION="true"
 export HYPHEN_INSENSITIVE="true"
 export DISABLE_MAGIC_FUNCTIONS="true"
-# eza handles colors, skip OMZ's ls detection
-export DISABLE_LS_COLORS="true"  
+export DISABLE_LS_COLORS="true"
 export INSIDE_EMACS=""
 
-# Theme
 ZSH_THEME=""
 
 plugins=(
@@ -62,44 +53,17 @@ plugins=(
   copypath
   zsh-autosuggestions
   zsh-syntax-highlighting
+  zsh-vi-mode
 )
 
-# Load Oh My Zsh
+source ~/dotfiles/prompt-themes.zsh
+source "$HOME/dotfiles/zshrc.d/vi-ghostty.zsh"
+
 source $ZSH/oh-my-zsh.sh
 
-# ===========================================
-# zsh-syntax-highlighting - Outrun/Vice City theme (blue/pink/purple)
-# ===========================================
-ZSH_HIGHLIGHT_STYLES[comment]='fg=8'                          # dark gray
-ZSH_HIGHLIGHT_STYLES[alias]='fg=13'                           # purple
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=13'                         # purple
-ZSH_HIGHLIGHT_STYLES[function]='fg=12'                        # blue
-ZSH_HIGHLIGHT_STYLES[command]='fg=12'                         # blue
-ZSH_HIGHLIGHT_STYLES[precommand]='fg=5'                       # magenta/pink
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=13'                   # purple
-ZSH_HIGHLIGHT_STYLES[string]='fg=5'                           # magenta/pink
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=5'           # magenta/pink
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=5'           # magenta/pink
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=5'           # magenta/pink
-ZSH_HIGHLIGHT_STYLES[variable]='fg=13'                        # purple
-ZSH_HIGHLIGHT_STYLES[path]='fg=14'                            # cyan
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=5'                         # magenta/pink
-ZSH_HIGHLIGHT_STYLES[option-flag]='fg=12'                     # blue
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=9,bold'               # light red, bold
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=14'                     # cyan
-
-# ===========================================
-# Prompt Theme System
-# ===========================================
-# Source theme definitions (allows runtime switching)
-source ~/dotfiles/prompt-themes.zsh
-
-
-# ===========================================
-# Sourced Shell Modules
-# ===========================================
+source "$HOME/dotfiles/zshrc.d/highlight.zsh"
 source "$HOME/dotfiles/zshrc.d/session.zsh"
+source "$HOME/dotfiles/zshrc.d/codex.zsh"
+source "$HOME/dotfiles/zshrc.d/omlx.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
-
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
-
