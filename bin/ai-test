@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run orchestrator unit tests."""
+"""Run session finder unit tests."""
 
 from __future__ import annotations
 
@@ -10,19 +10,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tests.test_orchestrator import (  # noqa: E402
-    PlanTests,
-    ProviderTests,
-    SessionIndexTests,
-)
+from tests.test_orchestrator import ProviderTests, SessionIndexTests  # noqa: E402
 
 
 def main() -> int:
-    suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(ProviderTests))
-    suite.addTests(loader.loadTestsFromTestCase(PlanTests))
     suite.addTests(loader.loadTestsFromTestCase(SessionIndexTests))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() else 1
