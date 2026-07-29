@@ -264,8 +264,9 @@ rows = [
 ]
 
 [ui.toast]
-delivery = "terminal"
+delivery = "herdr"
 
 [experimental]
 kitty_graphics = true
 switch_ascii_input_source_in_prefix = false
+
