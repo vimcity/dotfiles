@@ -80,4 +80,22 @@ elseif is_ssh_session and ( is_tmux_session or is_herdr_session ) then
   }
 end
 
+-- -- Neovide: provide a solid background color (no terminal behind the window)
+-- if vim.g.neovide then
+--   vim.g.neovide_normal_opacity = 1.0
+--   vim.g.neovide_theme = "bg_color"
+--
+--   -- After the colorscheme loads (which sets transparent bg), set the solid base color
+--   vim.api.nvim_create_autocmd("UIEnter", {
+--     group = vim.api.nvim_create_augroup("NeovideBg", { clear = true }),
+--     once = true,
+--     callback = function()
+--       local bg = "#29273f" -- Frappe base from catppuccin-rose
+--       vim.api.nvim_set_hl(0, "Normal", { bg = bg })
+--       vim.api.nvim_set_hl(0, "NormalNC", { bg = bg })
+--       vim.api.nvim_set_hl(0, "SignColumn", { bg = bg })
+--     end,
+--   })
+-- end
+--
 vim.g.autoformat = false
