@@ -166,14 +166,10 @@ Custom functions for fuzzy finding:
 - `gcof` / `gbdf` - Fuzzy git branch checkout/delete
 
 ### AI Integration
-- **Orchestrator (`ai`)** — `ai session pick --resume`, org plan create/launch; see `docs/ai-orchestrator.md`
-- **Pi + Herdr** — primary agent stack for coding and multi-agent layout
-- **Codex** — `co` (cloud) and `col` (local oMLX) via `zshrc.d/codex.zsh`
-- **oMLX** — local OpenAI-compatible LLM server (`zshrc.d/omlx.zsh`, `llm/extra-openai-models.yaml`)
-- **OpenCode Theme** — custom `catppuccin-rose` TUI theme in `opencode/themes/`
-- **Fabric voice prompt cleanup** — `voice_to_clean_prompt` pattern (oMLX-backed)
-- **GitHub Copilot** — code suggestions in Neovim
-- **`ask` / `llm`** — one-shot local questions and devdocs RAG
+- **Session finder (`ai`)** — `ai session pick --resume` across Codex + Pi
+- **Org + Pi (`org-pi`)** — org task → plan → Pi in Herdr
+- **Pi + Herdr** — delegation via Herdr skill
+- **Codex** — `co` / `col`; **oMLX** — local LLM; **Fabric / `ask`** — glue
 
 ### Git Workflow
 - Extensive git aliases in zsh
@@ -185,8 +181,8 @@ Custom functions for fuzzy finding:
 
 ```
 dotfiles/
-├── orchestrator/       # AI session index + org plan CLI library
-├── docs/               # Operator guides (ai-orchestrator.md)
+├── orchestrator/       # Session finder library (Codex + Pi index)
+├── docs/               # ai-orchestrator.md (session finder guide)
 ├── atuin/              # Shell history configuration
 ├── fastfetch/          # System info display config
 ├── ghostty/            # Terminal emulator config
@@ -247,6 +243,8 @@ The install script handles:
 - Config file symlinks to ~/.config/
 
 Note: The install script assumes the above tools are already installed via Homebrew.
+
+
 
 
 

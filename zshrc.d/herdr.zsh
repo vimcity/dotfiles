@@ -50,7 +50,7 @@ fingers() {
         print "fingers: not inside Herdr (HERDR_ENV=1)" >&2
         return 1
     }
-    command herdr plugin action run --plugin hotchpotch.herdr-tiny-fingers --action open
+    command herdr plugin action invoke --plugin hotchpotch.herdr-tiny-fingers --action open
 }
 
 typeset -g HERDR_AUTO_RENAME_LAST_CWD=''
@@ -63,3 +63,4 @@ herdr_auto_rename_current_tab() {
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd herdr_auto_rename_current_tab
 add-zsh-hook precmd herdr_auto_rename_current_tab
+
