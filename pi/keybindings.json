@@ -14,7 +14,7 @@
   "app.session.fork": [],
   "app.session.resume": [],
   "app.session.togglePath": ["ctrl+/"],
-  "app.session.toggleSort": ["ctrl+shift+s"],
+  "app.session.toggleSort": ["ctrl+s"],
   "app.session.toggleNamedFilter": ["ctrl+shift+n"],
   "app.session.rename": ["ctrl+shift+r"],
   "app.tools.expand": ["ctrl+o"],
