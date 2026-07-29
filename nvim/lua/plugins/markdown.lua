@@ -1,13 +1,60 @@
 return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    enabled = true,
-    opts = {},
+    -- Do not lazy-load on ft: FileType already fired before attach runs.
+    event = "VeryLazy",
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons"
+      "nvim-tree/nvim-web-devicons",
     },
-    ft = "markdown",
+    opts = {
+      file_types = { "markdown", "markdown.mdx" },
+      code = {
+        sign = false,
+        width = "block",
+        right_pad = 1,
+      },
+      heading = {
+        sign = false,
+        width = "full",
+        position = "overlay",
+      },
+      checkbox = {
+        enabled = true,
+      },
+    },
+    config = function(_, opts)
+      require("render-markdown").setup(opts)
+
+      -- Session restore can open markdown before VeryLazy; attach those buffers.
+      local manager = require("render-markdown.core.manager")
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].filetype == "markdown" then
+          manager.attach(buf)
+        end
+      end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_render_markdown", { clear = true }),
+        pattern = { "markdown", "markdown.mdx" },
+        callback = function(args)
+          vim.schedule(function()
+            manager.attach(args.buf)
+          end)
+        end,
+      })
+
+      vim.schedule(function()
+        local ok, snacks = pcall(require, "snacks")
+        if ok and snacks.toggle then
+          snacks.toggle({
+            name = "Render Markdown",
+            get = require("render-markdown").get,
+            set = require("render-markdown").set,
+          }):map("<leader>um")
+        end
+      end)
+    end,
   },
   {
     "preservim/vim-markdown",
