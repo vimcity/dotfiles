@@ -15,24 +15,6 @@ def dotfiles_root() -> Path:
     return home() / "dotfiles"
 
 
-def org_root() -> Path:
-    return Path(os.environ.get("ORG_PATH", home() / "Documents/org")).expanduser()
-
-
-def org_file() -> Path:
-    return Path(os.environ.get("ORG_FILE", org_root() / "todos.org")).expanduser()
-
-
-def plans_dir() -> Path:
-    return org_root() / "plans"
-
-
-def tasks_dir() -> Path:
-    path = org_root() / "ai-tasks"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
 def cache_dir() -> Path:
     path = Path(os.environ.get("AI_ORCH_CACHE", home() / ".cache/ai-orchestrator")).expanduser()
     path.mkdir(parents=True, exist_ok=True)
@@ -49,7 +31,3 @@ def codex_state_db() -> Path:
 
 def pi_sessions_root() -> Path:
     return home() / ".pi/agent/sessions"
-
-
-MANAGED_START = "<!-- ai-managed:start -->"
-MANAGED_END = "<!-- ai-managed:end -->"

@@ -11,8 +11,9 @@ Primary areas:
 - `install.sh` - bootstrap script and symlink setup
 - `nvim/` - LazyVim-based Neovim config in Lua
 - `pi/` - Pi agent extensions, skills, themes, SYSTEM.md
-- `orchestrator/` - session index, org plans, Herdr launch CLI (`bin/ai`)
-- `docs/ai-orchestrator.md` - operator guide for the orchestrator
+- `orchestrator/` - cross-provider session finder (`bin/ai`)
+- `bin/org-pi` - org task → plan → Pi in Herdr
+- `docs/ai-orchestrator.md` - session finder operator guide
 - `tmux/` - modular tmux config plus helper scripts (optional; primary terminal flow is Herdr)
 - `ghostty/`, `atuin/`, `fastfetch/`, `yazi/`, `qutebrowser/` - tool-specific config
 - `opencode/themes/` - OpenCode TUI theme only

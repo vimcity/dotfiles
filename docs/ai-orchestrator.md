@@ -1,6 +1,7 @@
-# AI Orchestrator (dotfiles)
+# AI session finder
 
-Terminal-native control plane for session discovery, org-backed plans, and Herdr launches.
+Cross-provider search/resume for native Codex and Pi sessions. Org work and
+Herdr orchestration use other tools — see below.
 
 ## Quick start
 
@@ -8,32 +9,37 @@ Terminal-native control plane for session discovery, org-backed plans, and Herdr
 ai doctor
 ai session rebuild
 ai session pick --resume
-ai plan create
-ai plan launch
 ```
 
-Shell aliases: `ais`, `aisr`, `aip`, `aipl`, `aips`, `aid`.
+Shell aliases: `ais`, `aisr`, `ail`, `aid`.
 
 ## Layout
 
 ```text
 dotfiles/
-  bin/ai                 # CLI entrypoint
-  orchestrator/          # Python implementation (stdlib only)
-  zshrc.d/ai.zsh         # shell aliases + optional ai-workbench PATH
-  pi/skills/orchestrator/
-  nvim/lua/plugins/ai-orchestrator.lua
+  bin/ai                 # session finder entrypoint
+  bin/org-pi             # org task → plan → Pi in Herdr
+  orchestrator/          # stdlib Python (Codex sqlite + Pi jsonl index)
+  zshrc.d/ai.zsh
+  pi/skills/sessions/    # when to use session pick/resume
+  pi/skills/herdr/       # pane/agent orchestration
 ~/.cache/ai-orchestrator/session-index.json
-~/Documents/org/plans/
-~/Documents/org/ai-tasks/
 ```
+
+## End-state routing
+
+| Job | Tool |
+|-----|------|
+| Find/resume any Codex or Pi session | `ai session pick --resume` / `aisr` |
+| Org task → plan | `org-pi plan` / `:OrgAiPlan` in Neovim |
+| Org task → Pi in Herdr | `org-pi launch` / `prefix+alt+r` |
+| Delegate to another agent in Herdr | `herdr` skill |
+| Enterprise vs local Codex | `co` / `col` |
+| Durable notes | `agent-context add` |
+| Plan progress | Edit plan markdown; Pi updates the file in-session |
 
 ## Design
 
-- Provider-native stores stay authoritative.
-- The orchestrator caches searchable metadata only.
-- Org headings with `:ai:` / `:agent:` tags bridge capture → plan → launch.
-- Herdr is the default launch backend; tmux workbench remains optional via `~/Projects/ai-workbench`.
-
-See also: `~/Documents/org/plans/ai-orchestrator-plan.md`.
-
+- Provider stores stay authoritative; `ai` only caches searchable metadata.
+- No second transcript database. No plan launcher inside `ai`.
+- Optional `~/Projects/ai-workbench` for tmux voice/runs when needed.
