@@ -64,8 +64,9 @@ return {
         end, 20)
       end
 
-      vim.keymap.set("i", "<A-y>", trigger_copilot, { desc = "Copilot completion invoke" })
-      vim.keymap.set("n", "<leader>as", trigger_copilot, { desc = "Copilot completion invoke" })
+      vim.keymap.set("i", "<A-y>", trigger_copilot, { desc = "Copilot: trigger suggestion" })
+      vim.keymap.set("n", "<leader>cp", trigger_copilot, { desc = "Copilot: trigger suggestion" })
     end,
   },
 }
+
