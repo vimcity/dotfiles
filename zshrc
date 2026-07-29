@@ -67,3 +67,5 @@ source "$HOME/dotfiles/zshrc.d/codex.zsh"
 source "$HOME/dotfiles/zshrc.d/omlx.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
+source "$HOME/dotfiles/zshrc.d/ai.zsh"
+
