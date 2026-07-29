@@ -16,25 +16,124 @@ alias ahl="atuin history list"
 alias cat=bat
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
+alias d="z"
+alias zo="cd \$(zoxide query -i)"
+alias ls="eza --icons=always -s=time -la"
+alias yz=yazi
+alias lz=lazygit
+alias lzz=lazygit
+alias lzd=lazydocker
+alias ghb='gh browse'
 alias sp='$HOME/dotfiles/tmux/scripts/tmux-sessionizer.sh'
-alias vimz="nvim ~/.zshrc"
-alias vimzz="nvim ~/.zshrc"
+alias vimz="vim ~/.zshrc"
+alias vimzz="vim ~/.zshrc"
+alias vimal="vim ~/zshrc.d/helpers.zsh"
 alias cur='cursor-agent'
+
+# Herdr 0.7.4 can lose its in-memory plugin registry after a live handoff.
+# Keep the pane-navigation actions available without touching normal API calls.
+_herdr_ensure_navigation_plugin() {
+  local plugin_source='lmilojevicc/herdr-splits.nvim'
+  local plugin_ref='167641719f364e6bd9866f584df8a210f7d7bfd2'
+  local actions
+
+  actions="$(command herdr plugin action list --plugin herdr-splits 2>/dev/null)" || return 0
+  [[ "$actions" == *'"action_id":"nav-left"'* ]] && return 0
+
+  command herdr plugin install "$plugin_source" --ref "$plugin_ref" --yes >/dev/null || return 1
+  command herdr server reload-config >/dev/null
+}
+
+herdr() {
+  local is_handoff_update=0
+  local arg
+
+  if [[ "$1" == "update" ]]; then
+    for arg in "$@"; do
+      [[ "$arg" == "--handoff" ]] && is_handoff_update=1
+    done
+  elif (( $# == 0 )); then
+    _herdr_ensure_navigation_plugin || return
+  fi
+
+  command herdr "$@"
+  local status=$?
+
+  if (( status == 0 && is_handoff_update )); then
+    _herdr_ensure_navigation_plugin || return
+  fi
+
+  return "$status"
+}
+
+_ensure_headroom_proxy() {
+  local mode="$1"
+  local port log_file
+
+  case "$mode" in
+    local)
+      port=8788
+      log_file=/tmp/headroom-local.log
+      if ! command lsof -iTCP:8000 -sTCP:LISTEN -n -P >/dev/null 2>&1; then
+        print "headroom local: local model server is not listening on 127.0.0.1:8000" >&2
+        return 1
+      fi
+      ;;
+    cloud)
+      port=8787
+      log_file=/tmp/headroom-cloud.log
+      ;;
+    *)
+      print "unknown headroom mode: $mode" >&2
+      return 2
+      ;;
+  esac
+
+  if command lsof -iTCP:${port} -sTCP:LISTEN -n -P >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if [[ "$mode" == local ]]; then
+    nohup headroom proxy --port "${port}" --no-telemetry --openai-api-url http://127.0.0.1:8000/v1 >"${log_file}" 2>&1 </dev/null &!
+  else
+    nohup headroom proxy --port "${port}" --no-telemetry >"${log_file}" 2>&1 </dev/null &!
+  fi
+
+  local attempt
+  for attempt in 1 2 3 4 5; do
+    sleep 1
+    if command lsof -iTCP:${port} -sTCP:LISTEN -n -P >/dev/null 2>&1; then
+      return 0
+    fi
+  done
+
+  print "headroom ${mode}: proxy failed to start; see ${log_file}" >&2
+  return 1
+}
+
 # Codex — enterprise default (cloud) + opt-in MCPs/plugins per session
 _codex_launch() {
   local mode="$1"
   shift
   local -a args=()
+  local -a default_args=()
   local parsing_mcps=1
+  local session_management_mode=0
+  local explicit_headroom=0
   local token
 
   case "$mode" in
-    cloud) ;;
+    cloud)
+      default_args+=(
+        -c 'model_provider="headroom"'
+        -c 'mcp_servers.headroom.enabled=true'
+      )
+      ;;
     local)
-      args+=(
+      default_args+=(
         --profile local
-        # -c 'mcp_servers.headroom.enabled=false'
-        # -c 'mcp_servers.serena.enabled=false'
+        -c 'model_provider="headroom-local"'
+        -c 'mcp_servers.headroom.enabled=true'
       )
       ;;
     *)
@@ -134,13 +233,21 @@ EOF
         ;;
       resume|fork|exec|review|mcp|plugin|login|logout|doctor|app|cloud|archive|delete|unarchive|completion|update|debug|features|sandbox|apply|remote-control|app-server|mcp-server|exec-server|help)
         parsing_mcps=0
+        case $token in
+          resume|fork|archive|delete|unarchive)
+            session_management_mode=1
+            ;;
+        esac
         args+=("$token" "$@")
         break
         ;;
       headroom)
         if (( parsing_mcps )); then
+          explicit_headroom=1
+          local headroom_provider="headroom"
+          [[ "$mode" == local ]] && headroom_provider="headroom-local"
           args+=(
-            -c 'model_provider="headroom-local"'
+            -c "model_provider=\"${headroom_provider}\""
             -c 'mcp_servers.headroom.enabled=true'
           )
         else
@@ -163,6 +270,13 @@ EOF
         ;;
     esac
   done
+
+  if (( explicit_headroom )); then
+    _ensure_headroom_proxy "$mode" || return 1
+  elif (( ! session_management_mode )); then
+    _ensure_headroom_proxy "$mode" || return 1
+    args=("${default_args[@]}" "${args[@]}")
+  fi
 
   codex "${args[@]}"
 }
@@ -189,14 +303,6 @@ alias asdf="source ~/.zshrc | head -10"
 zshprof() {
     ZSHRC_PROFILE=1 command time zsh -ic 'exit' 2>&1 | head -25
 }
-
-alias zo="cd \$(zoxide query -i)"
-alias ls="eza --icons=always -s=time -la"
-alias yz=yazi
-alias lz=lazygit
-alias lzz=lazygit
-alias lzd=lazydocker
-alias ghb='gh browse'
 
 export TLDR_AUTO_UPDATE_DISABLED=1
 # Ensure lazygit loads dotfiles-managed config on macOS
@@ -385,13 +491,16 @@ fdf() {
 # Ripgrep configuration
 alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
 
-# Codex memory + session search (memrg, sesrg, sesshow, sessid, codexrg)
-[[ -f "$HOME/dotfiles/codex-search.zsh" ]] && source "$HOME/dotfiles/codex-search.zsh"
+# Codex memory + session search
+[[ -f "$HOME/dotfiles/zshrc.d/codex-search.zsh" ]] && source "$HOME/dotfiles/zshrc.d/codex-search.zsh"
 
 # Modern terminal tools
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # bat will automatically use less as a pager for large files
 export BAT_PAGER="less -RF"
+
+# tailspin: JVM stack traces + dotfiles error/exception theme
+export TAILSPIN_EXTRAS="${TAILSPIN_EXTRAS:-jvm-stack-trace}"
 export BAT_THEME="Catppuccin Macchiato"
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
@@ -473,8 +582,13 @@ export PATH="$HOME/Projects/jenk-cli:$PATH"
 export PATH="$PATH:$HOME/.local/scripts"
 
 alias vimlocal="nvim ~/.zshrc.local"
-alias fabric="fabric-ai"
-alias fab="fabric-ai"
+# Fabric + local oMLX/Qwen: patterns send system-only messages by default, but Qwen's
+# chat template requires a user role. --raw fixes that; --disable-responses-api avoids
+# /v1/responses quirks with local OpenAI-compatible servers.
+fabric() {
+    fabric-ai --raw --disable-responses-api "$@"
+}
+alias fab="fabric"
 alias mvnds="mvn eclipse:clean eclipse:eclipse -DdownloadSources=true"
 export COLORTERM=truecolor
 alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
