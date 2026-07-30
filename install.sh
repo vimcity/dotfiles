@@ -264,6 +264,12 @@ link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
 link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME_DIR/.config/btop/themes/catppuccin-rose"
 
+# fence sandbox configuration
+if [ -d "$DOTFILES_DIR/.config/fence" ]; then
+	mkdir -p "$HOME_DIR/.config/fence"
+	link_dotfile "$DOTFILES_DIR/.config/fence/fence.jsonc" "$HOME_DIR/.config/fence/fence.jsonc"
+fi
+
 # Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
 if [ -d "$DOTFILES_DIR/pi" ]; then
 	mkdir -p "$HOME_DIR/.pi/agent"
