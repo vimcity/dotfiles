@@ -68,5 +68,6 @@ source "$HOME/dotfiles/zshrc.d/omlx.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
 source "$HOME/dotfiles/zshrc.d/org.zsh"
+source "$HOME/dotfiles/zshrc.d/fence.zsh"
 
 
