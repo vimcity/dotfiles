@@ -26,42 +26,44 @@ if (( IS_MAC )); then
 fi
 
 # ===========================================
-# Oh My Zsh Configuration
+# Completion & Plugins (no OMZ framework)
 # ===========================================
-export ZSH="$HOME/.oh-my-zsh"
-export ZSH_CUSTOM="$ZSH/custom"
-export ZSH_CACHE_DIR="$ZSH/cache"
-export DISABLE_UPDATE_PROMPT=true
-export DISABLE_AUTO_UPDATE=true
-export ZSH_DISABLE_COMPFIX=true
-export _CACHED_CHECK=true
 
+# Completion cache
 zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-policy _omz_cache_policy
+zstyle ':completion:*' special-dirs true
 
-export CASE_SENSITIVE="false"
-export ENABLE_CORRECTION="true"
-export HYPHEN_INSENSITIVE="true"
-export DISABLE_MAGIC_FUNCTIONS="true"
-export DISABLE_LS_COLORS="true"
-export INSIDE_EMACS=""
+# Direct compinit (use cached dump)
+autoload -Uz compinit
+compinit -C -d "${ZDOTDIR:-$HOME}/.zcompdump"
 
-ZSH_THEME=""
+# Plugins (sourced directly, no framework)
+source "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
+source "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh"
 
-plugins=(
-  git
-  copypath
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  zsh-vi-mode
-)
+# Git prompt helper (replaces OMZ lib/git.zsh)
+function __git_prompt_git() {
+  GIT_OPTIONAL_LOCKS=0 command git "$@"
+}
+
+# Completion menu & matching
+zmodload -i zsh/complist
+unsetopt menu_complete flowcontrol
+setopt auto_menu complete_in_word always_to_end
+zstyle ':completion:*:*:*:*:*' menu select
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'r:|=*' 'l:|=* r:|=*'
+
+# Directory navigation
+setopt auto_cd auto_pushd pushd_ignore_dups pushdminus
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -- -='cd -'
 
 source ~/dotfiles/prompt-themes.zsh
 source "$HOME/dotfiles/zshrc.d/vi-ghostty.zsh"
 
-source $ZSH/oh-my-zsh.sh
-
 source "$HOME/dotfiles/zshrc.d/highlight.zsh"
+source "$HOME/dotfiles/zshrc.d/git-aliases.zsh"
 source "$HOME/dotfiles/zshrc.d/session.zsh"
 source "$HOME/dotfiles/zshrc.d/codex.zsh"
 source "$HOME/dotfiles/zshrc.d/omlx.zsh"
@@ -69,5 +71,5 @@ source "$HOME/dotfiles/zshrc.d/helpers.zsh"
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
 source "$HOME/dotfiles/zshrc.d/org.zsh"
 source "$HOME/dotfiles/zshrc.d/fence.zsh"
-
-
+source "$HOME/dotfiles/zshrc.d/herdr.zsh"
+source "$HOME/dotfiles/zshrc.d/history.zsh"
