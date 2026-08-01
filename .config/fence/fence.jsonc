@@ -9,19 +9,17 @@
   "filesystem": {
     "denyRead": [
       // DenyRead from code-relaxed is inherited, add more:
-      "**/.env*",
+      "~/.zshenv",
+      "**/*.env",
       "~/.config/gh/hosts.yml",
       "~/.config/gh/oauth.yml",
       "~/.npmrc",
-      "~/Documents/org/deep-stash",
-      "~/Documents/org/journal*",
       "~/.pi/agent/auth.json"
     ],
     "denyWrite": [
       // Inherits denyWrite from code-relaxed, add more:
-      "~/.zshrc",
       "~/.zshenv",
-      "~/.zprofile",
+      // "~/.zprofile",
       "~/.bashrc",
       "~/.bash_profile",
       "~/.profile"
@@ -30,7 +28,8 @@
       // Inherits all agent dirs from code-relaxed.
       // Add pi-lens which isn't in the template:
       "~/.pi-lens",
-      "~/.pi-lens/**"
+      "~/.pi-lens/**",
+      "~/dotfiles/**"
     ]
   },
 

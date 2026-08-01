@@ -63,4 +63,3 @@ herdr_auto_rename_current_tab() {
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd herdr_auto_rename_current_tab
 add-zsh-hook precmd herdr_auto_rename_current_tab
-
