@@ -33,57 +33,34 @@ ghostty_cursor_keymap() {
     fi
 }
 
-# zsh-vi-mode hooks (defined before OMZ loads the plugin)
-function zvm_config() {
-    ZVM_KEYTIMEOUT=1
-    ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
+# Vi mode + Ghostty cursor sync
+bindkey -v
+KEYTIMEOUT=1
+
+zle-line-init() {
+    ghostty_cursor_apply insert
 }
-
-function zvm_after_init() {
-    function zle-keymap-select() {
-        ghostty_cursor_keymap
-    }
-    zle -N zle-keymap-select
-
-    function zle-line-init() {
-        ghostty_cursor_apply insert
-    }
-    zle -N zle-line-init
-
-    function zle-line-finish() {
-        ghostty_cursor_apply normal
-    }
-    zle -N zle-line-finish
+zle-line-finish() {
+    ghostty_cursor_apply normal
 }
+zle -N zle-line-init
+zle -N zle-line-finish
 
-# Fallback when zsh-vi-mode is not installed
-if [[ ! -f "$ZSH_CUSTOM/plugins/zsh-vi-mode/zsh-vi-mode.plugin.zsh" ]]; then
-    bindkey -v
-    KEYTIMEOUT=1
+vi-cmd-mode-cursor() {
+    zle vi-cmd-mode
+    ghostty_cursor_apply normal
+}
+zle -N vi-cmd-mode-cursor
+bindkey -M viins '^[' vi-cmd-mode-cursor
 
-    zle-line-init() {
-        ghostty_cursor_apply insert
-    }
-    zle-line-finish() {
-        ghostty_cursor_apply normal
-    }
-    zle -N zle-line-init
-    zle -N zle-line-finish
+zle-keymap-select() {
+    ghostty_cursor_keymap
+}
+zle -N zle-keymap-select
 
-    vi-cmd-mode-cursor() {
-        zle vi-cmd-mode
-        ghostty_cursor_apply normal
-    }
-    zle -N vi-cmd-mode-cursor
-    bindkey -M viins '^[' vi-cmd-mode-cursor
+cursor_precmd() {
+    ghostty_cursor_keymap
+}
+add-zsh-hook precmd cursor_precmd
 
-    zle-keymap-select() {
-        ghostty_cursor_keymap
-    }
-    zle -N zle-keymap-select
-
-    cursor_precmd() {
-        ghostty_cursor_keymap
-    }
-    add-zsh-hook precmd cursor_precmd
-fi
+bindkey -M viins '^R' atuin-search
