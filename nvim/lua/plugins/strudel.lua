@@ -1,3 +1,8 @@
+-- Only load on personal machine (PERSONAL=1 set in ~/.zshrc.local)
+if vim.env.PERSONAL ~= "1" then
+  return {}
+end
+
 return {
   "gruvw/strudel.nvim",
   build = "npm ci",
