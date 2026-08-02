@@ -14,19 +14,19 @@
       "~/.config/gh/hosts.yml",
       "~/.config/gh/oauth.yml",
       "~/.npmrc",
+      "~/.zshrc.local.env",
+      "~/.m2/settings.xml",
       "~/.pi/agent/auth.json"
     ],
     "denyWrite": [
       // Inherits denyWrite from code-relaxed, add more:
       "~/.zshenv",
-      // "~/.zprofile",
       "~/.bashrc",
       "~/.bash_profile",
       "~/.profile"
     ],
     "allowWrite": [
-      // Inherits all agent dirs from code-relaxed.
-      // Add pi-lens which isn't in the template:
+      // Inherits agent directories from code-relaxed; add only tool-specific caches.
       "~/.pi-lens",
       "~/.pi-lens/**",
       "~/dotfiles/**"
@@ -35,9 +35,9 @@
 
   // ── Network ───────────────────────────────────────────────────────
   "network": {
-    // Inherits allowedDomains from code-relaxed (OpenAI, Anthropic, GitHub, npm, etc.)
-    // code-relaxed has allowLocalOutbound: true and does NOT use a proxy
-    // (that's what makes it "relaxed")
+    // Inherits Fence's explicit provider, source-control, and package-registry
+    // allowlist from code-relaxed. Web research must use an allowed provider;
+    // no personal SearXNG endpoint is configured in shared dotfiles.
   },
 
   // ── Commands ──────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ venv/
 env/
 node_modules/
 .git/
+.worktrees/
 __pycache__/
 *.pyc
 .DS_Store
