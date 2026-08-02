@@ -116,6 +116,8 @@ return {
     vim.api.nvim_set_hl(0, "SnacksDashboardKey", { fg = "#9ccfd8" })
     vim.api.nvim_set_hl(0, "SnacksDashboardDesc", { fg = "#ca9ee6" })
     vim.api.nvim_set_hl(0, "SnacksDashboardIcon", { fg = "#7287fd" })
+
     return opts
   end,
 }
+

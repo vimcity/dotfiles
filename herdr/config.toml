@@ -158,6 +158,30 @@ height = "50%"
 description = "open quick LLM ask"
 
 [[keys.command]]
+key = "prefix+alt+v"
+type = "popup"
+command = "exec $HOME/bin/voice-ask"
+width = "50%"
+height = "30%"
+description = "voice ask — dictate → LLM → Kokoro TTS"
+
+[[keys.command]]
+key = "prefix+alt+c"
+type = "pane"
+command = "exec $HOME/bin/voice-chat"
+description = "voice chat — conversational mode with VAD"
+
+[[keys.command]]
+key = "prefix+alt+o"
+type = "popup"
+command = "exec $HOME/bin/org-ask"
+width = "60%"
+height = "50%"
+description = "org ask — query your org notes via llm"
+
+[[keys.command]]
+
+[[keys.command]]
 key = "prefix+ctrl+a"
 type = "popup"
 command = "exec $HOME/dotfiles/tmux/scripts/quick-org-task.sh"
@@ -250,18 +274,12 @@ sidebar_width = 34
 sidebar_max_width = 44
 
 [ui.sidebar.agents]
-row_gap = 1 
-rows = [
-  ["state_icon", "state_text", "agent"],
-  ["workspace", "tab"],
-]
+row_gap = 1
+rows = [["state_icon", "state_text", "agent"], ["workspace", "tab"]]
 
 [ui.sidebar.spaces]
 row_gap = 1
-rows = [
-  ["state_icon", "workspace"],
-  ["branch", "git_status"],
-]
+rows = [["state_icon", "workspace"], ["branch", "git_status"]]
 
 [ui.toast]
 delivery = "herdr"
@@ -269,5 +287,3 @@ delivery = "herdr"
 [experimental]
 kitty_graphics = true
 switch_ascii_input_source_in_prefix = false
-
-
