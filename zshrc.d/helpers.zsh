@@ -234,6 +234,7 @@ theme() {
 alias ask='$HOME/dotfiles/bin/ask'
 export LLM_LOCAL_MODEL="${LLM_LOCAL_MODEL:-omlx-gemma}"
 export LLM_REMOTE_MODEL="${LLM_REMOTE_MODEL:-gpt-4o-mini}"
+export LLM_DEFAULT_MODEL="${LLM_DEFAULT_MODEL:-openrouter/qwen/qwen3.5-35b-a3b}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 alias aws-check="env | fzf +i --query 'AWS_'"
 export PI_TELEMETRY=0
@@ -242,6 +243,7 @@ export PI_SKIP_VERSION_CHECK=1
 alias org='nvim $HOME/Documents/org/todos.org'
 export ORG_PATH="$HOME/Documents/org"
 alias vimlocal='vim $HOME/.zshrc.local'
+alias vimenv='vim $HOME/.zshrc.env'
 export PATH="$HOME/.local/bin:$PATH"
 alias lstat="$HOME/.local/bin/lstat"
 
