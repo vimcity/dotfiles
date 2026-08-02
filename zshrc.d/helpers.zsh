@@ -243,7 +243,7 @@ export PI_SKIP_VERSION_CHECK=1
 alias org='nvim $HOME/Documents/org/todos.org'
 export ORG_PATH="$HOME/Documents/org"
 alias vimlocal='vim $HOME/.zshrc.local'
-alias vimenv='vim $HOME/.zshrc.env'
+alias vimenv='vim $HOME/.zshrc.local.env'
 export PATH="$HOME/.local/bin:$PATH"
 alias lstat="$HOME/.local/bin/lstat"
 
