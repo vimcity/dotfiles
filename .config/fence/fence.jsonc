@@ -36,8 +36,12 @@
   // ── Network ───────────────────────────────────────────────────────
   "network": {
     // Inherits Fence's explicit provider, source-control, and package-registry
-    // allowlist from code-relaxed. Web research must use an allowed provider;
-    // no personal SearXNG endpoint is configured in shared dotfiles.
+    // allowlist from code-relaxed. Add the Codex web-search endpoint explicitly.
+    // No personal SearXNG endpoint is configured in shared dotfiles.
+    "allowedDomains": [
+      "chatgpt.com",
+      "*.chatgpt.com"
+    ]
   },
 
   // ── Commands ──────────────────────────────────────────────────────

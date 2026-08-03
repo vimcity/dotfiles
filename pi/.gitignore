@@ -1,5 +1,6 @@
 # Local Pi overrides, credentials, sessions, and runtime state
 settings.local.json
+mcp.json
 auth.json
 models*.json
 trust.json
