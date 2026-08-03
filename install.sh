@@ -362,8 +362,7 @@ if [ "$IS_MAC" -eq 1 ]; then
 		bash "$DOTFILES_DIR/rbw/configure.sh"
 	fi
 
-	# Pi MCP config (macOS-specific — .pi agent dir handled in common section)
-	link_dotfile "$DOTFILES_DIR/pi/mcp.json" "$HOME/.pi/agent/mcp.json"
+	# Pi MCP config is intentionally machine-local; do not install a shared file.
 
 	# Install npm dependencies for any extension that needs them
 	for pi_ext_dir in "$HOME/.pi/agent/extensions/"*/; do
