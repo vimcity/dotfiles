@@ -38,7 +38,7 @@ define_catppuccin_rose_theme() {
         [right_bg]="#45475a"
         [right_fg]="#f9e2af"
         [error_fg]="#eb6f92"
-        [prompt_char]="#ebbcba"
+        [prompt_char]="#ec8aba"
         
         # Metadata
         [name]="catppuccin-rose"

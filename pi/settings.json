@@ -18,12 +18,11 @@
       "maxRetryDelayMs": 15000
     }
   },
-  "lastChangelogVersion": "0.81.1",
+  "lastChangelogVersion": "0.83.0",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
     "npm:pi-lens",
-    "npm:@ff-labs/pi-fff",
     "npm:pi-web-access"
   ],
   "theme": "catppuccin-rose",
@@ -34,5 +33,7 @@
     "showTerminalProgress": true
   },
   "hideThinkingBlock": true,
-  "showHardwareCursor": true
+  "showHardwareCursor": true,
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-terra"
 }
