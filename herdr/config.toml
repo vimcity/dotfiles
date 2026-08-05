@@ -30,10 +30,10 @@ detach = ""
 help = "prefix+?"
 workspace_picker = "prefix+q"
 goto = "prefix+ctrl+f"
-edit_scrollback = "prefix+slash"
-resize_mode = "prefix+shift+z"
-new_worktree = "prefix+shift+g"
-open_worktree = "prefix+ctrl+g"
+edit_scrollback = ""
+resize_mode = "prefix+ctrl+z"
+new_worktree = "prefix+shift+w"
+open_worktree = "prefix+ctrl+w"
 previous_agent = "cmd+k"
 next_agent = "cmd+j"
 switch_workspace = "prefix+shift+1..9"
@@ -75,6 +75,12 @@ previous_workspace = "alt+k"
 next_workspace = "alt+j"
 
 [[keys.command]]
+key = "prefix+slash"
+type = "pane"
+command = "exec \"$HOME/dotfiles/herdr/scripts/scrollback-nvim.sh\""
+description = "scrollback in nvim with tailspin highlighting"
+
+[[keys.command]]
 key = "prefix+f"
 type = "popup"
 command = "exec \"${SHELL:-/bin/zsh}\" -l"
@@ -85,7 +91,7 @@ description = "open floating shell"
 [[keys.command]]
 key = "prefix+ctrl+n"
 type = "shell"
-command = "$HOME/dotfiles/bin/herdr-project-nvim"
+command = "$HOME/dotfiles/herdr/scripts/project-nvim.sh"
 description = "open Neovim in a Projects tab"
 
 [[keys.command]]
@@ -142,6 +148,12 @@ height = "65%"
 description = "review PRs in a floating popup"
 
 [[keys.command]]
+key = "prefix+shift+g"
+type = "pane"
+command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"${GH_PR_DASH_BIN:-$HOME/.local/bin/gh-pr-dash}\""
+description = "open gh-pr-dash PR dashboard"
+
+[[keys.command]]
 key = "prefix+shift+t"
 type = "popup"
 command = "exec \"${SHELL:-/bin/zsh}\" -l"
@@ -178,8 +190,6 @@ command = "exec $HOME/bin/org-ask"
 width = "60%"
 height = "50%"
 description = "org ask — query your org notes via llm"
-
-[[keys.command]]
 
 [[keys.command]]
 key = "prefix+ctrl+a"
@@ -246,7 +256,8 @@ type = "popup"
 command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\""
 width = "75%"
 height = "75%"
-description = "open btop"
+description = "open Jira TUI in a popup"
+
 [[keys.command]]
 key = "prefix+ctrl+y"
 type = "pane"

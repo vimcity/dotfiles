@@ -6,7 +6,7 @@ c.scrolling.smooth = True
 c.auto_save.session = True
 c.session.default_name = "main"
 c.session.lazy_restore = True
-c.context.tab_discard = True
+# c.content.tab_discard = True
 c.window.hide_decoration = True
 c.tabs.last_close = "close"
 
