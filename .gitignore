@@ -31,7 +31,6 @@ atuin/key
 .lazygit-local.yml
 .ghprs-repos.local
 qutebrowser/local.py
-bin/herdr-cmt-dev
 
 # Neovim package manager lock file
 nvim/lazy-lock.json

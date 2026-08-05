@@ -316,6 +316,10 @@ if [ -f "$DOTFILES_DIR/herdr/reviewr.toml" ]; then
 	link_dotfile "$DOTFILES_DIR/herdr/reviewr.toml" "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr/config.toml"
 fi
 
+if [ -d "$DOTFILES_DIR/herdr/scripts" ]; then
+	chmod +x "$DOTFILES_DIR"/herdr/scripts/*.sh
+fi
+
 if [ -f "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" ]; then
 	mkdir -p "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers"
 	link_dotfile "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers/config.toml"

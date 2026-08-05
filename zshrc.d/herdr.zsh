@@ -37,11 +37,11 @@ herdr() {
         _herdr_ensure_plugins || return
     fi
     command herdr "$@"
-    local status=$?
-    if (( status == 0 && is_handoff_update )); then
+    local exit_status=$?
+    if (( exit_status == 0 && is_handoff_update )); then
         _herdr_ensure_plugins || return
     fi
-    return "$status"
+    return "$exit_status"
 }
 
 # Same binding as prefix+t in herdr/config.toml
@@ -58,7 +58,7 @@ herdr_auto_rename_current_tab() {
     [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_TAB_ID:-}" ]] || return 0
     [[ "$PWD" == "$HERDR_AUTO_RENAME_LAST_CWD" ]] && return 0
     HERDR_AUTO_RENAME_LAST_CWD="$PWD"
-    "$HOME/dotfiles/bin/herdr-autorename-tab" "$PWD" >/dev/null 2>&1
+    "$HOME/dotfiles/herdr/scripts/autorename-tab.sh" "$PWD" >/dev/null 2>&1
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook chpwd herdr_auto_rename_current_tab
