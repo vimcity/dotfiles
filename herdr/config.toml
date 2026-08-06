@@ -277,6 +277,8 @@ command = "exec $HOME/.local/bin/lmstat"
 description = "open lmstat"
 
 [ui]
+pane_borders = true
+pane_gaps = true
 prompt_new_tab_name = false
 prompt_new_workspace_name = true
 show_agent_labels_on_pane_borders = true

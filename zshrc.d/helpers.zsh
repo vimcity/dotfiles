@@ -35,8 +35,8 @@ alias cur='cursor-agent'
 #  return "$status"
 # }
 alias vim=nvim
-export EDITOR="nvim"
-export VISUAL="nvim"
+export EDITOR="/opt/homebrew/bin/nvim"
+export VISUAL="/opt/homebrew/bin/nvim"
 alias view='nvim -R'
 alias nvclear="rm -rf ~/.cache/nvim ~/.local/share/nvim && echo '✓ Neovim caches cleared'"
 alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '✓ Neovim rebuilt'"
