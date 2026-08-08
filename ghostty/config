@@ -38,7 +38,7 @@ shell-integration = zsh
 copy-on-select = clipboard
 
 # Keybindings
-keybind = shift+enter=text:\x1b[13;2u
+# keybind = shift+enter=text:\x1b[13;2u
 
 # Disable Ctrl+Shift+P (conflicts with other tools)
 keybind = ctrl+shift+p=unbind
