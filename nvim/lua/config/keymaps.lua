@@ -162,8 +162,8 @@ vim.keymap.set("n", "<leader>fG", function()
 end, { desc = "Grep (buffer dir)" })
 
 vim.keymap.set("n", "<leader>/", function()
-  Snacks.picker.grep({ cwd = buffer_dir() })
-end, { desc = "Grep (buffer dir)" })
+  Snacks.picker.grep()
+end, { desc = "Grep (project/cwd)" })
 
 -- Resize windows with Ctrl + Arrow keys (10 rows/columns per press)
 vim.keymap.set("n", "<C-Up>", "<cmd>resize +10<cr>", { desc = "Increase window height" })
