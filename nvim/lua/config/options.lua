@@ -56,7 +56,7 @@ elseif is_mac and not is_ssh_session and not is_herdr_session then
 -- Remote multiplexer: update tmux's buffer when present and use OSC 52 for the client clipboard.
 -- Herdr panes may not inherit SSH_* from a persistent server process, so HERDR_ENV
 -- must independently select this provider.
-elseif is_ssh_session or is_herdr_session then
+elseif is_ssh_session and is_herdr_session then
   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
   local function tmux_osc52_copy(reg)
     return function(lines, regtype)

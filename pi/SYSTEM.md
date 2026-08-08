@@ -30,3 +30,5 @@ Herdr owns session tracking for pane-bound agents. Do not build parallel session
 
 Do not put project worktrees in `/tmp` or beside the repository unless explicitly requested. Keep `.worktrees/` ignored by Git and search tools. Normal tasks may continue on the current branch when isolation is unnecessary.
 Treat unexpected access, authentication, permission, tool, or external-service failures as a hard boundary: report and stop. Do not route around them, broaden searches, inspect alternate sources, or attempt remediation unless explicitly asked. Only investigate failures intrinsic to the requested work.
+
+Never use emojis in prompt responses, if you want to use symbols for readability, use nerd icons

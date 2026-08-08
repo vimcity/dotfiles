@@ -64,3 +64,4 @@ cursor_precmd() {
 add-zsh-hook precmd cursor_precmd
 
 bindkey -M viins '^R' atuin-search
+bindkey -M vicmd 'A' undefined-key
