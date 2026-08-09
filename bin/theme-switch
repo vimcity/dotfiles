@@ -21,6 +21,36 @@ esac
 mkdir -p "$state_dir"
 printf '%s\n' "$theme" >"$state_file"
 
+# Herdr has its own custom palette; update it alongside the shell state.
+herdr_config="$HOME/.config/herdr/config.toml"
+if [[ -w "$herdr_config" ]]; then
+  python3 - "$herdr_config" "$theme" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+theme = sys.argv[2]
+text = path.read_text()
+if theme == "catppuccin":
+    values = {
+        "panel_bg": "#303446", "surface0": "#414559", "surface1": "#51576d",
+        "surface_dim": "#292c3c", "overlay0": "#626880", "text": "#c6d0f5",
+        "subtext0": "#a5adce", "accent": "#8caaee",
+    }
+else:
+    values = {
+        "panel_bg": "#29273f", "surface0": "#2a273f", "surface1": "#393552",
+        "surface_dim": "#1f1d30", "overlay0": "#56526e", "text": "#c0bbce",
+        "subtext0": "#8a84a0", "accent": "#7287fd",
+    }
+for key, value in values.items():
+    text = re.sub(rf'(?m)^{key} = "[^"]*"$', f'{key} = "{value}"', text)
+path.write_text(text)
+PY
+  command herdr server reload-config >/dev/null 2>&1 || true
+fi
+
 # Ghostty reads its theme from the tracked config; keep this selector reversible.
 ghostty_config="$HOME/.config/ghostty/config"
 if [[ -w "$ghostty_config" ]]; then
