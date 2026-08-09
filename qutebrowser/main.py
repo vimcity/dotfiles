@@ -8,6 +8,8 @@ c.session.default_name = "main"
 c.session.lazy_restore = True
 # c.content.tab_discard = True
 c.window.hide_decoration = True
+# Enable translucent window background so rgba() on tabs actually shows transparency
+c.window.transparent = True
 c.tabs.last_close = "close"
 
 config.set("zoom.default", "120%")
@@ -54,7 +56,7 @@ c.tabs.min_width = 180
 # Muted blues, purples, pinks - no grey, no green, cohesive palette
 
 # Tabs
-c.colors.tabs.bar.bg = "#16141f"
+c.colors.tabs.bar.bg = "qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(255, 255, 255, 0.25), stop:1 rgba(255, 255, 255, 0.08))"  # Glass effect gradient on tab bar
 c.colors.tabs.odd.bg = "#221e35"
 c.colors.tabs.even.bg = "#221e35"
 c.colors.tabs.odd.fg = "#a896d3"

@@ -13,7 +13,7 @@ alias lz=lazygit
 alias lzz=lazygit
 alias lzd=lazydocker
 alias ghb='gh browse'
-alias sp='$HOME/dotfiles/tmux/scripts/tmux-sessionizer.sh'
+# tmux-sessionizer removed (Herdr-only workflow)
 alias vimz="nvim ~/.zshrc"
 alias vimal="nvim $HOME/dotfiles/zshrc.d/helpers.zsh"
 alias cur='cursor-agent'
@@ -197,10 +197,7 @@ export USE_BUILTIN_RIPGREP=0
 cheat() {
   curl "https://cheat.sh/$1"
 }
-if [[ -n "$TMUX_PANE" ]]; then
-  tmux set-window-option -t current status-style bg=blue 2>/dev/null
-  trap "tmux set-window-option -t current status-style bg=blue 2>/dev/null" USR1
-fi
+# tmux status/trap removed (Herdr-only workflow)
 if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi

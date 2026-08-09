@@ -1,4 +1,4 @@
-# herdr-tiny-fingers — tmux-fingers-style copy hints in Herdr
+# herdr-tiny-fingers — copy hints in Herdr
 # Keybinding: prefix+t (Ctrl+Space, then t)
 
 copy_toast = true
