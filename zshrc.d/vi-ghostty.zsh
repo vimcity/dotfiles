@@ -4,11 +4,7 @@ typeset -g _GHOSTTY_CURSOR_MODE=''
 
 ghostty_cursor() {
     local seq="$1"
-    if [[ -n "$TMUX" ]]; then
-        print -rn -- $'\033Ptmux;\033'"${seq}"$'\033\\'
-    else
-        print -rn -- "$seq"
-    fi
+    print -rn -- "$seq"
 }
 
 ghostty_cursor_apply() {

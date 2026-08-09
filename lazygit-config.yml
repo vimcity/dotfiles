@@ -1,3 +1,9 @@
+customCommands:
+  - key: 'C'
+    command: 'ai-commit'
+    context: 'files'
+    description: 'Commit with AI-generated message (OpenRouter - gemini-flash-lite)'
+    output: popup
 gui:
   nerdFontsVersion: '3'
   authorColors:

@@ -5,19 +5,18 @@ Personal macOS development environment configuration with a focus on modern CLI 
 ## Daily stack
 
 | Layer | Tool | Role |
-|-------|------|------|
+| ------- | ------ | ------ |
 | Terminal | **Ghostty** | GPU terminal emulator |
 | Multiplexer | **Herdr** | Primary workspaces, tabs, panes, agent sidebar |
 | Coding agent | **Pi** | Primary agent for repo work and org tasks |
 | IDE agent | **Cursor Agent** | In-editor coding when needed |
 | Optional | **Codex** (`co` / `col`) | Secondary CLI agent |
-| Legacy | **tmux** | SSH/homelab fallback; config kept, not daily driver |
 
 Session and agent state live in **Herdr** — not a separate dotfiles index. Do not reintroduce custom orchestrators or session indexes.
 
 ## Herdr + Pi workflow
 
-Herdr is the primary terminal multiplexer. Pi is the primary coding agent. tmux config remains for SSH/homelab fallback; daily work runs in Herdr.
+Herdr is the primary terminal multiplexer. Pi is the primary coding agent.
 
 ### Session restore
 
@@ -59,13 +58,6 @@ Or Pi: `/note ...` → `~/Documents/org/notes.md`
 
 Read Pi `herdr` skill when splitting panes or prompting another agent.
 
-### tmux (secondary)
-
-- Config lives in `tmux/` and still installs via `install.sh`
-- Several `tmux/scripts/` popups are wired into Herdr keybindings
-- Neovim uses Herdr pane navigation when `HERDR_ENV=1`, else falls back to tmux navigator
-- Do not add new daily-driver workflows to tmux unless they are SSH-only
-
 ## Quick Start
 
 ```bash
@@ -74,8 +66,9 @@ cd ~/dotfiles
 ```
 
 The install script will:
+
 - Install Oh My Zsh and plugins (autosuggestions, syntax highlighting)
-- Install TPM (Tmux Plugin Manager) for optional tmux use
+
 - Link Herdr, Pi, and Neovim configs
 - Backup existing configs
 - Create symlinks for all dotfiles
@@ -83,6 +76,7 @@ The install script will:
 ## Overview
 
 This configuration emphasizes:
+
 - **Herdr + Pi** as the primary terminal and agent workflow
 - **Modern CLI replacements** (bat, eza, fd, ripgrep, zoxide)
 - **Catppuccin-based theming** across all tools, with a custom `catppuccin-rose` variant in Neovim/OpenCode
@@ -93,6 +87,7 @@ This configuration emphasizes:
 ## Tools & Configuration
 
 ### Terminal
+
 **Ghostty** - Modern GPU-accelerated terminal emulator
 > Fast, native macOS terminal with GPU rendering for smooth scrolling and animations
 
@@ -100,30 +95,22 @@ This configuration emphasizes:
 - Font: CommitMono at 16pt with 40% cell height adjustment
 - Quick terminal toggle (`Cmd+Shift+\``)
 - Shell integration enabled for Zsh
-- Launches into **Herdr** for day-to-day work (tmux available when needed)
+- Launches into **Herdr** for day-to-day work
 
 ### Terminal Multiplexer (primary)
+
 **Herdr** - Agent-aware terminal multiplexer
 > Primary daily driver: workspaces, tabs, panes, agent sidebar, and session restore for Pi/Codex/Cursor agents
 
 - **Config**: `herdr/config.toml` (+ plugins under `herdr/plugins/`)
-- **Prefix**: `Ctrl+Space` (matches legacy tmux muscle memory)
+- **Prefix**: `Ctrl+Space`
 - **Agents**: Pi is the default coding agent; Herdr tracks pane-bound sessions
 - **Session restore**: `resume_agents_on_restore = true` rebuilds layout and resumes agents after restart
 - **Navigation**: `Cmd+j` / `Cmd+k` between agents; `Ctrl+h/j/k/l` across Neovim splits and panes
 - **Org → Pi**: `prefix+shift+i` runs `org-pi launch`
-- Reuses several popup/shell scripts from `tmux/scripts/` where workflows overlap
-
-### Terminal Multiplexer (optional)
-**Tmux** - Legacy session manager
-> Kept for SSH/homelab and scripts that still target tmux; not the primary daily workflow
-
-- **Prefix**: `Ctrl+Space` (shared with Herdr)
-- **Modular config** under `tmux/conf/`
-- **Plugins**: resurrect/continuum, yank, thumbs, fzf-url, sessionist, battery/cpu
-- Popup scripts in `tmux/scripts/` are also wired into Herdr keybindings
 
 ### Shell Environment
+
 **Zsh** - Unix shell with powerful customization
 > Primary command-line interface with enhanced features via Oh My Zsh framework
 
@@ -135,6 +122,7 @@ This configuration emphasizes:
 - **Python**: pyenv for version management (lazy-loaded)
 
 ### Shell History
+
 **Atuin** - Shell history database with sync capabilities
 > Replaces default shell history with searchable, encrypted, cross-machine synced command database
 
@@ -145,6 +133,7 @@ This configuration emphasizes:
 - Customized format showing relative time and directory
 
 ### Modern CLI Tools
+
 - **bat** - Syntax-highlighted file viewer
   > Drop-in cat replacement with syntax highlighting, line numbers, and git integration. Used as default pager for man pages
   - Catppuccin Frappe theme, used as man pager
@@ -167,21 +156,23 @@ This configuration emphasizes:
   
 - **delta** - Enhanced git diff viewer
    > Syntax-highlighting pager for git diffs with side-by-side view support
-   - Used in lazygit for better diff visualization
+  - Used in lazygit for better diff visualization
 
 ### Text Editor
+
 **Neovim (LazyVim)** - Modern modal text editor
 > Highly extensible Vim-based editor with LSP, treesitter, and modern IDE features
 
 - **Language Support**: TypeScript, Python, Java, Go, Kotlin, JSON with full LSP
 - **AI in-editor**: GitHub Copilot (`Alt-y` / `<leader>cp`), CodeCompanion → oMLX (`<leader>aa/ac/ap`)
 - **Org glue**: `:OrgAiPlan`, `:OrgAiLaunch` → `org-pi` in Herdr
-- **Herdr-aware splits**: `Ctrl+h/j/k/l` uses Herdr navigation when `HERDR_ENV=1`, else tmux
+- **Herdr-aware splits**: `Ctrl+h/j/k/l` uses Herdr navigation
 - **Testing / debugging**: Neotest, DAP
 - **Theme**: Custom `catppuccin-rose` colorscheme
 - **Surround**: LazyVim default `gsa` / `gsd` / `gsr` (mini-surround extra)
 
 ### Git Tools
+
 **Lazygit** - Terminal UI for git operations
 > Interactive terminal interface for git that simplifies staging, committing, branching, merging, and rebasing
 
@@ -191,12 +182,14 @@ This configuration emphasizes:
 - Custom theme matching overall color scheme
 
 ### System Info
+
 **Fastfetch** - System information tool
 > Fast neofetch alternative that displays system specs (OS, CPU, memory, etc.) with styling
 
 - Shows OS, kernel, uptime, packages, terminal, CPU, GPU, memory, battery, etc.
 
 ### Additional Tools
+
 **Starship** - Cross-shell prompt
 > Fast, customizable prompt that shows relevant context (git branch, language versions, execution time)
 
@@ -213,7 +206,9 @@ This configuration emphasizes:
 > Manage multiple Python versions and easily switch between them per-project
 
 ### Search & Navigation Aliases
+
 Custom functions for fuzzy finding:
+
 - `ff` - Fuzzy find files with bat preview
 - `fdir` - Fuzzy find directories with eza preview
 - `ffe` - Fuzzy find and edit files
@@ -222,6 +217,7 @@ Custom functions for fuzzy finding:
 - `gcof` / `gbdf` - Fuzzy git branch checkout/delete
 
 ### AI Integration
+
 - **Pi** — primary coding agent (terminal + org tasks)
 - **Herdr** — layout, agent sidebar, session restore (see **Herdr + Pi workflow** above)
 - **Org + Pi (`org-pi`)** — org task → plan → Pi; Herdr `prefix+shift+i`
@@ -231,6 +227,7 @@ Custom functions for fuzzy finding:
 - **`note`** — durable bullets; **oMLX / `ask`** — local glue and RAG
 
 ### Git Workflow
+
 - Extensive git aliases in zsh
 - Git worktree shortcuts for multi-branch development
 - Delta for enhanced git diffs
@@ -253,10 +250,7 @@ dotfiles/
 │   │   ├── config/     # Core settings (keymaps, options, autocmds, lazy.lua)
 │   │   └── plugins/    # Custom plugin configs (copilot, codecompanion, etc.)
 │   └── init.lua        # Entry point
-├── tmux/               # Optional tmux config (modular)
-│   ├── conf/
-│   ├── scripts/        # Shared popup/shell scripts (also used by Herdr)
-│   └── tmux.conf
+
 ├── zshrc               # Zsh entrypoint (sources zshrc.d/)
 ├── zshrc.d/            # Modular shell config (herdr, omlx, codex, prompt, …)
 ├── lazygit-config.yml  # Git UI configuration
@@ -270,7 +264,7 @@ dotfiles/
 
 - **Herdr-first workflow** with Pi as the primary agent and agent session restore
 - **Catppuccin + rose overrides** across Ghostty, Herdr, prompt, Neovim, and bat
-- **Vim keybindings** in shell (vi mode), Herdr/tmux copy mode, Neovim, and file managers
+- **Vim keybindings** in shell (vi mode), Herdr copy mode, Neovim, and file managers
 - **Fuzzy finding** integrated throughout with fzf (files, directories, git branches)
 - **Shell history** synced across machines with Atuin
 - **Testing & debugging** with Neotest and DAP
@@ -282,15 +276,17 @@ dotfiles/
 ## Requirements
 
 These tools should be installed via Homebrew or other package managers:
+
 - **Core**: ghostty, herdr, pi, neovim, zsh
-- **Optional legacy**: tmux (SSH/homelab)
+
 - **Utilities**: atuin, zoxide, fzf, fd, ripgrep, bat, eza, delta, lazygit, fastfetch, yazi
 - **Optional**: pyenv (Python), oMLX (local LLM), Codex, Karabiner-Elements
-- **Font**: JetBrains Mono Nerd Font or CommitMono (see https://commitmono.com/)
+- **Font**: JetBrains Mono Nerd Font or CommitMono (see <https://commitmono.com/>)
 
 The install script handles:
+
 - Oh My Zsh installation and plugin setup
-- TPM bootstrap for optional tmux
+
 - Symlinks for Herdr, Pi, Neovim, shell, and tool configs
 
 Note: The install script assumes the above tools are already installed via Homebrew on macOS, or via apt on Debian/Ubuntu Linux dev machines.

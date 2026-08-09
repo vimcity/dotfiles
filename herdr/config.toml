@@ -19,10 +19,8 @@ subtext0 = "#8a84a0"
 accent = "#7287fd"
 
 [keys]
-# Match the tmux prefix used in ~/dotfiles/tmux/conf/keybindings.conf.
 prefix = "ctrl+space"
 
-# Only bind Herdr controls when they have a close tmux equivalent.
 settings = "prefix+shift+s"
 reload_config = "prefix+,"
 toggle_sidebar = "prefix+e"
@@ -38,7 +36,6 @@ previous_agent = "cmd+k"
 next_agent = "cmd+j"
 switch_workspace = "prefix+shift+1..9"
 
-# Herdr tabs map most closely to tmux windows.
 new_tab = "prefix+c"
 previous_tab = "alt+h"
 next_tab = "alt+l"
@@ -46,7 +43,6 @@ switch_tab = ["prefix+1..9", "alt+1..9"]
 rename_tab = "prefix+r"
 close_tab = "prefix+w"
 
-# Herdr panes map to tmux panes.
 split_vertical = "prefix+v"
 split_horizontal = ["prefix+s", "prefix+minus"]
 close_pane = "prefix+x"
@@ -67,7 +63,6 @@ cycle_pane_previous = ""
 last_pane = "prefix+tab"
 rename_pane = ""
 
-# Herdr workspace layer mapped only where your tmux config has a session-like key.
 new_workspace = "prefix+n"
 rename_workspace = "prefix+period"
 close_workspace = ""
@@ -104,7 +99,7 @@ description = "toggle the reviewr sidebar"
 key = "prefix+t"
 type = "plugin_action"
 command = "hotchpotch.herdr-tiny-fingers.open"
-description = "copy visible text using tmux-fingers-style hints"
+description = "copy visible text using tiny-fingers hints"
 
 [[keys.command]]
 key = "ctrl+h"
@@ -130,7 +125,7 @@ type = "shell"
 command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh right"
 description = "navigate right across Neovim splits and Herdr panes"
 
-# Native floating popups matching the tmux display-popup workflows.
+# Floating popups
 [[keys.command]]
 key = "prefix+shift+p"
 type = "popup"
@@ -164,7 +159,7 @@ description = "open temporary floating shell"
 [[keys.command]]
 key = "prefix+alt+q"
 type = "popup"
-command = "exec $HOME/dotfiles/tmux/scripts/llm-ask.sh"
+command = "exec $HOME/dotfiles/herdr/scripts/llm-ask.sh"
 width = "60%"
 height = "50%"
 description = "open quick LLM ask"
@@ -194,7 +189,7 @@ description = "org ask — query your org notes via llm"
 [[keys.command]]
 key = "prefix+ctrl+a"
 type = "popup"
-command = "exec $HOME/dotfiles/tmux/scripts/quick-org-task.sh"
+command = "exec $HOME/dotfiles/herdr/scripts/quick-org-task.sh"
 width = "55%"
 height = "50%"
 description = "open or create an org todo"
@@ -216,7 +211,7 @@ description = "org task → Pi (org-pi launch)"
 [[keys.command]]
 key = "prefix+ctrl+o"
 type = "popup"
-command = "exec $HOME/dotfiles/tmux/scripts/agenda-today.sh"
+command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh"
 width = "65%"
 height = "65%"
 description = "open today agenda"
@@ -224,7 +219,7 @@ description = "open today agenda"
 [[keys.command]]
 key = "prefix+shift+o"
 type = "popup"
-command = "exec $HOME/dotfiles/tmux/scripts/org-note-popup.sh"
+command = "exec $HOME/dotfiles/herdr/scripts/org-note-popup.sh"
 width = "85%"
 height = "80%"
 description = "create new org plans"

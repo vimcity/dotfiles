@@ -18,10 +18,9 @@ vim.opt.clipboard = "unnamedplus"
 local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
 local is_ssh_session = vim.env.SSH_TTY or vim.env.SSH_CONNECTION
-local is_tmux_session = vim.env.TMUX
 local is_herdr_session = vim.env.HERDR_ENV == "1"
 local is_personal = vim.env.PERSONAL == "1"
-local is_homelab = is_linux and (is_ssh_session or is_tmux_session)
+local is_homelab = is_linux and is_ssh_session
 
 vim.g.is_homelab = is_homelab
 
@@ -53,32 +52,24 @@ elseif is_mac and not is_ssh_session and not is_herdr_session then
       ["*"] = "pbpaste",
     },
   }
--- Remote multiplexer: update tmux's buffer when present and use OSC 52 for the client clipboard.
+-- Remote multiplexer: use OSC 52 for the client clipboard.
 -- Herdr panes may not inherit SSH_* from a persistent server process, so HERDR_ENV
 -- must independently select this provider.
 elseif is_ssh_session and is_herdr_session then
   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
-  local function tmux_osc52_copy(reg)
-    return function(lines, regtype)
-      if is_tmux_session then
-        vim.fn.system("tmux load-buffer -", table.concat(lines, "\n"))
-      end
-      if ok then
-        osc52.copy(reg)(lines, regtype)
-      end
-    end
+  if ok then
+    vim.g.clipboard = {
+      name = "osc52",
+      copy = {
+        ["+"] = osc52.copy("+"),
+        ["*"] = osc52.copy("*"),
+      },
+      paste = {
+        ["+"] = osc52.paste("+"),
+        ["*"] = osc52.paste("*"),
+      },
+    }
   end
-  vim.g.clipboard = {
-    name = "tmux+osc52",
-    copy = {
-      ["+"] = tmux_osc52_copy("+"),
-      ["*"] = tmux_osc52_copy("*"),
-    },
-    paste = {
-      ["+"] = is_tmux_session and { "tmux", "show-buffer" } or osc52.paste("+"),
-      ["*"] = is_tmux_session and { "tmux", "show-buffer" } or osc52.paste("*"),
-    },
-  }
 end
 
 -- -- Neovide: provide a solid background color (no terminal behind the window)

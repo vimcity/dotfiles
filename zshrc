@@ -17,7 +17,9 @@ fi
 
 # Homebrew - static exports avoid spawning `brew` on every shell startup
 if (( IS_MAC )); then
-    export HOMEBREW_PREFIX="/opt/homebrew"
+    export WIKI_HOME="$HOME/Documents/org"   # pi-llm-wiki personal vault root
+
+export HOMEBREW_PREFIX="/opt/homebrew"
     export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
     export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
     export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
@@ -70,6 +72,5 @@ source "$HOME/dotfiles/zshrc.d/omlx.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
 source "$HOME/dotfiles/zshrc.d/rbw.zsh"
 source "$HOME/dotfiles/zshrc.d/org.zsh"
-source "$HOME/dotfiles/zshrc.d/fence.zsh"
 source "$HOME/dotfiles/zshrc.d/herdr.zsh"
 source "$HOME/dotfiles/zshrc.d/history.zsh"

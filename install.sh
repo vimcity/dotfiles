@@ -100,15 +100,7 @@ install_omz_plugin "zsh-users/zsh-completions" "$ZSH_CUSTOM/plugins/zsh-completi
 install_omz_plugin "zsh-users/zsh-syntax-highlighting" "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 
-# ============================================================================
-# TPM
-# ============================================================================
-if [ ! -d "$HOME_DIR/.tmux/plugins/tpm" ]; then
-	echo "󰌶 Installing TPM (Tmux Plugin Manager)..."
-	run_as_user git clone --depth=1 https://github.com/tmux-plugins/tpm "$HOME_DIR/.tmux/plugins/tpm"
-else
-	echo "󰄵 TPM already installed"
-fi
+# TPM removed (Herdr-only workflow)
 
 # ============================================================================
 # OS-specific package installation
@@ -136,7 +128,6 @@ else
 		wget
 		git
 		zsh
-		tmux
 		neovim
 		btop
 		ncdu
@@ -256,19 +247,11 @@ link_dotfile() {
 
 link_dotfile "$DOTFILES_DIR/zshrc" "$HOME_DIR/.zshrc"
 link_dotfile "$DOTFILES_DIR/vimrc" "$HOME_DIR/.vimrc"
-link_dotfile "$DOTFILES_DIR/tmux/tmux.conf" "$HOME_DIR/.tmux.conf"
-link_dotfile "$DOTFILES_DIR/tmux-cht-languages" "$HOME_DIR/.tmux-cht-languages"
-link_dotfile "$DOTFILES_DIR/tmux-cht-commands" "$HOME_DIR/.tmux-cht-commands"
+# tmux symlinks removed (Herdr-only workflow)
 link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/config.yml"
 link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
 link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME_DIR/.config/btop/themes/catppuccin-rose"
-
-# fence sandbox configuration
-if [ -d "$DOTFILES_DIR/.config/fence" ]; then
-	mkdir -p "$HOME_DIR/.config/fence"
-	link_dotfile "$DOTFILES_DIR/.config/fence/fence.jsonc" "$HOME_DIR/.config/fence/fence.jsonc"
-fi
 
 # Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
 if [ -d "$DOTFILES_DIR/pi" ]; then
@@ -436,12 +419,10 @@ echo ""
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󱀭 Optional: Create ~/.zshrc.local for machine-specific configs."
 	echo "󰜎 Primary workflow: Herdr + Pi (see README.md)."
-	echo "󰔌 Optional tmux: start tmux, press Ctrl+Space then Shift+I to install plugins."
 else
 	echo "Next steps:"
 	echo "  1. Primary workflow: Herdr + Pi (see README.md)."
-	echo "  2. Optional tmux plugins: Ctrl+Space then Shift+I inside tmux."
-	echo "  3. Open nvim and run :Lazy! sync"
-	echo "  4. Review $HOME_DIR/.zshrc.local for Linux-specific overrides."
+	echo "  2. Open nvim and run :Lazy! sync"
+	echo "  3. Review $HOME_DIR/.zshrc.local for Linux-specific overrides."
 fi
 echo ""

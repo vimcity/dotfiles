@@ -1,0 +1,445 @@
+{
+  "$schema": "https://unpkg.com/@aliou/pi-guardrails@0.16.2/schema.json",
+  "version": "0.13.0-20260619",
+  "enabled": true,
+  "applyBuiltinDefaults": true,
+  "onboarding": {
+    "completed": true,
+    "completedAt": "2026-08-10T00:00:00.000Z",
+    "version": "1"
+  },
+  "features": {
+    "guardrails": true,
+    "pathAccess": true,
+    "permissionGate": true
+  },
+  "policies": {
+    "rules": [
+      {
+        "id": "env-files",
+        "name": "Environment files",
+        "description": "Protect .env files and secret configs from being read or written",
+        "protection": "noAccess",
+        "onlyIfExists": false,
+        "patterns": [
+          {
+            "pattern": "**/.env"
+          },
+          {
+            "pattern": "**/*.env"
+          },
+          {
+            "pattern": "**/.env.*"
+          },
+          {
+            "pattern": "**/.envrc"
+          }
+        ],
+        "allowedPatterns": [
+          {
+            "pattern": ".env.example"
+          },
+          {
+            "pattern": "**/.env.example"
+          }
+        ]
+      },
+      {
+        "id": "ssh-keys",
+        "name": "SSH keys",
+        "description": "Protect SSH private keys from being read",
+        "protection": "noAccess",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.ssh/**"
+          }
+        ]
+      },
+      {
+        "id": "aws-creds",
+        "name": "AWS credentials",
+        "description": "Protect AWS credential files from being read",
+        "protection": "noAccess",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.aws/**"
+          },
+          {
+            "pattern": "~/.config/gh/hosts.yml"
+          },
+          {
+            "pattern": "~/.config/gh/oauth.yml"
+          }
+        ]
+      },
+      {
+        "id": "npmrc",
+        "name": "npmrc",
+        "description": "Protect npmrc and registry auth",
+        "protection": "noAccess",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.npmrc"
+          }
+        ]
+      },
+      {
+        "id": "shell-startup",
+        "name": "Shell startup files",
+        "description": "Protect shell config files from being written",
+        "protection": "readOnly",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.zshenv"
+          },
+          {
+            "pattern": "~/.zshrc.local.env"
+          },
+          {
+            "pattern": "~/.bashrc"
+          },
+          {
+            "pattern": "~/.bash_profile"
+          },
+          {
+            "pattern": "~/.profile"
+          }
+        ]
+      },
+      {
+        "id": "m2-settings",
+        "name": "Maven settings",
+        "description": "Protect Maven settings.xml containing possible credentials",
+        "protection": "noAccess",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.m2/settings.xml"
+          }
+        ]
+      },
+      {
+        "id": "pi-auth",
+        "name": "Pi auth",
+        "description": "Protect Pi's auth.json from being read",
+        "protection": "noAccess",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "~/.pi/agent/auth.json"
+          }
+        ]
+      },
+      {
+        "id": "pem-keys",
+        "name": "Private keys",
+        "description": "Protect private key files from being read or written",
+        "protection": "readOnly",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "**/*.pem"
+          },
+          {
+            "pattern": "**/*.key"
+          }
+        ]
+      }
+    ]
+  },
+  "pathAccess": {
+    "mode": "allow",
+    "allowedPaths": []
+  },
+  "permissionGate": {
+    "requireConfirmation": true,
+    "autoDenyPatterns": [
+      {
+        "pattern": "git push --force",
+        "description": "Force push is auto-denied"
+      },
+      {
+        "pattern": "git push -f",
+        "description": "Force push is auto-denied"
+      },
+      {
+        "pattern": "rm -rf /",
+        "description": "Dangerous recursive delete"
+      },
+      {
+        "pattern": "rm -rf ~",
+        "description": "Dangerous recursive delete"
+      },
+      {
+        "pattern": "sudo rm",
+        "description": "Privileged delete"
+      },
+      {
+        "pattern": "sudo dd",
+        "description": "Privileged disk write"
+      },
+      {
+        "pattern": "sudo shutdown",
+        "description": "System shutdown"
+      },
+      {
+        "pattern": "sudo reboot",
+        "description": "System reboot"
+      },
+      {
+        "pattern": "sudo halt",
+        "description": "System halt"
+      },
+      {
+        "pattern": "chmod -R 777 /",
+        "description": "Insecure recursive permissions"
+      },
+      {
+        "pattern": "chmod -R 777 ~",
+        "description": "Insecure recursive permissions"
+      },
+      {
+        "pattern": "chown -R",
+        "description": "Recursive ownership change"
+      },
+      {
+        "pattern": "curl | sh",
+        "description": "Pipe curl to shell"
+      },
+      {
+        "pattern": "curl | bash",
+        "description": "Pipe curl to bash"
+      },
+      {
+        "pattern": "curl | zsh",
+        "description": "Pipe curl to zsh"
+      },
+      {
+        "pattern": "wget -O - | sh",
+        "description": "Pipe wget to shell"
+      },
+      {
+        "pattern": "wget -O - | bash",
+        "description": "Pipe wget to bash"
+      },
+      {
+        "pattern": "ssh-keygen -t rsa",
+        "description": "RSA key generation"
+      },
+      {
+        "pattern": "ssh-keygen -t ed25519",
+        "description": "SSH key generation"
+      },
+      {
+        "pattern": "git gc --aggressive",
+        "description": "Aggressive git gc"
+      },
+      {
+        "pattern": "git prune",
+        "description": "Git prune"
+      },
+      {
+        "pattern": "git filter-branch",
+        "description": "Git filter-branch"
+      },
+      {
+        "pattern": "aws ec2 terminate-instances",
+        "description": "AWS EC2 termination"
+      },
+      {
+        "pattern": "aws ec2 delete-security-group",
+        "description": "AWS security group deletion"
+      },
+      {
+        "pattern": "aws ec2 delete-key-pair",
+        "description": "AWS key pair deletion"
+      },
+      {
+        "pattern": "aws ec2 delete-snapshot",
+        "description": "AWS snapshot deletion"
+      },
+      {
+        "pattern": "aws ec2 delete-volume",
+        "description": "AWS volume deletion"
+      },
+      {
+        "pattern": "aws ec2 delete-vpc",
+        "description": "AWS VPC deletion"
+      },
+      {
+        "pattern": "aws s3 rb",
+        "description": "AWS S3 bucket removal"
+      },
+      {
+        "pattern": "aws s3 rm --recursive",
+        "description": "AWS S3 recursive delete"
+      },
+      {
+        "pattern": "aws iam delete-user",
+        "description": "AWS IAM user deletion"
+      },
+      {
+        "pattern": "aws iam delete-role",
+        "description": "AWS IAM role deletion"
+      },
+      {
+        "pattern": "aws iam delete-policy",
+        "description": "AWS IAM policy deletion"
+      },
+      {
+        "pattern": "aws iam create-access-key",
+        "description": "AWS IAM access key creation"
+      },
+      {
+        "pattern": "aws lambda delete-function",
+        "description": "AWS Lambda function deletion"
+      },
+      {
+        "pattern": "aws dynamodb delete-table",
+        "description": "AWS DynamoDB table deletion"
+      },
+      {
+        "pattern": "aws cloudformation delete-stack",
+        "description": "AWS CloudFormation stack deletion"
+      },
+      {
+        "pattern": "aws eks delete-cluster",
+        "description": "AWS EKS cluster deletion"
+      },
+      {
+        "pattern": "aws kms schedule-key-deletion",
+        "description": "AWS KMS key deletion"
+      },
+      {
+        "pattern": "aws secretsmanager delete-secret",
+        "description": "AWS Secrets Manager deletion"
+      },
+      {
+        "pattern": "aws rds delete-db-instance",
+        "description": "AWS RDS instance deletion"
+      },
+      {
+        "pattern": "aws route53 delete-hosted-zone",
+        "description": "AWS Route53 zone deletion"
+      },
+      {
+        "pattern": "aws cloudtrail delete-trail",
+        "description": "AWS CloudTrail deletion"
+      },
+      {
+        "pattern": "aws cloudtrail stop-logging",
+        "description": "AWS CloudTrail stop logging"
+      },
+      {
+        "pattern": "aws redshift delete-cluster",
+        "description": "AWS Redshift cluster deletion"
+      },
+      {
+        "pattern": "aws ecr delete-repository",
+        "description": "AWS ECR repository deletion"
+      },
+      {
+        "pattern": "aws athena delete-data-catalog",
+        "description": "AWS Athena catalog deletion"
+      },
+      {
+        "pattern": "aws glue delete-database",
+        "description": "AWS Glue database deletion"
+      },
+      {
+        "pattern": "aws glue delete-table",
+        "description": "AWS Glue table deletion"
+      },
+      {
+        "pattern": "aws glue delete-crawler",
+        "description": "AWS Glue crawler deletion"
+      },
+      {
+        "pattern": "aws glue delete-job",
+        "description": "AWS Glue job deletion"
+      }
+    ],
+    "patterns": [
+      {
+        "pattern": "aws ec2",
+        "description": "AWS EC2 operation"
+      },
+      {
+        "pattern": "aws s3",
+        "description": "AWS S3 operation"
+      },
+      {
+        "pattern": "aws iam",
+        "description": "AWS IAM operation"
+      },
+      {
+        "pattern": "aws lambda",
+        "description": "AWS Lambda operation"
+      },
+      {
+        "pattern": "aws rds",
+        "description": "AWS RDS operation"
+      },
+      {
+        "pattern": "aws dynamodb",
+        "description": "AWS DynamoDB operation"
+      },
+      {
+        "pattern": "aws kms",
+        "description": "AWS KMS operation"
+      },
+      {
+        "pattern": "aws secretsmanager",
+        "description": "AWS Secrets Manager operation"
+      },
+      {
+        "pattern": "aws route53",
+        "description": "AWS Route53 operation"
+      },
+      {
+        "pattern": "aws cloudtrail",
+        "description": "AWS CloudTrail operation"
+      },
+      {
+        "pattern": "aws cloudformation",
+        "description": "AWS CloudFormation operation"
+      },
+      {
+        "pattern": "aws eks",
+        "description": "AWS EKS operation"
+      },
+      {
+        "pattern": "aws ecr",
+        "description": "AWS ECR operation"
+      },
+      {
+        "pattern": "aws redshift",
+        "description": "AWS Redshift operation"
+      },
+      {
+        "pattern": "aws athena",
+        "description": "AWS Athena operation"
+      },
+      {
+        "pattern": "aws glue",
+        "description": "AWS Glue operation"
+      },
+      {
+        "pattern": "aws s3api",
+        "description": "AWS S3 API operation"
+      },
+      {
+        "pattern": "aws efs",
+        "description": "AWS EFS operation"
+      },
+      {
+        "pattern": "aws kinesis",
+        "description": "AWS Kinesis operation"
+      }
+    ]
+  }
+}
