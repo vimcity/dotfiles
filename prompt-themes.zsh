@@ -50,37 +50,36 @@ define_catppuccin_rose_theme() {
     )
 }
 
-# Catppuccin Mocha Theme (dark alternative)
-# Colors: bold, modern, high contrast
+# Catppuccin Frappe Theme (lower contrast alternative)
 define_catppuccin_theme() {
     THEME_COLORS=(
         # Main segments
-        [user_bg]="#45475a"
-        [user_fg]="#f5f5f5"
-        [dir_bg]="#89b4fa"
-        [dir_fg]="#1e1e2e"
-        [git_bg]="#313244"
-        [git_fg]="#89b4fa"
-        [git_icon]="#a6e3a1"
-        [venv_bg]="#45475a"
-        [venv_fg]="#a6e3a1"
+        [user_bg]="#414559"
+        [user_fg]="#c6d0f5"
+        [dir_bg]="#8caaee"
+        [dir_fg]="#303446"
+        [git_bg]="#292c3c"
+        [git_fg]="#8caaee"
+        [git_icon]="#a6d189"
+        [venv_bg]="#414559"
+        [venv_fg]="#a6d189"
         
         # Git status colors
-        [git_added]="#a6e3a1"
-        [git_modified]="#f9e2af"
-        [git_deleted]="#f38ba8"
-        [git_renamed]="#89b4fa"
-        [git_unmerged]="#f38ba8"
-        [git_untracked]="#fab387"
-        [git_ahead]="#94e2d5"
-        [git_behind]="#74c7ec"
-        [git_stash]="#89dceb"
+        [git_added]="#a6d189"
+        [git_modified]="#e5c890"
+        [git_deleted]="#e78284"
+        [git_renamed]="#8caaee"
+        [git_unmerged]="#e78284"
+        [git_untracked]="#ef9f76"
+        [git_ahead]="#81c8be"
+        [git_behind]="#99d1db"
+        [git_stash]="#85c1dc"
         
         # Right prompt
-        [right_bg]="#45475a"
-        [right_fg]="#f9e2af"
-        [error_fg]="#f38ba8"
-        [prompt_char]="#fab387"
+        [right_bg]="#414559"
+        [right_fg]="#e5c890"
+        [error_fg]="#e78284"
+        [prompt_char]="#ef9f76"
         
         # Metadata
         [name]="catppuccin"
