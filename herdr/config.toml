@@ -238,10 +238,8 @@ description = "open Jira TUI"
 
 [[keys.command]]
 key = "prefix+ctrl+b"
-type = "popup"
+type = "pane"
 command = "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\""
-width = "75%"
-height = "75%"
 description = "open btop"
 
 
