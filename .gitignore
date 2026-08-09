@@ -4,7 +4,7 @@
 *.swp
 *.swo
 *~
-*.pyc
+**.pyc
 *.luac
 luac.out
 *.log
@@ -39,3 +39,4 @@ snacks-diffview/*
 *.ruff_cache**
 ./luai.nvim/**
 ytui-config/**
+
