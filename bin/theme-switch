@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+state_file="$state_dir/theme"
+current=""
+[[ -f "$state_file" ]] && current=$(<"$state_file")
+
+case "${1:-toggle}" in
+  rose|catppuccin-rose) theme="catppuccin-rose" ;;
+  frappe|catppuccin) theme="catppuccin" ;;
+  toggle)
+    [[ "$current" == "catppuccin" ]] && theme="catppuccin-rose" || theme="catppuccin"
+    ;;
+  *)
+    printf 'Usage: theme-switch [rose|frappe|toggle]\n'
+    exit 2
+    ;;
+esac
+
+mkdir -p "$state_dir"
+printf '%s\n' "$theme" >"$state_file"
+
+# Ghostty reads its theme from the tracked config; keep this selector reversible.
+ghostty_config="$HOME/.config/ghostty/config"
+if [[ -w "$ghostty_config" ]]; then
+  if [[ "$theme" == "catppuccin" ]]; then
+    sed -i '' 's/^theme = .*/theme = Catppuccin Frappe/' "$ghostty_config"
+  else
+    sed -i '' 's/^theme = .*/theme = catppuccin-rose/' "$ghostty_config"
+  fi
+fi
+
+printf 'Theme set to %s. New shells and newly opened apps will use it.\n' "$theme"
+printf 'Run `source ~/.zshrc` in this shell; restart/reload Neovim and Ghostty if needed.\n'

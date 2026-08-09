@@ -1,7 +1,7 @@
 # Ghostty Configuration 
 # ==================================================
 
-theme = catppuccin-rose
+theme = Catppuccin Frappe
 # Launch maximized
 window-decoration = false
 macos-titlebar-style = hidden

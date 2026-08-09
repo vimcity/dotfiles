@@ -4,6 +4,10 @@
 # Easy switching between different prompt themes
 
 # Set current theme (can override in .zshrc.local or shell session)
+THEME_STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/theme"
+if [[ -z "$PROMPT_THEME" && -f "$THEME_STATE_FILE" ]]; then
+    PROMPT_THEME="$(<"$THEME_STATE_FILE")"
+fi
 export PROMPT_THEME="${PROMPT_THEME:-catppuccin-rose}"
 
 # Define theme colors and styles
