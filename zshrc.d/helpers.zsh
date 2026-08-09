@@ -179,7 +179,16 @@ alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export BAT_PAGER="less -RF"
 export TAILSPIN_EXTRAS="${TAILSPIN_EXTRAS:-jvm-stack-trace}"
-export BAT_THEME="Catppuccin Macchiato"
+if [[ "${PROMPT_THEME:-catppuccin-rose}" == "catppuccin" ]]; then
+  export BAT_THEME="Catppuccin Frappe"
+else
+  export BAT_THEME="Catppuccin Macchiato"
+fi
+
+theme-switch() {
+  command theme-switch "$@"
+  source "$HOME/.zshrc"
+}
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'

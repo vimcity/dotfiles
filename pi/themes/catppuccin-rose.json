@@ -29,7 +29,7 @@
     "success": "green", "error": "red", "warning": "yellow", "muted": "subtle", "dim": "muted", "text": "text", "thinkingText": "mauve",
     "selectedBg": "overlay", "userMessageBg": "userMessage", "userMessageText": "#f2d5cf", "customMessageBg": "surface", "customMessageText": "text", "customMessageLabel": "pink",
     "toolPendingBg": "toolPending", "toolSuccessBg": "toolSuccess", "toolErrorBg": "toolError", "toolTitle": "sky", "toolOutput": "subtle",
-    "mdHeading": "sky", "mdLink": "sky", "mdLinkUrl": "muted", "mdCode": "peach", "mdCodeBlock": "green", "mdCodeBlockBorder": "overlay", "mdQuote": "subtle", "mdQuoteBorder": "mauve", "mdHr": "overlay", "mdListBullet": "pink",
+    "mdHeading": "mauve", "mdLink": "sky", "mdLinkUrl": "muted", "mdCode": "peach", "mdCodeBlock": "green", "mdCodeBlockBorder": "overlay", "mdQuote": "subtle", "mdQuoteBorder": "mauve", "mdHr": "overlay", "mdListBullet": "pink",
     "toolDiffAdded": "green", "toolDiffRemoved": "red", "toolDiffContext": "subtle",
     "syntaxComment": "muted", "syntaxKeyword": "mauve", "syntaxFunction": "blue", "syntaxVariable": "text", "syntaxString": "green", "syntaxNumber": "peach", "syntaxType": "yellow", "syntaxOperator": "sky", "syntaxPunctuation": "subtle",
     "thinkingOff": "muted", "thinkingMinimal": "subtle", "thinkingLow": "sky", "thinkingMedium": "blue", "thinkingHigh": "mauve", "thinkingXhigh": "rose", "thinkingMax": "pink", "bashMode": "green"
