@@ -30,7 +30,7 @@ font-size = 20
 # Cursor styling: mode-driven block/bar cursor.
 cursor-style = block
 adjust-cursor-thickness = 4
-# custom-shader = shaders/cursor_smear_fade.glsl
+custom-shader = shaders/cursor_smear_fade.glsl
 # Shell integration
 shell-integration = zsh
 
