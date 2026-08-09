@@ -57,6 +57,25 @@ return {
     end,
   },
   {
+    "cavanaug/render-markdown-mermaid.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "MeanderingProgrammer/render-markdown.nvim",
+    },
+    opts = {
+      mode = "unicode",
+      placement = "above",
+      auto_setup_render_markdown = false,
+      render_markdown = {
+        file_types = { "markdown", "markdown.mdx" },
+      },
+    },
+    config = function(_, opts)
+      require("render-markdown-mermaid").setup(opts)
+    end,
+  },
+  {
     "preservim/vim-markdown",
     ft = "markdown",
     init = function()
@@ -68,21 +87,21 @@ return {
         local line = vim.api.nvim_get_current_line()
         local col = vim.api.nvim_win_get_cursor(0)[2] + 1
 
-        local url = line:match('%[.*%]%(([^)]+)%)')
+        local url = line:match("%[.*%]%(([^)]+)%)")
         if not url then
-          url = line:match('<([^>]+)>')
+          url = line:match("<([^>]+)>")
         end
 
         if not url then
           return
         end
 
-        if url:match('^http') then
-          vim.fn.system('open ' .. url)
+        if url:match("^http") then
+          vim.fn.system("open " .. url)
         else
-          local current_dir = vim.fn.expand('%:p:h')
-          local full_path = current_dir .. '/' .. url
-          vim.api.nvim_command('edit ' .. vim.fn.fnameescape(full_path))
+          local current_dir = vim.fn.expand("%:p:h")
+          local full_path = current_dir .. "/" .. url
+          vim.api.nvim_command("edit " .. vim.fn.fnameescape(full_path))
         end
       end
 
