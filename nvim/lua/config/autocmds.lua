@@ -15,13 +15,13 @@ if vim.env.NVIM_ORG_POPUP == "1" then
   })
 end
 
--- Enable word wrapping for org files
+-- Enable word wrapping for prose-oriented filetypes
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "*",
+  pattern = { "org", "markdown", "md", "text", "txt", "rmd", "quarto", "latex", "tex", "plaintex" },
   callback = function()
-    vim.opt_local.wrap = false
-    vim.opt_local.linebreak = true -- Break at word boundaries, not mid-word
-    vim.opt_local.breakindent = true -- Indent wrapped lines to match indentation
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.breakindent = true
   end,
 })
 vim.api.nvim_create_autocmd("FileType", {
