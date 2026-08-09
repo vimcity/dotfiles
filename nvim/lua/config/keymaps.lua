@@ -2,36 +2,18 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
--- Install pane navigation after LazyVim's defaults so there is one final owner.
--- A running tmux server is irrelevant: TMUX is set only inside an attached client.
-local direct_herdr = vim.env.HERDR_ENV == "1" and (vim.env.TMUX == nil or vim.env.TMUX == "")
+-- Pane navigation: Herdr-aware Ctrl+h/j/k/l.
 local pane_directions = {
-  h = { herdr = "move_cursor_left", tmux = "TmuxNavigateLeft", desc = "Navigate left" },
-  j = { herdr = "move_cursor_down", tmux = "TmuxNavigateDown", desc = "Navigate down" },
-  k = { herdr = "move_cursor_up", tmux = "TmuxNavigateUp", desc = "Navigate up" },
-  l = { herdr = "move_cursor_right", tmux = "TmuxNavigateRight", desc = "Navigate right" },
+  h = { action = "move_cursor_left", desc = "Navigate left" },
+  j = { action = "move_cursor_down", desc = "Navigate down" },
+  k = { action = "move_cursor_up", desc = "Navigate up" },
+  l = { action = "move_cursor_right", desc = "Navigate right" },
 }
 
 for key, direction in pairs(pane_directions) do
-  if direct_herdr then
-    vim.keymap.set("n", "<C-" .. key .. ">", function()
-      require("herdr-splits")[direction.herdr]()
-    end, { silent = true, desc = direction.desc .. " (Herdr/split)" })
-  else
-    vim.keymap.set(
-      "n",
-      "<C-" .. key .. ">",
-      "<cmd><C-U>" .. direction.tmux .. "<cr>",
-      { silent = true, desc = direction.desc .. " (tmux/split)" }
-    )
-  end
-end
-
-if not direct_herdr then
-  vim.keymap.set("n", "<C-\\>", "<cmd>TmuxNavigatePrevious<cr>", {
-    silent = true,
-    desc = "Navigate previous (tmux/split)",
-  })
+  vim.keymap.set("n", "<C-" .. key .. ">", function()
+    require("herdr-splits")[direction.action]()
+  end, { silent = true, desc = direction.desc .. " (Herdr)" })
 end
 
 -- Deletes → register "d" (paste with P), never system clipboard. Yanks still use unnamedplus.

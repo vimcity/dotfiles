@@ -26,7 +26,6 @@ return {
         zsh = { names = false },
         conf = { names = false },
         dosini = { names = false },
-        tmux = { names = false },
         lua = { names = false },
         toml = { names = false },
         yaml = { names = false },
