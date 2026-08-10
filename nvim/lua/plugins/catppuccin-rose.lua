@@ -3,7 +3,16 @@ return {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
-    opts = {
+    opts = function()
+      if vim.env.PROMPT_THEME == "catppuccin" then
+        return {
+          flavour = "frappe",
+          transparent_background = false,
+          background = { light = "latte", dark = "frappe" },
+        }
+      end
+
+      return {
       flavour = "frappe",
       transparent_background = true,
       background = {
@@ -42,25 +51,30 @@ return {
           NormalNC = { bg = "NONE", fg = colors.text },
           EndOfBuffer = { bg = "NONE", fg = "NONE" },
           -- Nudge the UI closer to Rose Pine Moon in places Catppuccin styles differently
-          CursorLine = { bg = "#393552" },
-          ColorColumn = { bg = "#393552" },
-          CursorLineNr = { fg = colors.text, bold = true },
-          LineNr = { fg = "#6e6a86" },
+          CursorLine = { bg = "#51576d" },
+          ColorColumn = { bg = "#51576d" },
+          CursorLineNr = { fg = colors.blue, bold = true },
+          LineNr = { fg = "#737994" },
+          CursorWord = { bg = "#51576d", fg = colors.text },
+          IlluminatedWordText = { bg = "#51576d", fg = colors.text },
+          LspReferenceText = { bg = "#51576d", fg = colors.text },
+          LspReferenceRead = { bg = "#51576d", fg = colors.text },
+          LspReferenceWrite = { bg = "#51576d", fg = colors.text },
           SignColumn = { bg = "NONE" },
-          FoldColumn = { bg = "NONE", fg = "#6e6a86" },
+          FoldColumn = { bg = "NONE", fg = "#737994" },
           NormalFloat = { bg = "NONE", fg = colors.text },
-          FloatBorder = { bg = "NONE", fg = "#393552" },
+          FloatBorder = { bg = "NONE", fg = "#51576d" },
           FloatTitle = { bg = "NONE", fg = colors.iris or colors.lavender },
           Pmenu = { bg = "NONE", fg = colors.text },
-          PmenuSel = { bg = "#393552", fg = colors.text },
+          PmenuSel = { bg = "#51576d", fg = colors.text },
           PmenuSbar = { bg = "NONE" },
-          PmenuThumb = { bg = "#6e6a86" },
+          PmenuThumb = { bg = "#737994" },
           StatusLine = { bg = "NONE", fg = colors.text },
-          StatusLineNC = { bg = "NONE", fg = "#6e6a86" },
-          WinSeparator = { fg = "#393552" },
-          VertSplit = { fg = "#393552" },
-          Visual = { bg = "#393552" },
-          Search = { bg = "#393552", fg = colors.gold or colors.yellow },
+          StatusLineNC = { bg = "NONE", fg = "#737994" },
+          WinSeparator = { fg = "#51576d" },
+          VertSplit = { fg = "#51576d" },
+          Visual = { bg = "#51576d" },
+          Search = { bg = "#51576d", fg = colors.gold or colors.yellow },
           IncSearch = { bg = colors.green, fg = colors.base },
           SnacksPicker = { bg = "NONE", fg = colors.text },
           SnacksPickerBorder = { bg = "NONE", fg = colors.lavender },
@@ -159,6 +173,7 @@ return {
         telescope = true,
         treesitter = true,
       },
-    },
+      }
+    end,
   },
 }
