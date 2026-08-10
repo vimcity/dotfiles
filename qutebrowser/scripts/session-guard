@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""Backup, validate, and recover qutebrowser session YAML files."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import shutil
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+TAB_HEADER = re.compile(
+    r"^\s+-\s+(?:active:\s+\w+\s*\n\s+)?history:", re.MULTILINE
+)
+URL_LINE = re.compile(r"^\s+url:\s*(.*)\s*$", re.MULTILINE)
+EMPTY_TABS = re.compile(r"^\s+tabs:\s*\[\]\s*$", re.MULTILINE)
+
+
+def session_dir() -> Path:
+    for candidate in (
+        Path.home() / "Library/Application Support/qutebrowser/sessions",
+        Path.home() / ".local/share/qutebrowser/sessions",
+    ):
+        if candidate.is_dir():
+            return candidate
+    return candidate
+
+
+def backup_dir() -> Path:
+    path = session_dir() / "backups"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def analyze(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    tab_count = len(TAB_HEADER.findall(text))
+    empty_windows = bool(EMPTY_TABS.search(text))
+    bad_urls = 0
+    for match in URL_LINE.finditer(text):
+        value = match.group(1).strip().strip("'\"")
+        if not value or value in {"null", "~"}:
+            bad_urls += 1
+
+    issues: list[str] = []
+    if tab_count == 0:
+        issues.append("no tabs")
+    if empty_windows:
+        issues.append("empty tabs: [] window")
+    if bad_urls:
+        issues.append(f"{bad_urls} empty/invalid url(s)")
+
+    return {
+        "path": path,
+        "tabs": tab_count,
+        "issues": issues,
+        "ok": not issues,
+        "size": path.stat().st_size,
+    }
+
+
+def fmt_report(info: dict) -> str:
+    flag = "ok" if info["ok"] else "BAD"
+    detail = ", ".join(info["issues"]) if info["issues"] else "healthy"
+    modified = datetime.fromtimestamp(
+        info["path"].stat().st_mtime, tz=timezone.utc
+    ).astimezone()
+    return (
+        f"[{flag:>3}] {info['path'].name:16} "
+        f"tabs={info['tabs']:3} size={info['size']:6} "
+        f"modified={modified:%Y-%m-%d %H:%M}  {detail}"
+    )
+
+
+def backup_file(path: Path, *, label: str | None = None) -> Path:
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    suffix = path.stem if label is None else label
+    dest = backup_dir() / f"{stamp}-{suffix}.yml"
+    shutil.copy2(path, dest)
+    return dest
+
+
+def cmd_list(_: argparse.Namespace) -> int:
+    root = session_dir()
+    files = sorted(
+        p for p in root.glob("*.yml") if p.name != "_autosave.yml"
+    )
+    autosave = root / "_autosave.yml"
+    if autosave.exists():
+        files.append(autosave)
+
+    if not files:
+        print(f"No session files in {root}")
+        return 1
+
+    for path in files:
+        print(fmt_report(analyze(path)))
+
+    backups = sorted(backup_dir().glob("*.yml"), key=lambda p: p.stat().st_mtime)
+    if backups:
+        print(f"\nBackups ({len(backups)}) in {backup_dir()}/")
+        for path in backups[-8:]:
+            print(fmt_report(analyze(path)))
+        if len(backups) > 8:
+            print(f"... and {len(backups) - 8} older backup(s)")
+    return 0
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    if not path.is_absolute():
+        path = session_dir() / path
+    if not path.exists():
+        print(f"Missing: {path}", file=sys.stderr)
+        return 1
+    info = analyze(path)
+    print(fmt_report(info))
+    return 0 if info["ok"] else 2
+
+
+def cmd_backup(args: argparse.Namespace) -> int:
+    root = session_dir()
+    names = args.names or [p.stem for p in root.glob("*.yml")]
+    copied = 0
+    for name in names:
+        src = root / (name if name.endswith(".yml") else f"{name}.yml")
+        if not src.exists():
+            print(f"skip missing {src.name}")
+            continue
+        dest = backup_file(src, label=src.stem)
+        print(f"backed up {src.name} -> {dest.name}")
+        copied += 1
+    return 0 if copied else 1
+
+
+def cmd_recover(args: argparse.Namespace) -> int:
+    root = session_dir()
+    target = root / f"{args.name}.yml"
+    candidates = sorted(
+        backup_dir().glob(f"*-{args.name}.yml"),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    if not candidates:
+        # Fall back to any named session file with tabs.
+        candidates = sorted(
+            (
+                p
+                for p in root.glob("*.yml")
+                if p.name not in {"_autosave.yml", f"{args.name}.yml"}
+            ),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+
+    for path in candidates:
+        info = analyze(path)
+        if info["ok"] and info["tabs"] > 0:
+            if target.exists():
+                backup_file(target, label=f"{args.name}-pre-recover")
+            shutil.copy2(path, target)
+            print(f"recovered {args.name}.yml from {path.name} ({info['tabs']} tabs)")
+            print("Restart qutebrowser, or run :session-load", args.name)
+            return 0
+
+    print(f"No healthy backup found for {args.name}", file=sys.stderr)
+    return 1
+
+
+def cmd_prune(args: argparse.Namespace) -> int:
+    keep = args.keep
+    files = sorted(
+        backup_dir().glob("*.yml"),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    removed = 0
+    for path in files[keep:]:
+        path.unlink()
+        removed += 1
+    print(f"kept {min(len(files), keep)} backup(s), removed {removed}")
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("list", help="Show session health and recent backups").set_defaults(
+        func=cmd_list
+    )
+
+    validate = sub.add_parser("validate", help="Validate one session file")
+    validate.add_argument("file", help="Session name or path")
+    validate.set_defaults(func=cmd_validate)
+
+    backup = sub.add_parser("backup", help="Copy session(s) into backups/")
+    backup.add_argument("names", nargs="*", help="Session names (default: all)")
+    backup.set_defaults(func=cmd_backup)
+
+    recover = sub.add_parser("recover", help="Restore a session from backup")
+    recover.add_argument("name", help="Session name, e.g. main")
+    recover.set_defaults(func=cmd_recover)
+
+    prune = sub.add_parser("prune", help="Drop old timestamped backups")
+    prune.add_argument("--keep", type=int, default=30, help="Backups to retain")
+    prune.set_defaults(func=cmd_prune)
+
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

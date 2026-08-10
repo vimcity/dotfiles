@@ -2,10 +2,18 @@
 # pyright: reportUndefinedVariable=false, reportGeneralTypeIssues=false
 #
 c.scrolling.smooth = True
-# Minimal session-first workflow
+# Sessions (native qutebrowser behavior + small config hooks):
+# - _autosave.yml: written periodically while browsing (auto_save.interval + tab loads)
+# - main.yml: written on quit (auto_save.session + session.default_name)
+# - --backup on :ss/:wq keeps the previous main.yml before each overwrite (built into :session-save)
 c.auto_save.session = True
+c.auto_save.interval = 15000  # native default; governs _autosave + config/cookies flush rate
 c.session.default_name = "main"
 c.session.lazy_restore = True
+# Renderer crashes on some sites (Gmail, etc.) when Service Worker cache corrupts.
+c.qt.workarounds.remove_service_workers = True
+# macOS/Qt 6.11: clicking certain in-page links crashes in QAccessible (#8971, #8797).
+c.qt.workarounds.disable_accessibility = "always"
 # c.content.tab_discard = True
 c.window.hide_decoration = True
 # Enable translucent window background so rgba() on tabs actually shows transparency
@@ -158,19 +166,23 @@ c.url.searchengines = {
 c.aliases["qm"] = "quickmark-load"
 c.aliases["qmt"] = "quickmark-load -t"
 c.aliases["qma"] = "quickmark-add"
-c.aliases["ss"] = "session-save"
-c.aliases["sl"] = "session-load"
-c.aliases["sb"] = "session-save --backup"
+# Snapshots + quit. :q still uses native auto_save on quit; these add --backup first.
+c.aliases["ss"] = "session-save --backup --force main"
+c.aliases["sb"] = "session-save --backup --force"
+c.aliases["sl"] = "session-load main"
+c.aliases["wq"] = "session-save --backup --force main;; quit"
+c.aliases["wqa"] = "session-save --backup --force main;; quit --all"
 c.aliases["g"] = "open -t  https://google.com"
 c.aliases["t"] = "tab-focus"
 
 # Tab close/reopen ergonomics
 config.unbind("<Ctrl-t>")
-config.bind("x", "tab-close")
 config.bind("d", "cmd-run-with-count 20 scroll down")
 config.bind("u", "cmd-run-with-count 20 scroll up")
 config.bind("X", "undo")
 config.bind(",r", "config-source")
+# Native _autosave ignores tab closes (#8219); flush main using built-in :session-save.
+config.bind("x", "tab-close;; session-save --backup --force main")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
