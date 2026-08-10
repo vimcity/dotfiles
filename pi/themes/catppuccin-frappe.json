@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
+  "name": "catppuccin-frappe",
+  "vars": {
+    "base": "#303446",
+    "surface": "#414559",
+    "overlay": "#51576d",
+    "muted": "#737994",
+    "subtle": "#838ba7",
+    "text": "#c6d0f5",
+    "rose": "#e78284",
+    "pink": "#f4b8e4",
+    "mauve": "#ca9ee6",
+    "red": "#e78284",
+    "peach": "#ef9f76",
+    "yellow": "#e5c890",
+    "green": "#a6d189",
+    "teal": "#81c8be",
+    "sky": "#99d1db",
+    "blue": "#8caaee",
+    "lavender": "#babbf1",
+    "toolPending": "#51576d",
+    "userMessage": "#414559",
+    "toolSuccess": "#344a40",
+    "toolError": "#543b3b"
+  },
+  "colors": {
+    "accent": "blue", "border": "overlay", "borderAccent": "blue", "borderMuted": "muted",
+    "success": "green", "error": "red", "warning": "yellow", "muted": "subtle", "dim": "muted", "text": "text", "thinkingText": "mauve",
+    "selectedBg": "overlay", "userMessageBg": "userMessage", "userMessageText": "text", "customMessageBg": "surface", "customMessageText": "text", "customMessageLabel": "blue",
+    "toolPendingBg": "toolPending", "toolSuccessBg": "toolSuccess", "toolErrorBg": "toolError", "toolTitle": "sky", "toolOutput": "subtle",
+    "mdHeading": "blue", "mdLink": "sky", "mdLinkUrl": "muted", "mdCode": "peach", "mdCodeBlock": "green", "mdCodeBlockBorder": "overlay", "mdQuote": "subtle", "mdQuoteBorder": "mauve", "mdHr": "overlay", "mdListBullet": "lavender",
+    "toolDiffAdded": "green", "toolDiffRemoved": "red", "toolDiffContext": "subtle",
+    "syntaxComment": "muted", "syntaxKeyword": "mauve", "syntaxFunction": "blue", "syntaxVariable": "text", "syntaxString": "green", "syntaxNumber": "peach", "syntaxType": "yellow", "syntaxOperator": "sky", "syntaxPunctuation": "subtle",
+    "thinkingOff": "muted", "thinkingMinimal": "subtle", "thinkingLow": "sky", "thinkingMedium": "blue", "thinkingHigh": "mauve", "thinkingXhigh": "rose", "thinkingMax": "pink", "bashMode": "green"
+  },
+  "export": { "pageBg": "base", "cardBg": "surface", "infoBg": "overlay" }
+}

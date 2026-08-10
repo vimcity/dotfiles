@@ -24,7 +24,7 @@ return {
 
       opts.options.theme = {
         normal = {
-          a = { bg = palette.mauve, fg = palette.base, gui = "bold" },
+          a = { bg = palette.blue, fg = palette.base, gui = "bold" },
           b = { bg = palette.surface0, fg = palette.text },
           c = { bg = "NONE", fg = palette.text },
         },

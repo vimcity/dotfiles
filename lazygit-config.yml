@@ -7,41 +7,41 @@ customCommands:
 gui:
   nerdFontsVersion: '3'
   authorColors:
-    '*': '#c4a7e7'
+    '*': '#babbf1'
   branchColorPatterns:
     '^main$': '#a6d189'
     '^master$': '#a6d189'
-    '^feat(ure)?/': '#c4a7e7'
-    '^fix/': '#ea9a97'
-    '^hotfix/': '#eb6f92'
+    '^feat(ure)?/': '#8caaee'
+    '^fix/': '#e78284'
+    '^hotfix/': '#e78284'
   theme:
-    # Catppuccin Rose theme - explicit colors ensure consistency in Neovim terminal
+    # Catppuccin Frappe theme
     activeBorderColor:
-      - '#c4a7e7'
+      - '#babbf1'
       - bold
     inactiveBorderColor:
-      - '#6e6a86'
+      - '#737994'
     searchingActiveBorderColor:
-      - '#ea9a97'
+      - '#8caaee'
       - bold
     optionsTextColor:
-      - '#ebbcbA'
+      - '#a5adce'
     selectedLineBgColor:
-      - '#393552'
+      - '#51576d'
     inactiveViewSelectedLineBgColor:
-      - '#2a273f'
+      - '#414559'
     cherryPickedCommitFgColor:
       - '#99d1db'
     cherryPickedCommitBgColor:
-      - '#2f3149'
+      - '#344a40'
     markedBaseCommitFgColor:
-      - '#29273f'
+      - '#303446'
     markedBaseCommitBgColor:
-      - '#ebbcbA'
+      - '#e5c890'
     unstagedChangesColor:
-      - '#eb6f92'
+      - '#e78284'
     defaultFgColor:
-      - '#ddd6f4'
+      - '#c6d0f5'
 git:
   diffRenderers:
     - colorArg: always
