@@ -16,7 +16,8 @@ surface_dim = "#292c3c"
 overlay0 = "#626880"
 text = "#c6d0f5"
 subtext0 = "#a5adce"
-accent = "#8caaee"
+accent = "#7287fd"
+# accent = "#8caaee"
 
 [keys]
 prefix = "ctrl+space"
