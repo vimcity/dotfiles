@@ -16,6 +16,18 @@
   "policies": {
     "rules": [
       {
+        "id": "node-modules",
+        "name": "npm packages",
+        "description": "Protect installed npm packages from writes",
+        "protection": "readOnly",
+        "onlyIfExists": true,
+        "patterns": [
+          {
+            "pattern": "**/node_modules/**"
+          }
+        ]
+      },
+      {
         "id": "env-files",
         "name": "Environment files",
         "description": "Protect .env files and secret configs from being read or written",

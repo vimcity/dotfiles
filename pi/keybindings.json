@@ -4,7 +4,7 @@
   "app.model.cycleBackward": ["alt+."],
   "app.thinking.cycle": ["alt+r"],
   "app.thinking.toggle": ["ctrl+shift+t"],
-  "app.interrupt": ["ctrl+x"],
+  "app.interrupt": ["ctrl+s"],
   "app.clear": ["ctrl+c"],
   "app.exit": ["ctrl+q"],
   "app.suspend": ["ctrl+z"],

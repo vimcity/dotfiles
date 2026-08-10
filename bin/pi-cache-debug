@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# pi-cache-debug — analyse cache performance from a Pi session log
+# Usage: pi-cache-debug [session-id-or-path]
+
+set -euo pipefail
+
+SESSION="${1:-}"
+
+# If no arg, show recent sessions
+if [ -z "$SESSION" ]; then
+    echo "Recent sessions:"
+    find ~/.pi/agent/sessions -name "*.jsonl" -type f 2>/dev/null | sort -r | head -10 | while read f; do
+        name=$(basename "$f" .jsonl)
+        size=$(wc -c < "$f" | tr -d ' ')
+        echo "  $name  ($(echo "scale=1; $size/1024" | bc) KB)"
+    done
+    echo ""
+    echo "Usage: pi-cache-debug <session-id>"
+    echo "   or: pi-cache-debug /path/to/session.jsonl"
+    exit 0
+fi
+
+# Resolve session file
+if [ -f "$SESSION" ]; then
+    FILE="$SESSION"
+else
+    FILE=$(find ~/.pi/agent/sessions -name "*$SESSION*" -type f 2>/dev/null | head -1)
+    if [ -z "$FILE" ]; then
+        echo "Session not found: $SESSION"
+        exit 1
+    fi
+fi
+
+echo "File: $FILE"
+echo ""
+
+python3 "$(dirname "$0")/pi-cache-debug.py" "$FILE"
