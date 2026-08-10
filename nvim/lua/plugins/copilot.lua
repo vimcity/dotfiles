@@ -1,3 +1,8 @@
+-- Disable on personal machines (PERSONAL=1 set in .zshrc.local)
+if vim.env.PERSONAL == "1" then
+  return {}
+end
+
 return {
   {
     "zbirenbaum/copilot.lua",
