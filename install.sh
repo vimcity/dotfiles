@@ -36,8 +36,8 @@ USER_NAME="${SUDO_USER:-$USER}"
 HOME_DIR="$(eval echo "~$USER_NAME")"
 
 if [ "$IS_MAC" -eq 1 ]; then
-	QUTE_CONFIG_DIR="$HOME/.qutebrowser"
-	QUTE_DATA_DIR="$HOME/Library/Application Support/qutebrowser"
+	QUTE_CONFIG_DIR="$HOME_DIR/.qutebrowser"
+	QUTE_DATA_DIR="$HOME_DIR/Library/Application Support/qutebrowser"
 else
 	QUTE_CONFIG_DIR="$HOME_DIR/.config/qutebrowser"
 	QUTE_DATA_DIR="$HOME_DIR/.local/share/qutebrowser"
@@ -107,7 +107,7 @@ install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󰌶 Installing macOS tools via Homebrew..."
-	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw; do
+	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw ripgrep fd atuin; do
 		if brew list "$formula" &>/dev/null; then
 			echo "󰄵 $formula already installed"
 		else
@@ -223,11 +223,11 @@ mkdir -p "$HOME_DIR/.config/tailspin"
 mkdir -p "$HOME_DIR/.pi/agent"
 
 if [ "$IS_MAC" -eq 1 ]; then
-	mkdir -p "$HOME/Library/Application Support/lazygit"
-	mkdir -p "$HOME/.config/opencode"
+	mkdir -p "$HOME_DIR/Library/Application Support/lazygit"
+	mkdir -p "$HOME_DIR/.config/opencode"
 	mkdir -p "$QUTE_CONFIG_DIR"
 	mkdir -p "$QUTE_DATA_DIR/userscripts"
-	mkdir -p "$HOME/.pi/agent"
+	mkdir -p "$HOME_DIR/.pi/agent"
 fi
 
 if [ "$IS_LINUX" -eq 1 ]; then
@@ -251,7 +251,8 @@ link_dotfile "$DOTFILES_DIR/vimrc" "$HOME_DIR/.vimrc"
 link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/config.yml"
 link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
-link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-rose" "$HOME_DIR/.config/btop/themes/catppuccin-rose"
+link_dotfile "$DOTFILES_DIR/btop/themes/catpuccin-rose.theme" "$HOME_DIR/.config/btop/themes/catppuccin-frappe.theme"
+link_dotfile "$DOTFILES_DIR/btop/themes/catpuccin-rose.theme" "$HOME_DIR/.config/btop/themes/catpuccin-rose.theme"
 
 # Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
 if [ -d "$DOTFILES_DIR/pi" ]; then
@@ -321,14 +322,16 @@ fi
 # macOS-only symlinks
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
-	link_dotfile "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
-	link_dotfile "$DOTFILES_DIR/mpv" "$HOME/.config/mpv"
-	link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
-	link_dotfile "$DOTFILES_DIR/ytui-config" "$HOME/.config/ytui"
-	link_dotfile "$DOTFILES_DIR/opencode/themes" "$HOME/.config/opencode/themes"
-	link_dotfile "$DOTFILES_DIR/opencode/tui.json" "$HOME/.config/opencode/tui.json"
-	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME/.local/qute-scripts"
+	link_dotfile "$DOTFILES_DIR/ghostty" "$HOME_DIR/.config/ghostty"
+	link_dotfile "$DOTFILES_DIR/mpv" "$HOME_DIR/.config/mpv"
+	link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/Library/Application Support/lazygit/config.yml"
+	link_dotfile "$DOTFILES_DIR/ytui-config" "$HOME_DIR/.config/ytui"
+	link_dotfile "$DOTFILES_DIR/opencode/themes" "$HOME_DIR/.config/opencode/themes"
+	link_dotfile "$DOTFILES_DIR/opencode/tui.json" "$HOME_DIR/.config/opencode/tui.json"
+	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME_DIR/.local/qute-scripts"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
+	link_dotfile "$DOTFILES_DIR/qutebrowser/main.py" "$QUTE_CONFIG_DIR/main.py"
+	link_dotfile "$DOTFILES_DIR/qutebrowser/local.py" "$QUTE_CONFIG_DIR/local.py"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
 	for userscript in bw-copy rbw-autofill _rbw-common.sh; do
@@ -336,11 +339,6 @@ if [ "$IS_MAC" -eq 1 ]; then
 		chmod +x "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" 2>/dev/null || true
 	done
 	chmod +x "$DOTFILES_DIR/qutebrowser/scripts/session-guard" 2>/dev/null || true
-
-	if [ -d "$DOTFILES_DIR/yazi" ]; then
-		remove_if_exists "$HOME/.config/yazi"
-		link_dotfile "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
-	fi
 
 	if command -v llm >/dev/null 2>&1; then
 		bash "$DOTFILES_DIR/llm/setup.sh"
@@ -353,7 +351,7 @@ if [ "$IS_MAC" -eq 1 ]; then
 	# Pi MCP config is intentionally machine-local; do not install a shared file.
 
 	# Install npm dependencies for any extension that needs them
-	for pi_ext_dir in "$HOME/.pi/agent/extensions/"*/; do
+	for pi_ext_dir in "$HOME_DIR/.pi/agent/extensions/"*/; do
 		if [ -f "$pi_ext_dir/package.json" ]; then
 			deps=$(python3 -c "import json; d=json.load(open('${pi_ext_dir}package.json')); print(len(d.get('dependencies',{})))" 2>/dev/null || echo "0")
 			if [ "$deps" -gt 0 ] && [ ! -d "$pi_ext_dir/node_modules" ]; then
@@ -363,20 +361,24 @@ if [ "$IS_MAC" -eq 1 ]; then
 		fi
 	done
 
-	# Apply catppuccin-rose theme in settings if currently set to dark
-	if [ -f "$HOME/.pi/agent/settings.json" ]; then
-		current_theme=$(python3 -c "import json; s=json.load(open('$HOME/.pi/agent/settings.json')); print(s.get('theme',''))" 2>/dev/null || echo "")
-		if [ "$current_theme" = "dark" ] || [ -z "$current_theme" ]; then
+	# Default Pi theme: catppuccin-frappe (rose kept in pi/themes/ for theme-switch)
+	if [ -f "$HOME_DIR/.pi/agent/settings.json" ]; then
+		current_theme=$(python3 -c "import json; s=json.load(open('$HOME_DIR/.pi/agent/settings.json')); print(s.get('theme',''))" 2>/dev/null || echo "")
+		if [ "$current_theme" = "dark" ] || [ -z "$current_theme" ] || [ "$current_theme" = "catppuccin-rose" ]; then
 			python3 -c "
 import json
-path = '$HOME/.pi/agent/settings.json'
+path = '$HOME_DIR/.pi/agent/settings.json'
 s = json.load(open(path))
-s['theme'] = 'catppuccin-rose'
-s['defaultThinkingLevel'] = 'low'
-s['showHardwareCursor'] = True
+s['theme'] = 'catppuccin-frappe'
+s.setdefault('defaultThinkingLevel', 'low')
 json.dump(s, open(path, 'w'), indent=2)
-" 2>/dev/null && echo "  󰆊 Set Pi theme to catppuccin-rose"
+" 2>/dev/null && echo "  󰆊 Set Pi theme to catppuccin-frappe"
 		fi
+	fi
+	# Default prompt theme state (Frappé). Rose remains available via theme-switch.
+	mkdir -p "$HOME_DIR/.config/dotfiles"
+	if [ ! -f "$HOME_DIR/.config/dotfiles/theme" ]; then
+		printf '%s\n' "catppuccin" >"$HOME_DIR/.config/dotfiles/theme"
 	fi
 fi
 

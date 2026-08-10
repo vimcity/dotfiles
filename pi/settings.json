@@ -25,7 +25,7 @@
     "npm:pi-lens",
     "npm:pi-web-access"
   ],
-  "theme": "catppuccin-rose",
+  "theme": "catppuccin-frappe",
   "outputPad": 1,
   "defaultThinkingLevel": "low",
   "editorPaddingX": 1,

@@ -8,7 +8,7 @@ THEME_STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/theme"
 if [[ -z "$PROMPT_THEME" && -f "$THEME_STATE_FILE" ]]; then
     PROMPT_THEME="$(<"$THEME_STATE_FILE")"
 fi
-export PROMPT_THEME="${PROMPT_THEME:-catppuccin-rose}"
+export PROMPT_THEME="${PROMPT_THEME:-catppuccin}"
 
 # Define theme colors and styles
 # Neovim (lualine) mirrors these in nvim/lua/config/dotfiles_prompt_colors.lua — keep in sync.
