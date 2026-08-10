@@ -1,47 +1,51 @@
+os:
+  edit: "nvim -- {{filename}}"
+  editAtLine: "nvim -- +{{line}} {{filename}}"
+
 customCommands:
-  - key: 'C'
-    command: 'ai-commit'
-    context: 'files'
-    description: 'Commit with AI-generated message (OpenRouter - gemini-flash-lite)'
+  - key: "C"
+    command: "ai-commit"
+    context: "files"
+    description: "Commit with AI-generated message"
     output: popup
 gui:
-  nerdFontsVersion: '3'
+  nerdFontsVersion: "3"
   authorColors:
-    '*': '#babbf1'
+    "*": "#babbf1"
   branchColorPatterns:
-    '^main$': '#a6d189'
-    '^master$': '#a6d189'
-    '^feat(ure)?/': '#8caaee'
-    '^fix/': '#e78284'
-    '^hotfix/': '#e78284'
+    "^main$": "#a6d189"
+    "^master$": "#a6d189"
+    "^feat(ure)?/": "#8caaee"
+    "^fix/": "#e78284"
+    "^hotfix/": "#e78284"
   theme:
     # Catppuccin Frappe theme
     activeBorderColor:
-      - '#babbf1'
+      - "#babbf1"
       - bold
     inactiveBorderColor:
-      - '#737994'
+      - "#737994"
     searchingActiveBorderColor:
-      - '#8caaee'
+      - "#8caaee"
       - bold
     optionsTextColor:
-      - '#a5adce'
+      - "#a5adce"
     selectedLineBgColor:
-      - '#51576d'
+      - "#51576d"
     inactiveViewSelectedLineBgColor:
-      - '#414559'
+      - "#414559"
     cherryPickedCommitFgColor:
-      - '#99d1db'
+      - "#99d1db"
     cherryPickedCommitBgColor:
-      - '#344a40'
+      - "#344a40"
     markedBaseCommitFgColor:
-      - '#303446'
+      - "#303446"
     markedBaseCommitBgColor:
-      - '#e5c890'
+      - "#e5c890"
     unstagedChangesColor:
-      - '#e78284'
+      - "#e78284"
     defaultFgColor:
-      - '#c6d0f5'
+      - "#c6d0f5"
 git:
   diffRenderers:
     - colorArg: always
