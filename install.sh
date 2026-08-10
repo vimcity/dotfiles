@@ -251,8 +251,7 @@ link_dotfile "$DOTFILES_DIR/vimrc" "$HOME_DIR/.vimrc"
 link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/config.yml"
 link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
-link_dotfile "$DOTFILES_DIR/btop/themes/catpuccin-rose.theme" "$HOME_DIR/.config/btop/themes/catppuccin-frappe.theme"
-link_dotfile "$DOTFILES_DIR/btop/themes/catpuccin-rose.theme" "$HOME_DIR/.config/btop/themes/catpuccin-rose.theme"
+link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME_DIR/.config/btop/themes/catppuccin-frappe.theme"
 
 # Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
 if [ -d "$DOTFILES_DIR/pi" ]; then
@@ -290,6 +289,15 @@ fi
 if [ -d "$DOTFILES_DIR/fastfetch" ]; then
 	remove_if_exists "$HOME_DIR/.config/fastfetch"
 	link_dotfile "$DOTFILES_DIR/fastfetch" "$HOME_DIR/.config/fastfetch"
+fi
+
+if [ -d "$DOTFILES_DIR/posting" ]; then
+	mkdir -p "$HOME_DIR/.config/posting" "$HOME_DIR/.local/share/posting/themes"
+	link_dotfile "$DOTFILES_DIR/posting/config.yaml" "$HOME_DIR/.config/posting/config.yaml"
+	for theme in "$DOTFILES_DIR/posting/themes"/*.yaml; do
+		[ -f "$theme" ] || continue
+		link_dotfile "$theme" "$HOME_DIR/.local/share/posting/themes/$(basename "$theme")"
+	done
 fi
 
 if [ -f "$DOTFILES_DIR/herdr/config.toml" ]; then

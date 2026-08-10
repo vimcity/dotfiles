@@ -1,0 +1,97 @@
+# Catppuccin Frappé for btop
+#
+# Palette reference (from catppuccin-frappe)
+#   base         #303446
+#   surface      #414559
+#   overlay      #51576d
+#   muted        #737994
+#   subtle       #838ba7
+#   text         #c6d0f5
+#   rose/red     #e78284
+#   pink         #f4b8e4
+#   mauve        #ca9ee6
+#   peach        #ef9f76
+#   yellow       #e5c890
+#   green        #a6d189
+#   teal         #81c8be
+#   sky          #99d1db
+#   blue         #8caaee
+#   lavender     #babbf1
+
+# Base UI
+theme[main_bg]="#303446"
+theme[main_fg]="#c6d0f5"
+theme[title]="#c6d0f5"
+theme[hi_fg]="#8caaee"
+
+# Selection and chrome
+theme[selected_bg]="#51576d"
+theme[selected_fg]="#c6d0f5"
+theme[inactive_fg]="#737994"
+theme[graph_text]="#838ba7"
+theme[meter_bg]="#414559"
+theme[div_line]="#51576d"
+
+# Box outlines
+theme[cpu_box]="#8caaee"
+theme[mem_box]="#81c8be"
+theme[net_box]="#ca9ee6"
+theme[proc_box]="#e78284"
+
+# Temperature graph: teal -> peach -> red
+theme[temp_start]="#81c8be"
+theme[temp_mid]="#ef9f76"
+theme[temp_end]="#e78284"
+
+# CPU graph: teal -> blue -> mauve
+theme[cpu_start]="#81c8be"
+theme[cpu_mid]="#8caaee"
+theme[cpu_end]="#ca9ee6"
+
+# Memory meters
+# Free: green -> teal -> sky
+theme[free_start]="#a6d189"
+theme[free_mid]="#81c8be"
+theme[free_end]="#99d1db"
+
+# Cached: sky -> blue -> lavender
+theme[cached_start]="#99d1db"
+theme[cached_mid]="#8caaee"
+theme[cached_end]="#babbf1"
+
+# Available: blue -> lavender -> mauve
+theme[available_start]="#8caaee"
+theme[available_mid]="#babbf1"
+theme[available_end]="#ca9ee6"
+
+# Used: peach -> red -> pink
+theme[used_start]="#ef9f76"
+theme[used_mid]="#e78284"
+theme[used_end]="#f4b8e4"
+
+# Network graphs
+# Download: green -> teal -> sky
+theme[download_start]="#a6d189"
+theme[download_mid]="#81c8be"
+theme[download_end]="#99d1db"
+
+# Upload: mauve -> pink -> red
+theme[upload_start]="#ca9ee6"
+theme[upload_mid]="#f4b8e4"
+theme[upload_end]="#e78284"
+
+# Process table
+theme[proc_misc]="#8caaee"
+
+# CPU/mem/threads: teal -> blue -> mauve
+theme[process_start]="#81c8be"
+theme[process_mid]="#8caaee"
+theme[process_end]="#ca9ee6"
+
+# Process states and banners
+theme[proc_banner_bg]="#51576d"
+theme[proc_banner_fg]="#c6d0f5"
+theme[proc_pause_bg]="#ca9ee6"
+theme[proc_follow_bg]="#414559"
+theme[followed_bg]="#414559"
+theme[followed_fg]="#81c8be"
