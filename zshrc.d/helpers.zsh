@@ -57,7 +57,7 @@ alias vnvinit="python -m venv venv"
 alias vnva="source venv/bin/activate"
 alias python=python3
 eval "$(zoxide init zsh)"
-export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info'
+export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border --inline-info --color=fg:#c6d0f5,bg:#303446,fg+:#f2f2f2,bg+:#414559,hl:#8caaee,hl+:#ca9ee6,info:#a5adce,prompt:#ca9ee6,query:#c6d0f5,pointer:#f2d5cf,marker:#a6d189,spinner:#f4b8e4,header:#8caaee,border:#51576d,separator:#51576d,gutter:#303446,scrollbar:#51576d,preview-fg:#c6d0f5,preview-bg:#303446,disabled:#6c7086'
 detect_file_type() {
   local file="$1"
   if [[ -z "$file" ]]; then
@@ -141,31 +141,41 @@ open_file() {
       ;;
   esac
 }
+_fzf_file_picker() {
+  local open_action="$1"
+  local file
+  file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${2:-.}" \
+    | fzf --preview-window=right:65% \
+      --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}' \
+      --bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
+      --bind 'alt-k:preview-up,alt-j:preview-down') || return 0
+  [[ -n "$file" ]] || return 0
+  case "$open_action" in
+    editor)
+      ${EDITOR:-nvim} "$file"
+      ;;
+    opener)
+      open_file "$file"
+      ;;
+  esac
+}
+
 ff() {
-  fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-    | fzf --preview-window=right:60% \
-       --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}' \
-       --bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
-       --bind 'alt-k:preview-up,alt-j:preview-down'
+  _fzf_file_picker opener "$@"
 }
 fdir() {
   fd --type d --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-    | fzf --preview "eza --tree --level=2 --icons {}"
-}
-ffe() {
-  local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-    | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
-  [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
+    | fzf --preview-window=right:65% \
+      --preview "eza --tree --level=2 --icons=always --color=always {}"
 }
 fo() {
-  local file=$(fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" "${1:-.}" \
-    | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}')
-  [[ -n "$file" ]] && open_file "$file"
+  _fzf_file_picker opener "$@"
 }
 fde() {
   [[ $# -eq 0 ]] && { echo "Usage: fde <extension> [path]"; return 1; }
   fd --type f --hidden --exclude .git --ignore-file "$HOME/.fdignore" --extension "$1" "${2:-.}" \
-    | fzf --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}'
+    | fzf --preview-window=right:65% \
+      --preview 'bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}'
 }
 fdm() {
   [[ $# -eq 0 ]] && { echo "Usage: fdm <time> [path] (e.g., 1h, 1d, 1w)"; return 1; }
