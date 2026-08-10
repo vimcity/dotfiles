@@ -6,15 +6,15 @@
   "compaction": {
     "enabled": true,
     "reserveTokens": 16384,
-    "keepRecentTokens": 16000
+    "keepRecentTokens": 20000
   },
   "retry": {
     "enabled": true,
-    "maxRetries": 2,
+    "maxRetries": 3,
     "baseDelayMs": 1000,
     "provider": {
       "timeoutMs": 120000,
-      "maxRetries": 0,
+      "maxRetries": 2,
       "maxRetryDelayMs": 15000
     }
   },
@@ -23,7 +23,9 @@
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
     "npm:pi-lens",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:@aliou/pi-guardrails",
+    "npm:@zosmaai/pi-llm-wiki"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,

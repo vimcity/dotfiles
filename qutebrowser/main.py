@@ -151,17 +151,6 @@ c.hints.scatter = True
 # Full alphabet for hints: 26 letters = 676 two-letter combinations (26×26)
 c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 
-# Search engine bang commands for quick site searches
-c.url.searchengines = {
-    "DEFAULT": "https://duckduckgo.com/search?q={}",
-    "ytm": "https://music.youtube.com/search?q={}",
-    "gh": "https://github.com/search?q={}",
-    "yt": "https://www.youtube.com/watch?q={}",
-    "blog": "https://www.indiehackers.com/search?q={}",
-    "wiki": "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}",
-    "reddit": "https://www.reddit.com/search/?q={}",
-}
-
 # Command aliases for faster command-line usage.
 c.aliases["qm"] = "quickmark-load"
 c.aliases["qmt"] = "quickmark-load -t"

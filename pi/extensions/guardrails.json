@@ -47,8 +47,8 @@
       {
         "id": "ssh-keys",
         "name": "SSH keys",
-        "description": "Protect SSH private keys from being read",
-        "protection": "noAccess",
+        "description": "Protect SSH keys from being written or edited",
+        "protection": "readOnly",
         "onlyIfExists": true,
         "patterns": [
           {
