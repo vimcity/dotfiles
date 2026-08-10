@@ -17,7 +17,35 @@ vim.opt.clipboard = "unnamedplus"
 
 local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
-local is_ssh_session = vim.env.SSH_TTY or vim.env.SSH_CONNECTION
+-- Detect SSH by env var (portable) or process ancestry (works when SSH doesn't forward env vars)
+local function is_ssh_session_by_proc()
+  local ok, handle = pcall(vim.loop.new_timer)
+  if not ok then
+    return false
+  end
+  handle:close()
+
+  -- Walk up the process tree looking for sshd
+  local pid = vim.fn.getpid()
+  for _ = 1, 20 do
+    local ppid = vim.fn.systemlist("ps -o ppid= -p " .. pid)
+    if #ppid == 0 then
+      break
+    end
+    local parent = tonumber(ppid[1])
+    if not parent or parent <= 1 then
+      break
+    end
+    local comm = vim.fn.systemlist("ps -o comm= -p " .. parent)
+    if #comm > 0 and comm[1]:match("sshd") then
+      return true
+    end
+    pid = parent
+  end
+  return false
+end
+
+local is_ssh_session = vim.env.SSH_TTY or vim.env.SSH_CONNECTION or is_ssh_session_by_proc()
 local is_herdr_session = vim.env.HERDR_ENV == "1"
 local is_personal = vim.env.PERSONAL == "1"
 local is_homelab = is_linux and is_ssh_session
