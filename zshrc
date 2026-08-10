@@ -31,6 +31,12 @@ fi
 # Completion & Plugins (no OMZ framework)
 # ===========================================
 
+# Add Homebrew completions to fpath (before compinit)
+export FPATH="$HOMEBREW_PREFIX/share/zsh/site-functions:$FPATH"
+
+# Add zsh-completions (from oh-my-zsh custom plugins) to fpath
+export FPATH="$HOME/.oh-my-zsh/custom/plugins/zsh-completions/src:$FPATH"
+
 # Completion cache
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' special-dirs true
