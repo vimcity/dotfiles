@@ -335,6 +335,7 @@ if [ "$IS_MAC" -eq 1 ]; then
 		link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" "$QUTE_DATA_DIR/userscripts/$userscript"
 		chmod +x "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" 2>/dev/null || true
 	done
+	chmod +x "$DOTFILES_DIR/qutebrowser/scripts/session-guard" 2>/dev/null || true
 
 	if [ -d "$DOTFILES_DIR/yazi" ]; then
 		remove_if_exists "$HOME/.config/yazi"
