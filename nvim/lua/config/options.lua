@@ -40,8 +40,9 @@ then
     },
     cache_enabled = 0,
   }
--- macOS: use pbcopy/pbpaste only outside remote multiplexers.
-elseif is_mac and not is_ssh_session and not is_herdr_session then
+-- Local macOS (including Herdr panes on this machine): direct pbcopy.
+-- Herdr + nvim on the same Mac can call pbcopy; no OSC 52 hop needed.
+elseif is_mac and not is_ssh_session then
   vim.g.clipboard = {
     copy = {
       ["+"] = "pbcopy",
@@ -52,10 +53,9 @@ elseif is_mac and not is_ssh_session and not is_herdr_session then
       ["*"] = "pbpaste",
     },
   }
--- Remote multiplexer: use OSC 52 for the client clipboard.
--- Herdr panes may not inherit SSH_* from a persistent server process, so HERDR_ENV
--- must independently select this provider.
-elseif is_ssh_session and is_herdr_session then
+-- Remote: Linux Herdr panes (`herdr --remote`) or SSH. OSC 52 → Ghostty/host clipboard.
+-- Remote Herdr panes often lack SSH_*; HERDR_ENV alone must select this path.
+elseif is_herdr_session or is_ssh_session then
   local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
   if ok then
     vim.g.clipboard = {

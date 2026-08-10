@@ -24,7 +24,7 @@ function M.get()
   if name and themes[name] then
     return themes[name], name
   end
-  return themes["catppuccin-rose"], "catppuccin-rose"
+  return themes["catppuccin"], "catppuccin"
 end
 
 return M

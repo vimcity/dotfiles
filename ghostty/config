@@ -34,6 +34,10 @@ adjust-cursor-thickness = 4
 # Shell integration
 shell-integration = zsh
 
+# OSC 52 — required for Neovim/yanks over Herdr remote and SSH
+clipboard-read = allow
+clipboard-write = allow
+
 # Copy on select
 copy-on-select = clipboard
 
