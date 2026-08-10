@@ -25,7 +25,7 @@
     "npm:pi-lens",
     "npm:pi-web-access",
     "npm:@aliou/pi-guardrails",
-    "npm:@zosmaai/pi-llm-wiki"
+    "./packages/pi-llm-wiki"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
@@ -35,5 +35,7 @@
     "showTerminalProgress": true
   },
   "hideThinkingBlock": true,
-  "showHardwareCursor": true
+  "showHardwareCursor": true,
+  "defaultProvider": "openrouter",
+  "defaultModel": "openai/gpt-5.6-luna"
 }
