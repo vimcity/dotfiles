@@ -33,7 +33,5 @@
     "showTerminalProgress": true
   },
   "hideThinkingBlock": true,
-  "showHardwareCursor": true,
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-terra"
+  "showHardwareCursor": true
 }
