@@ -1,0 +1,36 @@
+name: dracula-frappe
+description: Built-in Dracula, Frappé background only — Ctrl+P → Change theme
+author: rgaur
+dark: true
+
+# Dracula (unchanged)
+primary: '#BD93F9'
+secondary: '#6272A4'
+accent: '#FF79C6'
+warning: '#FFB86C'
+error: '#FF5555'
+success: '#50FA7B'
+
+# Catppuccin Frappé base only
+background: '#303446'
+surface: '#414559'
+panel: '#51576d'
+
+# Posting injects non-Dracula defaults for custom themes; mirror built-in fallbacks.
+method:
+  get: '#D3B7FB'
+  post: '#8BFBA7'
+  put: '#FFD09D'
+  delete: '#FF8E8E'
+  options: 'auto 60%'
+  head: 'auto 60%'
+  patch: null
+
+url:
+  base: '#97A1C2'
+  protocol: '#FFA6D9'
+  separator: '#F8F8F299'
+
+variable:
+  resolved: '#8BFBA7'
+  unresolved: '#FF8E8E'

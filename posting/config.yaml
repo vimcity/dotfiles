@@ -1,0 +1,14 @@
+keymap:
+  send-request: ctrl+r
+  expand-section: space
+  toggle-collection: ctrl+b,ctrl+h
+  search-requests: ctrl+f,f2
+  quit: ctrl+q,ctrl+c
+theme: dracula-frappe
+# animation: full
+focus:
+  on_startup: collection
+  # on_response: body
+  on_request_open: body
+collection_browser:
+  show_on_startup: true
