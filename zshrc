@@ -80,3 +80,6 @@ source "$HOME/dotfiles/zshrc.d/rbw.zsh"
 source "$HOME/dotfiles/zshrc.d/org.zsh"
 source "$HOME/dotfiles/zshrc.d/herdr.zsh"
 source "$HOME/dotfiles/zshrc.d/history.zsh"
+export LLM_OPENAI_API_BASE="http://127.0.0.1:8000/v1"
+export LLM_OPENAI_API_KEY=none
+export LLM_OPENAI_MODEL="Qwen3.6-35B-A3B-OptiQ-4bit"
