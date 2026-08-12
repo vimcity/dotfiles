@@ -37,7 +37,8 @@ return {
                 },
                 schema = {
                   model = {
-                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-27B-4bit"),
+                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-35B-A3B-OptiQ-4bit")
+          is_custom = true,
                   },
                 },
               })
