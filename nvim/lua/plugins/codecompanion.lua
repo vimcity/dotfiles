@@ -27,6 +27,15 @@ return {
     opts = function()
       return {
         adapters = {
+          copilot = function()
+            return require("codecompanion.adapters").extend("copilot", {
+              schema = {
+                model = {
+                  default = "claude-3.5-sonnet",
+                },
+              },
+            })
+          end,
           http = {
             omlx = function()
               return require("codecompanion.adapters").extend("openai_compatible", {
@@ -37,8 +46,7 @@ return {
                 },
                 schema = {
                   model = {
-                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-35B-A3B-OptiQ-4bit")
-          is_custom = true,
+                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-35B-A3B-OptiQ-4bit"),
                   },
                 },
               })
@@ -46,9 +54,9 @@ return {
           },
         },
         interactions = {
-          chat = { adapter = "omlx" },
-          inline = { adapter = "omlx" },
-          cmd = { adapter = "omlx" },
+          chat = { adapter = env("USE_COPILOT", "omlx") },
+          inline = { adapter = env("USE_COPILOT", "omlx") },
+          cmd = { adapter = env("USE_COPILOT", "omlx") },
         },
         display = {
           chat = {

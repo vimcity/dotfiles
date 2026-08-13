@@ -4,9 +4,10 @@ set -euo pipefail
 
 plans_dir="${ORG_PLANS_PATH:-$HOME/Documents/org/plans}"
 inbox_dir="${ORG_INBOX_PATH:-$plans_dir/inbox}"
+archive_dir="$plans_dir/archive"
 editor="${EDITOR:-nvim}"
 
-mkdir -p "$inbox_dir"
+mkdir -p "$inbox_dir" "$archive_dir"
 cd "$plans_dir"
 
 new_note='[ new note ]'
@@ -19,10 +20,11 @@ file="$({
 	--layout reverse \
 	--border \
 	--prompt 'plan> ' \
-	--header 'enter: open   ctrl-n: new note' \
+	--header 'ctrl-n: new note   ctrl-a: archive' \
 	--preview-window 'right:70%:wrap' \
 	--preview 'if [[ {} == "[ new note ]" ]]; then printf "Create a fresh Markdown note in %s\n" "$inbox_dir"; else bat --color=always --style=header,grid --line-range :300 {} 2>/dev/null || file {}; fi' \
 	--bind "ctrl-n:become(printf '%s\\n' '$new_note')" \
+	--bind 'ctrl-a:execute-silent(bash $HOME/dotfiles/herdr/scripts/archive-plan.sh {})+reload(fd --type f --hidden --exclude .git --exclude archive --extension md --extension org --strip-cwd-prefix .)' \
 	--bind 'ctrl-u:preview-page-up,ctrl-d:preview-page-down' \
 	--bind 'alt-k:preview-up,alt-j:preview-down')" || exit 0
 

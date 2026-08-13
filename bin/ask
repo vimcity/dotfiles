@@ -60,7 +60,10 @@ ensure_omlx() {
         omlx start >/dev/null 2>&1 || true
         sleep 2
         curl -sf --max-time 5 "${OMLX_API_BASE%/}/models" >/dev/null 2>&1
+        return $?
     fi
+
+    return 1
 }
 
 run_fabric_pattern() {
@@ -133,6 +136,7 @@ main() {
     local use_clipboard=0
     local use_pane=0
     local log_search=""
+    local show_logs=0
     local use_devdocs=0
     local use_stdin=0
     local context_kind=""
@@ -214,8 +218,13 @@ main() {
                 shift
                 ;;
             -l | --logs)
-                log_search="${2:-}"
-                shift 2
+                show_logs=1
+                if [[ $# -ge 2 && "$2" != -* ]]; then
+                    log_search="$2"
+                    shift 2
+                else
+                    shift
+                fi
                 ;;
             --)
                 shift
@@ -232,7 +241,7 @@ main() {
         esac
     done
 
-    if [[ -n "$log_search" ]]; then
+    if [[ "$show_logs" -eq 1 ]]; then
         if [[ -n "$log_search" ]]; then
             llm logs -s "$log_search"
         else

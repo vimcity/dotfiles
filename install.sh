@@ -339,10 +339,9 @@ if [ "$IS_MAC" -eq 1 ]; then
 	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts" "$HOME_DIR/.local/qute-scripts"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/config.py" "$QUTE_CONFIG_DIR/config.py"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/main.py" "$QUTE_CONFIG_DIR/main.py"
-	link_dotfile "$DOTFILES_DIR/qutebrowser/local.py" "$QUTE_CONFIG_DIR/local.py"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
-	for userscript in bw-copy rbw-autofill _rbw-common.sh; do
+	for userscript in rbw-autofill _rbw-common.sh; do
 		link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" "$QUTE_DATA_DIR/userscripts/$userscript"
 		chmod +x "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" 2>/dev/null || true
 	done

@@ -35,8 +35,8 @@ alias cur='cursor-agent'
 #  return "$status"
 # }
 alias vim=nvim
-export EDITOR="/opt/homebrew/bin/nvim"
-export VISUAL="/opt/homebrew/bin/nvim"
+export EDITOR="${EDITOR:-$(command -v nvim)}"
+export VISUAL="${VISUAL:-$EDITOR}"
 alias view='nvim -R'
 alias nvclear="rm -rf ~/.cache/nvim ~/.local/share/nvim && echo '✓ Neovim caches cleared'"
 alias nvrebuild="nvclear && nvim -c 'Lazy! sync' -c 'TSUpdate' -c 'qa' && echo '✓ Neovim rebuilt'"
@@ -219,7 +219,6 @@ gwab() { git worktree add -b "$1" "../$1"; }  # new branch
 gwa() { git worktree add "../$1" "$1"; }      # existing branch
 export PATH="$HOME/Projects/jenk-cli:$PATH"
 export PATH="$PATH:$HOME/.local/scripts"
-alias vimlocal="nvim ~/.zshrc.local"
 fabric() {
   fabric-ai --raw --disable-responses-api "$@"
 }
@@ -244,8 +243,8 @@ export PI_OFFLINE=1
 export PI_SKIP_VERSION_CHECK=1
 alias org='nvim $HOME/Documents/org/todos.org'
 export ORG_PATH="$HOME/Documents/org"
-alias vimlocal='vim $HOME/.zshrc.local'
-alias vimenv='vim $HOME/.zshrc.local.env'
+alias vimlocal='${EDITOR:-nvim} $HOME/.zshrc.local'
+alias vimenv='${EDITOR:-nvim} $HOME/.zshrc.local.env'
 export PATH="$HOME/.local/bin:$PATH"
 alias lstat="$HOME/.local/bin/lstat"
 
