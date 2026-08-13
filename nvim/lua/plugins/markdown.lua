@@ -97,7 +97,7 @@ return {
         end
 
         if url:match("^http") then
-          vim.fn.system("open " .. url)
+          vim.system({ "open", url }, { detach = true })
         else
           local current_dir = vim.fn.expand("%:p:h")
           local full_path = current_dir .. "/" .. url

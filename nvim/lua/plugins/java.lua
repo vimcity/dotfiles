@@ -88,9 +88,16 @@ return {
           jdtls_opts = original_jdtls(jdtls_opts, root_dir)
         end
         
-        -- Set environment variable for jdtls wrapper to find Java 21
-        jdtls_opts.cmd_env = jdtls_opts.cmd_env or {}
-        jdtls_opts.cmd_env.JAVA_HOME = "/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home"
+        -- jdtls needs Java 21+, while the project runtime may be older.
+        local jdtls_java_home = vim.env.JDTLS_JAVA_HOME
+        if jdtls_java_home and vim.fn.isdirectory(jdtls_java_home) == 1 then
+          jdtls_opts.cmd_env = jdtls_opts.cmd_env or {}
+          jdtls_opts.cmd_env.JAVA_HOME = jdtls_java_home
+        elseif jdtls_java_home then
+          vim.notify("JDTLS_JAVA_HOME is not a valid directory: " .. jdtls_java_home, vim.log.levels.WARN)
+        else
+          vim.notify("JDTLS_JAVA_HOME is not set; jdtls may use the default Java runtime", vim.log.levels.WARN)
+        end
         
         -- Download source jars for dependencies so breakpoints work in library code
         jdtls_opts.settings = vim.tbl_deep_extend("force", jdtls_opts.settings or {}, {

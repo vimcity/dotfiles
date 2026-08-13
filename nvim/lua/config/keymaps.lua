@@ -55,15 +55,6 @@ vim.keymap.set({ "n", "v" }, "gl", "$", { desc = "Go to end of line" })
 -- File navigation: picker-first workflow with nvim-tree
 -- Picker-first workflow keeps navigation focused on fast file and buffer jumps.
 
--- nvim-tree explorer
-vim.keymap.set("n", "<leader>e", function()
-  vim.cmd("NvimTreeToggle")
-end, { desc = "Toggle file explorer" })
-
-vim.keymap.set("n", "<leader>E", function()
-  vim.cmd("NvimTreeFindFile")
-end, { desc = "Reveal current file" })
-
 -- Project management
 vim.keymap.set("n", "<leader>fp", function()
   -- Expand the path before passing to the async finder
@@ -157,24 +148,3 @@ vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +10<cr>", { desc = "Incre
 -- Better command-line editing
 vim.keymap.set("c", "<M-Left>", "<S-Left>", { noremap = true }) -- back a word
 vim.keymap.set("c", "<M-Right>", "<S-Right>", { noremap = true }) -- forward a word
-
--- Format all Java files in project directory
-vim.api.nvim_create_user_command("FormatProject", function()
-  local cwd = vim.fn.getcwd()
-  local java_files = vim.fn.systemlist("find " .. cwd .. " -type f -name '*.java'")
-
-  if #java_files == 0 then
-    vim.notify("No Java files found in " .. cwd, vim.log.levels.WARN)
-    return
-  end
-
-  local formatted = 0
-  for _, file in ipairs(java_files) do
-    vim.cmd("edit " .. file)
-    vim.lsp.buf.format({ async = false })
-    vim.cmd("write")
-    formatted = formatted + 1
-  end
-
-  vim.notify("Formatted " .. formatted .. " Java files in " .. cwd, vim.log.levels.INFO)
-end, { desc = "Format all Java files in project directory" })
