@@ -8,7 +8,8 @@ end
 
 return {
   "iamkarasik/sonarqube.nvim",
-  cond = not is_personal_machine(),
+  -- Disabled until SonarQube is intentionally re-enabled.
+  cond = false,
   cmd = {
     "SonarQubeListAllRules",
     "SonarQubeShowConfig",
