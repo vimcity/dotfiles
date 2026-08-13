@@ -59,7 +59,6 @@
   "render-markdown-mermaid.nvim": { "branch": "master", "commit": "d4b4443110493a81af5d956efbcc042cdb453ceb" },
   "render-markdown.nvim": { "branch": "main", "commit": "f422cb5c6855f150e2ddcfaf44e7157b98b34f6a" },
   "snacks.nvim": { "branch": "main", "commit": "882c996cf28183f4d63640de0b4c02ec886d01f2" },
-  "sonarqube.nvim": { "branch": "master", "commit": "811bf8f46e0aa5ed9c9b5783aaf6f87640df553a" },
   "telescope-orgmode.nvim": { "branch": "main", "commit": "214fe56e105bb3d0638f33320ed959911a1bfcb1" },
   "telescope.nvim": { "branch": "master", "commit": "427b576c16792edad01a92b89721d923c19ad60f" },
   "todo-comments.nvim": { "branch": "main", "commit": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668" },

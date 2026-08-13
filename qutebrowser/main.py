@@ -7,7 +7,9 @@ c.scrolling.smooth = True
 # - main.yml: written on quit (auto_save.session + session.default_name)
 # - --backup on :ss/:wq keeps the previous main.yml before each overwrite (built into :session-save)
 c.auto_save.session = True
-c.auto_save.interval = 15000  # native default; governs _autosave + config/cookies flush rate
+c.auto_save.interval = (
+    15000  # native default; governs _autosave + config/cookies flush rate
+)
 c.session.default_name = "main"
 c.session.lazy_restore = True
 # Renderer crashes on some sites (Gmail, etc.) when Service Worker cache corrupts.
@@ -184,9 +186,9 @@ config.bind(",pw", "spawn --userscript rbw-autofill both", mode="insert")
 config.bind(",pu", "spawn --userscript rbw-autofill username", mode="insert")
 config.bind(",pp", "spawn --userscript rbw-autofill password", mode="insert")
 config.bind(",pt", "spawn --userscript rbw-autofill totp", mode="insert")
-config.bind(",Pc", "spawn --userscript bw-copy password")
-config.bind(",Pu", "spawn --userscript bw-copy username")
-config.bind(",Pt", "spawn --userscript bw-copy totp")
+config.bind(",Pc", "spawn --userscript rbw-autofill password")
+config.bind(",Pu", "spawn --userscript rbw-autofill username")
+config.bind(",Pt", "spawn --userscript rbw-autofill totp")
 
 # Allow clicking links with custom URI schemes (e.g. slack://) to open in macOS default app
 c.content.unknown_url_scheme_policy = "allow-all"

@@ -24,8 +24,7 @@
     "npm:pi-subagents",
     "npm:pi-lens",
     "npm:pi-web-access",
-    "npm:@aliou/pi-guardrails",
-    "./packages/pi-llm-wiki"
+    "npm:@aliou/pi-guardrails"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
@@ -36,6 +35,6 @@
   },
   "hideThinkingBlock": true,
   "showHardwareCursor": true,
-  "defaultProvider": "openrouter",
-  "defaultModel": "openai/gpt-5.6-luna"
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna"
 }

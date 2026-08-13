@@ -1,6 +1,5 @@
 os:
-  edit: "nvim -- {{filename}}"
-  editAtLine: "nvim -- +{{line}} {{filename}}"
+  editPreset: "nvim-remote"
 
 customCommands:
   - key: "C"
