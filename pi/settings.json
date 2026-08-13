@@ -23,8 +23,7 @@
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
     "npm:pi-lens",
-    "npm:pi-web-access",
-    "npm:@aliou/pi-guardrails"
+    "npm:pi-web-access"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
