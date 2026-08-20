@@ -7,7 +7,7 @@ return {
         auto_enable = false,
         auto_enable_stdin = true,
         filetypes = { "log", "ansi" },
-        theme = "catppuccin",
+        theme = "catppuccin-frappe",
       })
     end,
   },

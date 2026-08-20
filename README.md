@@ -79,7 +79,7 @@ This configuration emphasizes:
 
 - **Herdr + Pi** as the primary terminal and agent workflow
 - **Modern CLI replacements** (bat, eza, fd, ripgrep, zoxide)
-- **Catppuccin-based theming** across all tools, with a custom `catppuccin-rose` variant in Neovim/OpenCode
+- **Catppuccin Frappé theming** across the supported tools
 - **Vim-style keybindings** everywhere
 - **Cross-machine sync** with machine-specific overrides
 - **Performance** with lazy-loading and optimized startup
@@ -91,7 +91,7 @@ This configuration emphasizes:
 **Ghostty** - Modern GPU-accelerated terminal emulator
 > Fast, native macOS terminal with GPU rendering for smooth scrolling and animations
 
-- **Theme**: Custom `catppuccin-rose` (tracked in `ghostty/themes/`, derived from Catppuccin Frappe with rose accents)
+- **Theme**: Catppuccin Frappe
 - Font: CommitMono at 16pt with 40% cell height adjustment
 - Quick terminal toggle (`Cmd+Shift+\``)
 - Shell integration enabled for Zsh
@@ -115,7 +115,7 @@ This configuration emphasizes:
 > Primary command-line interface with enhanced features via Oh My Zsh framework
 
 - **Modules**: `zshrc.d/` splits prompt, Herdr glue, oMLX, Codex, org helpers
-- **Prompt**: Custom prompt theme system with `catppuccin-rose` as the default, plus Starship modules for context
+- **Prompt**: Catppuccin Frappé colors with Starship modules for context
 - **Plugins**: git, zsh-autosuggestions, zsh-syntax-highlighting, docker-compose
 - **History**: Standard zsh history for up/down arrow, Atuin for fuzzy search (`Ctrl+R`)
 - **Navigation**: Zoxide for smart directory jumping
@@ -168,7 +168,7 @@ This configuration emphasizes:
 - **Org glue**: `:OrgAiPlan`, `:OrgAiLaunch` → `org-pi` in Herdr
 - **Herdr-aware splits**: `Ctrl+h/j/k/l` uses Herdr navigation
 - **Testing / debugging**: Neotest, DAP
-- **Theme**: Custom `catppuccin-rose` colorscheme
+- **Theme**: Catppuccin Frappé
 - **Surround**: LazyVim default `gsa` / `gsd` / `gsr` (mini-surround extra)
 
 ### Git Tools
@@ -239,6 +239,7 @@ Custom functions for fuzzy finding:
 dotfiles/
 ├── bin/                # org-pi, note, herdr helpers
 ├── herdr/              # Herdr config + plugins (primary multiplexer)
+├── harness/            # Harness config and local oMLX profile
 ├── pi/                 # Pi agent config, skills, extensions, SYSTEM.md
 ├── atuin/              # Shell history configuration
 ├── fastfetch/          # System info display config
@@ -287,6 +288,6 @@ The install script handles:
 
 - Oh My Zsh installation and plugin setup
 
-- Symlinks for Herdr, Pi, Neovim, shell, and tool configs
+- Symlinks for Harness, Herdr, Pi, Neovim, shell, and tool configs
 
 Note: The install script assumes the above tools are already installed via Homebrew on macOS, or via apt on Debian/Ubuntu Linux dev machines.

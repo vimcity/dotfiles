@@ -43,7 +43,7 @@ else
 	QUTE_DATA_DIR="$HOME_DIR/.local/share/qutebrowser"
 fi
 
-echo "🔧 Installing dotfiles on $OS..."
+echo "󰒓 Installing dotfiles on $OS..."
 
 remove_if_exists() {
 	if [ -L "$1" ]; then
@@ -218,6 +218,7 @@ mkdir -p "$HOME_DIR/.config"
 mkdir -p "$HOME_DIR/.config/lazygit"
 mkdir -p "$HOME_DIR/.config/btop/themes"
 mkdir -p "$HOME_DIR/.config/herdr"
+mkdir -p "$HOME_DIR/.local/share/harness"
 mkdir -p "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr"
 mkdir -p "$HOME_DIR/.config/tailspin"
 mkdir -p "$HOME_DIR/.pi/agent"
@@ -252,6 +253,12 @@ link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/confi
 link_dotfile "$DOTFILES_DIR/fdignore" "$HOME_DIR/.fdignore"
 link_dotfile "$DOTFILES_DIR/bin" "$HOME_DIR/.local/scripts"
 link_dotfile "$DOTFILES_DIR/btop/themes/catppuccin-frappe.theme" "$HOME_DIR/.config/btop/themes/catppuccin-frappe.theme"
+
+# Harness configuration is versioned; credentials and sessions stay local.
+if [ -d "$DOTFILES_DIR/harness" ]; then
+	remove_if_exists "$HOME_DIR/.config/harness"
+	link_dotfile "$DOTFILES_DIR/harness" "$HOME_DIR/.config/harness"
+fi
 
 # Pi coding-agent configuration. Keep credentials, sessions, and runtime state local.
 if [ -d "$DOTFILES_DIR/pi" ]; then
@@ -368,11 +375,9 @@ if [ "$IS_MAC" -eq 1 ]; then
 		fi
 	done
 
-	# Default Pi theme: catppuccin-frappe (rose kept in pi/themes/ for theme-switch)
+	# Keep Pi on the official Catppuccin Frappé theme.
 	if [ -f "$HOME_DIR/.pi/agent/settings.json" ]; then
-		current_theme=$(python3 -c "import json; s=json.load(open('$HOME_DIR/.pi/agent/settings.json')); print(s.get('theme',''))" 2>/dev/null || echo "")
-		if [ "$current_theme" = "dark" ] || [ -z "$current_theme" ] || [ "$current_theme" = "catppuccin-rose" ]; then
-			python3 -c "
+		python3 -c "
 import json
 path = '$HOME_DIR/.pi/agent/settings.json'
 s = json.load(open(path))
@@ -380,12 +385,6 @@ s['theme'] = 'catppuccin-frappe'
 s.setdefault('defaultThinkingLevel', 'low')
 json.dump(s, open(path, 'w'), indent=2)
 " 2>/dev/null && echo "  󰆊 Set Pi theme to catppuccin-frappe"
-		fi
-	fi
-	# Default prompt theme state (Frappé). Rose remains available via theme-switch.
-	mkdir -p "$HOME_DIR/.config/dotfiles"
-	if [ ! -f "$HOME_DIR/.config/dotfiles/theme" ]; then
-		printf '%s\n' "catppuccin" >"$HOME_DIR/.config/dotfiles/theme"
 	fi
 fi
 

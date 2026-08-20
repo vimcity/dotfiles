@@ -1,5 +1,12 @@
 export OMLX_BASE_DIR="${OMLX_BASE_DIR:-$HOME/.omlx}"
 export OMLX_MODEL_DIR="${OMLX_MODEL_DIR:-$OMLX_BASE_DIR/models}"
+
+# Run Harness against the local oMLX profile without changing the shell's
+# OpenAI credentials. A function keeps arguments working like a normal command.
+ness() {
+  OPENAI_API_KEY=local command harness --config "$HOME/.config/harness/omlx.toml" "$@"
+}
+
 _omlx_model_list() {
   [[ -d "$OMLX_MODEL_DIR" ]] || return 1
   command ls -1 "$OMLX_MODEL_DIR" 2>/dev/null | sort

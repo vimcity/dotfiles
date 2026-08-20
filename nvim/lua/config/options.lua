@@ -12,54 +12,53 @@ vim.opt.softtabstop = 4 -- Number of spaces that a <Tab> counts for while perfor
 vim.opt.smartindent = true -- Do smart autoindenting when starting a new line
 vim.opt.autoindent = true -- Copy indent from current line when starting a new line
 
--- Clipboard provider overrides for different environments
-vim.opt.clipboard = "unnamedplus"
-
+-- Clipboard: one explicit provider per environment.
+-- Never use unnamedplus - it silently fails on remote hosts (no pbcopy).
 local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
-local is_ssh_session = vim.env.SSH_TTY ~= nil or vim.env.SSH_CONNECTION ~= nil
-local is_herdr_session = vim.env.HERDR_ENV == "1"
-local is_personal = vim.env.PERSONAL == "1"
+local is_ssh = vim.env.SSH_TTY ~= nil or vim.env.SSH_CONNECTION ~= nil
+vim.g.is_homelab = is_linux and is_ssh
 
-vim.g.is_homelab = is_linux and is_ssh_session
-
--- Termux: use termux-clipboard-set/get (for tablet SSH usage)
+-- Termux: tablet SSH usage
 if
-  is_personal
+  vim.env.PERSONAL == "1"
   and vim.fn.executable("termux-clipboard-set") == 1
   and vim.fn.executable("termux-clipboard-get") == 1
 then
   vim.g.clipboard = {
     name = "termux",
-    copy = {
-      ["+"] = "termux-clipboard-set",
-    },
-    paste = {
-      ["+"] = "termux-clipboard-get",
-    },
-    cache_enabled = 0,
+    copy = { ["+"] = "termux-clipboard-set" },
+    paste = { ["+"] = "termux-clipboard-get" },
+    cache_enabled = false,
   }
--- Remote sessions use OSC 52 → the host terminal clipboard.
-elseif is_ssh_session or (is_linux and is_herdr_session) then
-  local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
-  if ok then
-    vim.g.clipboard = {
-      name = "osc52",
-      copy = { ["+"] = osc52.copy("+"), ["*"] = osc52.copy("*") },
-      paste = { ["+"] = osc52.paste("+"), ["*"] = osc52.paste("*") },
-    }
-  end
--- Local macOS uses the native clipboard.
+
+-- SSH/remote: OSC 52 across the tunnel. Copy writes to local terminal
+-- (Ghostty -> macOS pbcopy). Paste sends a read request back to local Ghostty.
+elseif is_ssh then
+  -- Copy: stdin -> base64 -> OSC 52 escape via xargs printf (proven to work)
+  local osc_copy = {
+    "bash", "-c",
+    [[python3 -c 'import sys,base64; sys.stdout.write(base64.b64encode(sys.stdin.read().encode()).decode())' | xargs -I{} printf "\033]52;c;{}\a" ]],
+  }
+
+  -- Paste: send OSC 52 read request, decode Ghostty response
+  local osc_paste = {
+    "bash", "-c",
+    [[printf "\033]52;c;?\a" && read -r -t 3 LINE < /dev/tty && echo "${LINE#*c;}" | base64 -d 2>/dev/null]],
+  }
+
+  vim.g.clipboard = {
+    name = "osc52",
+    copy = { ["+"] = osc_copy, ["*"] = osc_copy },
+    paste = { ["+"] = osc_paste, ["*"] = osc_paste },
+  }
+
+-- Local macOS: native clipboard.
 elseif is_mac then
   vim.g.clipboard = {
-    copy = {
-      ["+"] = "pbcopy",
-      ["*"] = "pbcopy",
-    },
-    paste = {
-      ["+"] = "pbpaste",
-      ["*"] = "pbpaste",
-    },
+    name = "macOS",
+    copy = { ["+"] = "pbcopy", ["*"] = "pbcopy" },
+    paste = { ["+"] = "pbpaste", ["*"] = "pbpaste" },
   }
 end
 
@@ -73,7 +72,7 @@ end
 --     group = vim.api.nvim_create_augroup("NeovideBg", { clear = true }),
 --     once = true,
 --     callback = function()
---       local bg = "#29273f" -- Frappe base from catppuccin-rose
+--       local bg = "#303446" -- Catppuccin Frappe base
 --       vim.api.nvim_set_hl(0, "Normal", { bg = bg })
 --       vim.api.nvim_set_hl(0, "NormalNC", { bg = bg })
 --       vim.api.nvim_set_hl(0, "SignColumn", { bg = bg })

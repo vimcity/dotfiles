@@ -5,13 +5,11 @@ return {
     opts = function(_, opts)
       local palette = require("catppuccin.palettes").get_palette("frappe")
 
-      ---Match `prompt-themes.zsh`: green git icon, violet branch, blue project accent (see `config/dotfiles_prompt_colors.lua`).
       local function define_lualine_accent_highlights()
-        local t = require("config.dotfiles_prompt_colors").get()
-        vim.api.nvim_set_hl(0, "DotfilesLualineGitIcon", { fg = t.git_icon })
-        vim.api.nvim_set_hl(0, "DotfilesLualineGitBranch", { fg = t.git_fg, bold = true })
-        vim.api.nvim_set_hl(0, "DotfilesLualineProjLine", { fg = t.dir_accent, italic = true })
-        vim.api.nvim_set_hl(0, "DotfilesLualineBranchProjSep", { fg = t.sep })
+        vim.api.nvim_set_hl(0, "DotfilesLualineGitIcon", { fg = palette.green })
+        vim.api.nvim_set_hl(0, "DotfilesLualineGitBranch", { fg = palette.mauve, bold = true })
+        vim.api.nvim_set_hl(0, "DotfilesLualineProjLine", { fg = palette.blue, italic = true })
+        vim.api.nvim_set_hl(0, "DotfilesLualineBranchProjSep", { fg = palette.overlay0 })
       end
 
       define_lualine_accent_highlights()
@@ -25,28 +23,28 @@ return {
       opts.options.theme = {
         normal = {
           a = { bg = palette.blue, fg = palette.base, gui = "bold" },
-          b = { bg = palette.surface0, fg = palette.text },
-          c = { bg = "NONE", fg = palette.text },
+          b = { bg = palette.base, fg = palette.text },
+          c = { bg = palette.base, fg = palette.text },
         },
         insert = {
-          a = { bg = "#81c8be", fg = palette.base, gui = "bold" },
-          b = { bg = palette.surface0, fg = palette.text },
-          c = { bg = "NONE", fg = palette.text },
+          a = { bg = palette.teal, fg = palette.base, gui = "bold" },
+          b = { bg = palette.base, fg = palette.text },
+          c = { bg = palette.base, fg = palette.text },
         },
         visual = {
-          a = { bg = palette.blue, fg = palette.base, gui = "bold" },
-          b = { bg = palette.surface0, fg = palette.text },
-          c = { bg = "NONE", fg = palette.text },
+          a = { bg = palette.mauve, fg = palette.base, gui = "bold" },
+          b = { bg = palette.base, fg = palette.text },
+          c = { bg = palette.base, fg = palette.text },
         },
         replace = {
           a = { bg = palette.red, fg = palette.base, gui = "bold" },
-          b = { bg = palette.surface0, fg = palette.text },
-          c = { bg = "NONE", fg = palette.text },
+          b = { bg = palette.base, fg = palette.text },
+          c = { bg = palette.base, fg = palette.text },
         },
         command = {
           a = { bg = palette.yellow, fg = palette.base, gui = "bold" },
-          b = { bg = palette.surface0, fg = palette.text },
-          c = { bg = "NONE", fg = palette.text },
+          b = { bg = palette.base, fg = palette.text },
+          c = { bg = palette.base, fg = palette.text },
         },
         inactive = {
           a = { bg = "NONE", fg = palette.overlay0, gui = "bold" },
@@ -69,11 +67,19 @@ return {
         { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
         {
           function()
-            return vim.fn.expand("%:p")
+            local path = vim.fn.expand("%:p")
+            local ok, root = pcall(function()
+              return LazyVim.root.get({ normalize = true })
+            end)
+            if ok and root and vim.startswith(path, root .. "/") then
+              return vim.fs.relpath(root, path)
+            end
+            return vim.fn.fnamemodify(path, ":~")
           end,
           cond = function()
             return vim.fn.expand("%") ~= ""
           end,
+          color = { fg = palette.overlay1 },
         },
         {
           "diagnostics",

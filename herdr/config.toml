@@ -16,7 +16,7 @@ surface_dim = "#292c3c"
 overlay0 = "#626880"
 text = "#c6d0f5"
 subtext0 = "#a5adce"
-accent = "#7287fd"
+accent = "#8caaee"
 # accent = "#8caaee"
 
 [keys]
@@ -63,6 +63,8 @@ cycle_pane_next = ""
 cycle_pane_previous = ""
 last_pane = "prefix+tab"
 rename_pane = ""
+move_tab_previous = "prefix+shift+h"
+move_tab_next = "prefix+shift+l"
 
 new_workspace = "prefix+n"
 rename_workspace = "prefix+period"
@@ -211,11 +213,11 @@ description = "org task → Pi (org-pi launch)"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
-type = "popup"
+type = "pane"
 command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh"
-width = "65%"
-height = "65%"
-description = "open today agenda"
+# width = "65%"
+# height = "65%"
+description = "open today's org agenda"
 
 [[keys.command]]
 key = "prefix+shift+o"
@@ -272,7 +274,13 @@ description = "open lmstat"
 
 [ui]
 pane_borders = true
+pane_outer_borders = true
 pane_gaps = true
+status_indicators = "symbols"
+tab_bar_right = [
+  { type = "command", command = "$HOME/dotfiles/herdr/scripts/status-right.sh", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "text", text = " " },
+]
 prompt_new_tab_name = false
 prompt_new_workspace_name = true
 show_agent_labels_on_pane_borders = true
