@@ -18,12 +18,6 @@ function formatCost(cost: number): string {
   return `$${cost.toFixed(3)}`;
 }
 
-function speedProfile(thinkingLevel: string): string {
-  if (thinkingLevel === "off" || thinkingLevel === "minimal" || thinkingLevel === "low") return "fast";
-  if (thinkingLevel === "medium") return "balanced";
-  return "deliberate";
-}
-
 export default function (pi: ExtensionAPI) {
   let invalidate: (() => void) | undefined;
   let modelLabel = "no model";
@@ -57,13 +51,13 @@ export default function (pi: ExtensionAPI) {
 
           const context = ctx.getContextUsage();
           const contextText = context?.percent === null || context?.percent === undefined ? "?" : `${Math.round(context.percent)}%`;
-          const sessionName = pi.getSessionName() ?? "untitled";
+          const sessionName = pi.getSessionName() ?? "";
           const sessionId = ctx.sessionManager.getSessionId().slice(0, 8);
           const directory = ctx.cwd.split("/").filter(Boolean).pop() ?? "~";
           const branch = footerData.getGitBranch();
           const parts = [
             theme.fg("accent", "󰧑") + theme.fg("text", ` ${sessionName}`),
-            theme.fg("thinkingText", `${modelLabel} ${thinkingLevel} ${speedProfile(thinkingLevel)}`),
+            theme.fg("thinkingText", `${modelLabel} ${thinkingLevel}`),
             theme.fg("dim", `#${sessionId}`),
             theme.fg("muted", `󰉋 ${directory}`),
             ...(branch ? [theme.fg("syntaxFunction", ` ${branch}`)] : []),

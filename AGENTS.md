@@ -13,6 +13,10 @@ Guidance for coding agents working in this dotfiles repository.
 
 Herdr + Pi workflow is documented in **README.md** (session restore, org-pi, delegation). Do not reintroduce custom orchestrators, session indexes, or compression middleware.
 
+## Local LLM (OMLX)
+
+**Setup:** Apple Silicon OMLX (mlx-community). Model dir: `~/.omlx/models/`.
+
 ## Repository Overview
 
 This repo is a personal macOS dotfiles setup, not a compiled application.

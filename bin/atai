@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+config="$HOME/.config/atuin-ai-server/config.toml"
+
+[[ -f "$config" ]] || {
+  echo "Config not found: $config" >&2
+  exit 1
+}
+
+docker start atuin-ai-server 2>/dev/null || docker run -d \
+  --name atuin-ai-server \
+  --restart unless-stopped \
+  -v "$config:/etc/atuin-ai/config.toml:ro" \
+  -p 127.0.0.1:8081:8081 \
+  ghcr.io/atuinsh/atuin-ai-server:latest

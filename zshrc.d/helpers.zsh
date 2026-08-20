@@ -182,10 +182,6 @@ else
   export BAT_THEME="Catppuccin Macchiato"
 fi
 
-theme-switch() {
-  command theme-switch "$@"
-  source "$HOME/.zshrc"
-}
 alias ll='eza -la --git --icons'
 alias la='eza -a --icons'
 alias lt='eza --tree --level=2 --icons'
@@ -228,10 +224,6 @@ alias jdtls-clean='rm -rf ~/.cache/nvim/jdtls'
 alias qt='qutebrowser >/dev/null 2>&1 &'
 alias qtr='~/.local/qute-scripts/qute-remote'           # remote control qutebrowser
 alias shellmaster="$HOME/dotfiles/shell-master/shell-master"
-alias theme-list='prompt_switch_theme'
-theme() {
-  prompt_switch_theme "$1"
-}
 alias ask='$HOME/dotfiles/bin/ask'
 export LLM_LOCAL_MODEL="${LLM_LOCAL_MODEL:-omlx-gemma}"
 export LLM_REMOTE_MODEL="${LLM_REMOTE_MODEL:-gpt-4o-mini}"
@@ -247,4 +239,8 @@ alias vimlocal='${EDITOR:-nvim} $HOME/.zshrc.local'
 alias vimenv='${EDITOR:-nvim} $HOME/.zshrc.local.env'
 export PATH="$HOME/.local/bin:$PATH"
 alias lstat="$HOME/.local/bin/lstat"
+
+# Atuin AI self-hosted
+alias atai='$HOME/dotfiles/bin/atai'
+alias atuin-config='${EDITOR:-nvim} $HOME/.config/atuin/config.toml'
 

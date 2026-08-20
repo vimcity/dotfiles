@@ -16,7 +16,13 @@ for key, direction in pairs(pane_directions) do
   end, { silent = true, desc = direction.desc .. " (Herdr)" })
 end
 
--- Deletes → register "d" (paste with P), never system clipboard. Yanks still use unnamedplus.
+-- Move lines up/down with Alt+Up/Down (K is keyword lookup)
+vim.keymap.set("n", "<M-Down>", ":m +<cr>==", { desc = "Move line down" })
+vim.keymap.set("n", "<M-Up>", ":m -2<cr>==", { desc = "Move line up" })
+vim.keymap.set("v", "<M-Up>", ":m '>+<cr>gv=gv", { desc = "Move selection down" })
+vim.keymap.set("v", "<M-Down>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
+
+-- Deletes → register "d" (paste with P), never system clipboard. Yanks go to clipboard provider.
 local delete_map_opts = { noremap = true, silent = true }
 local delete_maps = {
   { "n", "d", '"_d' },
