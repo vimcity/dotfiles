@@ -18,7 +18,7 @@
       "maxRetryDelayMs": 15000
     }
   },
-  "lastChangelogVersion": "0.83.0",
+  "lastChangelogVersion": "0.84.2",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
@@ -27,7 +27,7 @@
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "off",
   "editorPaddingX": 1,
   "terminal": {
     "showTerminalProgress": true
