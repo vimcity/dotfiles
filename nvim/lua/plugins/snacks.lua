@@ -65,6 +65,12 @@ return {
     -- Picker configuration (primary navigation tool)
     opts.picker = vim.tbl_deep_extend("force", opts.picker or {}, {
       show_delay = 0,
+      layout = {
+        backdrop = false,
+        layout = {
+          backdrop = false,
+        },
+      },
       win = {
         input = {
           keys = {
