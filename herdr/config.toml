@@ -10,6 +10,8 @@ resume_agents_on_restore = true
 
 [theme.custom]
 panel_bg = "#303446"
+active_row_bg = "#51576d"
+selection_bg = "#626880"
 surface0 = "#414559"
 surface1 = "#51576d"
 surface_dim = "#292c3c"
@@ -17,7 +19,6 @@ overlay0 = "#626880"
 text = "#c6d0f5"
 subtext0 = "#a5adce"
 accent = "#8caaee"
-# accent = "#8caaee"
 
 [keys]
 prefix = "ctrl+space"
@@ -129,6 +130,7 @@ command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh r
 description = "navigate right across Neovim splits and Herdr panes"
 
 # Floating popups
+# TODO: change this to open pi new sesison in the projects dir 
 [[keys.command]]
 key = "prefix+shift+p"
 type = "popup"
@@ -137,6 +139,7 @@ width = "72%"
 height = "65%"
 description = "review PRs in a floating popup"
 
+# TODO: remove this and have navidrome music be launched in a bg pane in a space or somethign for music 
 [[keys.command]]
 key = "prefix+shift+m"
 type = "popup"
@@ -145,6 +148,7 @@ width = "72%"
 height = "65%"
 description = "review PRs in a floating popup"
 
+# TODO: imrprove first pane loading render thingy by loading the list of prs first and their comments, descriptions ,and diff later lazy loading or like later async
 [[keys.command]]
 key = "prefix+shift+g"
 type = "pane"
@@ -159,35 +163,37 @@ width = "75%"
 height = "75%"
 description = "open temporary floating shell"
 
-[[keys.command]]
-key = "prefix+alt+q"
-type = "popup"
-command = "exec $HOME/dotfiles/herdr/scripts/llm-ask.sh"
-width = "60%"
-height = "50%"
-description = "open quick LLM ask"
+# TODO: understand what these systems do and whta to do and what could be removed from here 
 
-[[keys.command]]
-key = "prefix+alt+v"
-type = "popup"
-command = "exec $HOME/bin/voice-ask"
-width = "50%"
-height = "30%"
-description = "voice ask — dictate → LLM → Kokoro TTS"
+# [[keys.command]]
+# key = "prefix+ctrl+q"
+# type = "popup"
+# command = "exec $HOME/dotfiles/herdr/scripts/llm-ask.sh"
+# width = "60%"
+# height = "50%"
+# description = "open quick LLM ask"
+#
+# [[keys.command]]
+# key = "prefix+alt+v"
+# type = "popup"
+# command = "exec $HOME/bin/voice-ask"
+# width = "50%"
+# height = "30%"
+# description = "voice ask — dictate → LLM → Kokoro TTS"
+#
+# [[keys.command]]
+# key = "prefix+alt+c"
+# type = "pane"
+# command = "exec $HOME/bin/voice-chat"
+# description = "voice chat — conversational mode with VAD"
 
-[[keys.command]]
-key = "prefix+alt+c"
-type = "pane"
-command = "exec $HOME/bin/voice-chat"
-description = "voice chat — conversational mode with VAD"
-
-[[keys.command]]
-key = "prefix+alt+o"
-type = "popup"
-command = "exec $HOME/bin/org-ask"
-width = "60%"
-height = "50%"
-description = "org ask — query your org notes via llm"
+# [[keys.command]]
+# key = "prefix+alt+o"
+# type = "popup"
+# command = "exec $HOME/bin/org-ask"
+# width = "60%"
+# height = "50%"
+# description = "org ask — query your org notes via llm"
 
 [[keys.command]]
 key = "prefix+ctrl+a"
@@ -203,6 +209,7 @@ type = "pane"
 command = "exec codex --yolo"
 description = "open codex"
 
+# TODO: understand the use cases of this better, also herdr api for interacting with agents could replace the codex pi and this one 
 [[keys.command]]
 key = "prefix+shift+i"
 type = "popup"
@@ -245,15 +252,6 @@ type = "pane"
 command = "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\""
 description = "open btop"
 
-
-[[keys.command]]
-key = "prefix+o"
-type = "popup"
-command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\""
-width = "75%"
-height = "75%"
-description = "open Jira TUI in a popup"
-
 [[keys.command]]
 key = "prefix+ctrl+y"
 type = "pane"
@@ -290,7 +288,10 @@ sidebar_max_width = 44
 
 [ui.sidebar.agents]
 row_gap = 1
-rows = [["state_icon", "state_text", "agent"], ["workspace", "tab"]]
+rows = [
+  ["state_icon", "state_text", { token = "agent", fg = "#f2d5cf", bold = true }],
+  [{ token = "workspace", fg = "#c6d0f5" }, { token = "tab", fg = "#babbf1" }],
+]
 
 [ui.sidebar.spaces]
 row_gap = 1
