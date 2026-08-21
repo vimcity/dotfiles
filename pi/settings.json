@@ -33,7 +33,7 @@
     "showTerminalProgress": true
   },
   "hideThinkingBlock": true,
-  "showHardwareCursor": true,
+  "showHardwareCursor": false,
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna"
 }
