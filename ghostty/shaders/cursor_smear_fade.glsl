@@ -58,7 +58,8 @@ float ease(float x) {
     return pow(1.0 - x, 3.0);
 }
 
-const vec4 TRAIL_COLOR = vec4(0.494, 0.463, 0.588, 1.0); // muted purple-grey #7e7696
+// Match the Catppuccin Frappe cursor color.
+const vec4 TRAIL_COLOR = vec4(0.776, 0.816, 0.961, 1.0); // Blue #c6d0f5
 const float DURATION = 0.11;
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
