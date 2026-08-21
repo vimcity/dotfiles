@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Apply personal accent on personal machine (PERSONAL=1)
+# or default blue on work.
+# Run standalone:  PERSONAL=1 apply-accent
+# Sourced in herdr.zsh on Herdr startup.
+
+set -euo pipefail
+
+PERSONAL_ACCENT="#f4b8e4"
+DEFAULT_ACCENT="#8caaee"
+
+# --- Herdr config -----------------------------------------------------------
+HERDR_CONFIG="${DOTFILES:-$HOME/dotfiles}/herdr/config.toml"
+
+if [[ -f "$HERDR_CONFIG" ]]; then
+    if [[ "${PERSONAL:-}" == "1" ]]; then
+        sed -i '' 's/accent = "'"$DEFAULT_ACCENT"'"$/accent = "'"$PERSONAL_ACCENT"'"/' "$HERDR_CONFIG" 2>/dev/null || true
+    else
+        sed -i '' 's/accent = "'"$PERSONAL_ACCENT"'"$/accent = "'"$DEFAULT_ACCENT"'"/' "$HERDR_CONFIG" 2>/dev/null || true
+    fi
+fi
