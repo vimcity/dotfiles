@@ -12,7 +12,7 @@ mouse-hide-while-typing = true
 # Font settings
 font-feature = -calt
 # font-family = "CommitMono"
-adjust-cell-height = -10%
+adjust-cell-height = 0%
 # font-family = "FiraCode Nerd Font"
 # adjust-cell-height = 40%
 # adjust-cell-height = 10%

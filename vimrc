@@ -5,10 +5,7 @@ syntax on
 set termguicolors
 set background=dark
 
-" ===========================================
-" Catppuccin Theme
-" ===========================================
-" colorscheme catppuccin_macchiato
+colorscheme catppuccin_frappe
 
 " ===========================================
 " Clipboard Integration
