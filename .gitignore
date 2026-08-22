@@ -40,3 +40,4 @@ snacks-diffview/*
 ./luai.nvim/**
 ytui-config/**
 .pi/
+zshrc.d/codex.zshc
