@@ -45,7 +45,7 @@ return {
     }, "\n")
 
     -- Set custom header
-    if vim.env.NVIM_ORG_POPUP == "1" then
+    if vim.env.NVIM_ORG_POPUP == "1" and vim.env.NVIM_NO_DASHBOARD ~= "1" then
       opts.dashboard.preset = opts.dashboard.preset or {}
       opts.dashboard.preset.header = org_header
       opts.dashboard.preset.keys = {}
