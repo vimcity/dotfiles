@@ -53,6 +53,13 @@ fingers() {
     command herdr plugin action invoke --plugin hotchpotch.herdr-tiny-fingers --action open
 }
 
+# Personal accent toggle: source the shared script on Herdr startup
+if [[ "${HERDR_ENV:-}" == "1" && -z "${HERDR_ACCENT_APPLIED:-}" ]]; then
+    export HERDR_ACCENT_APPLIED=1
+    "$HOME/dotfiles/bin/apply-accent"
+    command herdr server reload-config >/dev/null 2>&1
+fi
+
 typeset -g HERDR_AUTO_RENAME_LAST_CWD=''
 herdr_auto_rename_current_tab() {
     [[ "${HERDR_ENV:-}" == "1" && -n "${HERDR_TAB_ID:-}" ]] || return 0

@@ -107,7 +107,7 @@ install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󰌶 Installing macOS tools via Homebrew..."
-	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw ripgrep fd atuin; do
+	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw ripgrep fd atuin aria2; do
 		if brew list "$formula" &>/dev/null; then
 			echo "󰄵 $formula already installed"
 		else
@@ -173,6 +173,7 @@ else
 		shellcheck
 		yazi
 		zoxide
+		aria2
 	)
 
 	missing_tools=()
@@ -319,10 +320,33 @@ if [ -d "$DOTFILES_DIR/herdr/scripts" ]; then
 	chmod +x "$DOTFILES_DIR"/herdr/scripts/*.sh
 fi
 
+# Helper: install a Herdr plugin from GitHub if herdr is available and the plugin
+# isn't already installed. Skips silently if herdr is not in PATH (Docker/Linux).
+install_herdr_plugin() {
+	local repo="$1"
+	local plugin_id="$2"
+	if command -v herdr >/dev/null 2>&1; then
+		if herdr plugin list 2>/dev/null | grep -q "$plugin_id"; then
+			echo "  󰄵 herdr plugin $plugin_id already installed"
+		else
+			echo "  󰌶 Installing herdr plugin $plugin_id from $repo..."
+			herdr plugin install "$repo" -y 2>/dev/null || echo "  󰅖 Failed to install $plugin_id (herdr may not be running)"
+		fi
+	fi
+}
+
+# Symlink the tiny-fingers config (user preferences). Plugin binary is installed
+# via herdr plugin install below — the old install.sh approach only symlinked config
+# without building the Rust binary, which made prefix+t silently fail.
 if [ -f "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" ]; then
 	mkdir -p "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers"
 	link_dotfile "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers/config.toml"
 fi
+
+# Install herdr plugins that require binary builds (not just config symlinks).
+# This runs only on machines where herdr is installed and active.
+install_herdr_plugin "hotchpotch/herdr-tiny-fingers" "hotchpotch.herdr-tiny-fingers"
+install_herdr_plugin "persiyanov/herdr-reviewr" "persiyanov.reviewr"
 
 if [ -f "$DOTFILES_DIR/tailspin/theme.toml" ]; then
 	link_dotfile "$DOTFILES_DIR/tailspin/theme.toml" "$HOME_DIR/.config/tailspin/theme.toml"

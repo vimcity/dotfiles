@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ytui — privacy-focused YouTube TUI
-# Backend: yt-dlp (no Google auth, no tracking)
+# Backend: yt-dlp + aria2c (no Google auth, no tracking)
 # UI: fzf with thumbnail preview
 # Playback: mpv
 # Summarize: fabric-ai
@@ -33,6 +33,10 @@ SEARCH_RESULTS=30          # max search results
 CHANNEL_VIDEOS=50          # videos to show when browsing a channel
 YTUI_LOOP=1                # reopen same picker after playback/selection
 
+# aria2c flags for yt-dlp downloads
+# -x 16 = 16 connections per server, -s 16 = 16 splits, -k 1M = 1MiB chunk
+YTDLP_ARIA2_FLAGS=(--downloader aria2c --downloader-args "aria2c:-x 16 -s 16 -k 1M" --throttled-rate 100K --concurrent-fragments 5)
+
 # Colors (for non-fzf output)
 RED='\033[0;31m'
 GRN='\033[0;32m'
@@ -44,61 +48,61 @@ RST='\033[0m'
 # Utilities
 # ---------------------------------------------------------------------------
 die() {
-    printf "${RED}error:${RST} %s\n" "$*" >&2
-    exit 1
+	printf "${RED}error:${RST} %s\n" "$*" >&2
+	exit 1
 }
 info() { printf "${BLU}:${RST} %s\n" "$*" >&2; }
 ok() { printf "${GRN}ok:${RST} %s\n" "$*" >&2; }
 warn() { printf "${YLW}warn:${RST} %s\n" "$*" >&2; }
 
 ensure_dirs() {
-    mkdir -p "$YTUI_CONFIG_DIR" "$YTUI_CACHE_DIR" "$YTUI_THUMB_CACHE"
+	mkdir -p "$YTUI_CONFIG_DIR" "$YTUI_CACHE_DIR" "$YTUI_THUMB_CACHE"
 }
 
 # Build a pre-formatted display line for fzf's list.
 # Format:  DATE  CHANNEL (fixed 20 chars)  DURATION  TITLE
 fmt_display() {
-    local id="$1" title="$2" secs="$3" channel="$4" views="$5" ts="$6"
+	local id="$1" title="$2" secs="$3" channel="$4" views="$5" ts="$6"
 
-    # Duration
-    local dur="--:--"
-    secs="${secs%.*}"
-    if [[ -n "$secs" && "$secs" -gt 0 ]] 2>/dev/null; then
-        local h=$((secs / 3600)) m=$(((secs % 3600) / 60)) s=$((secs % 60))
-        if ((h > 0)); then
-            dur=$(printf "%d:%02d:%02d" "$h" "$m" "$s")
-        else
-            dur=$(printf "%d:%02d" "$m" "$s")
-        fi
-    fi
+	# Duration
+	local dur="--:--"
+	secs="${secs%.*}"
+	if [[ -n "$secs" && "$secs" -gt 0 ]] 2>/dev/null; then
+		local h=$((secs / 3600)) m=$(((secs % 3600) / 60)) s=$((secs % 60))
+		if ((h > 0)); then
+			dur=$(printf "%d:%02d:%02d" "$h" "$m" "$s")
+		else
+			dur=$(printf "%d:%02d" "$m" "$s")
+		fi
+	fi
 
-    # Relative date from epoch: "2h ago", "3d ago", "1mo ago", "2y ago"
-    local date_str="      "
-    if [[ -n "$ts" && "$ts" != "0" ]] 2>/dev/null; then
-        local now diff
-        now=$(date +%s)
-        diff=$((now - ts))
-        if ((diff < 3600)); then
-            date_str="${diff}s ago"
-        elif ((diff < 86400)); then
-            date_str="$((diff / 3600))h ago"
-        elif ((diff < 2592000)); then
-            date_str="$((diff / 86400))d ago"
-        elif ((diff < 31536000)); then
-            date_str="$((diff / 2592000))mo ago"
-        else
-            date_str="$((diff / 31536000))y ago"
-        fi
-    fi
-    date_str=$(printf '%-8s' "$date_str")
+	# Relative date from epoch: "2h ago", "3d ago", "1mo ago", "2y ago"
+	local date_str="      "
+	if [[ -n "$ts" && "$ts" != "0" ]] 2>/dev/null; then
+		local now diff
+		now=$(date +%s)
+		diff=$((now - ts))
+		if ((diff < 3600)); then
+			date_str="${diff}s ago"
+		elif ((diff < 86400)); then
+			date_str="$((diff / 3600))h ago"
+		elif ((diff < 2592000)); then
+			date_str="$((diff / 86400))d ago"
+		elif ((diff < 31536000)); then
+			date_str="$((diff / 2592000))mo ago"
+		else
+			date_str="$((diff / 31536000))y ago"
+		fi
+	fi
+	date_str=$(printf '%-8s' "$date_str")
 
-    # Truncate channel to 20 chars, pad to 20
-    local ch_display
-    ch_display=$(printf '%-20.20s' "$channel")
+	# Truncate channel to 20 chars, pad to 20
+	local ch_display
+	ch_display=$(printf '%-20.20s' "$channel")
 
-    # ANSI: dim date, green channel, yellow duration, normal title
-    printf '\033[2m%s\033[0m  \033[32m%s\033[0m  \033[33m%7s\033[0m  %s' \
-        "$date_str" "$ch_display" "$dur" "$title"
+	# ANSI: dim date, green channel, yellow duration, normal title
+	printf '\033[2m%s\033[0m  \033[32m%s\033[0m  \033[33m%7s\033[0m  %s' \
+		"$date_str" "$ch_display" "$dur" "$title"
 }
 
 # Build the video URL from an id
@@ -108,164 +112,169 @@ video_url() { echo "https://www.youtube.com/watch?v=${1}"; }
 # Playback
 # ---------------------------------------------------------------------------
 play_video() {
-    local video_id="$1"
-    local url
-    url=$(video_url "$video_id")
-    info "Playing $url"
-    if command -v mpv &>/dev/null; then
-        mpv --ytdl=yes \
-            --ytdl-format="bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
-            --demuxer-max-bytes=150MiB \
-            --demuxer-readahead-secs=60 \
-            --cache=yes \
-            --cache-pause-wait=3 \
-            --no-terminal \
-            "$url" &
-        disown
-    else
-        open "$url"
-    fi
+	local video_id="$1"
+	local url
+	url=$(video_url "$video_id")
+	info "Playing $url"
+	if command -v mpv &>/dev/null; then
+		mpv --ytdl-format="bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
+			--demuxer-max-bytes=150MiB \
+			--demuxer-readahead-secs=60 \
+			--cache=yes \
+			--cache-pause-wait=3 \
+			--no-terminal \
+			--script-opts=ytdl_hook-ytdl_path=/opt/homebrew/bin/yt-dlp \
+			"$url" &
+		disown
+	else
+		open "$url"
+	fi
 }
 
 # ---------------------------------------------------------------------------
 # Download & play
 # ---------------------------------------------------------------------------
 download_and_play() {
-    local video_id="$1"
-    local title="$2"
-    local url
-    url=$(video_url "$video_id")
-    local outdir="$HOME/Downloads"
-    local outfile="$outdir/%(title)s.%(ext)s"
-    info "Downloading $url to $outdir ..."
-    local downloaded
-    downloaded=$(yt-dlp --format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" --merge-output-format mp4 --output "$outfile" --print after_move:filepath "$url" 2>/dev/null)
-    if [[ -n "$downloaded" && -f "$downloaded" ]]; then
-        ok "Downloaded: $downloaded"
-        mpv --no-terminal "$downloaded" &
-        disown
-    else
-        warn "Download failed, falling back to stream"
-        play_video "$video_id"
-    fi
+	local video_id="$1"
+	local title="$2"
+	local url
+	url=$(video_url "$video_id")
+	local outdir="$HOME/Downloads"
+	local outfile="$outdir/%(title)s.%(ext)s"
+	info "Downloading $url to $outdir ..."
+	local downloaded
+	downloaded=$(yt-dlp \
+		"${YTDLP_ARIA2_FLAGS[@]}" \
+		--format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
+		--merge-output-format mp4 \
+		--output "$outfile" \
+		--print after_move:filepath "$url" 2>/dev/null)
+	if [[ -n "$downloaded" && -f "$downloaded" ]]; then
+		ok "Downloaded: $downloaded"
+		mpv --no-terminal "$downloaded" &
+		disown
+	else
+		warn "Download failed, falling back to stream"
+		play_video "$video_id"
+	fi
 }
 
 # ---------------------------------------------------------------------------
 # Summarize
 # ---------------------------------------------------------------------------
 summarize_video() {
-    local video_id="$1"
-    local url
-    url=$(video_url "$video_id")
-    if ! command -v fabric-ai &>/dev/null; then
-        die "fabric-ai not found"
-    fi
-    # Override via env: YTUI_MODEL=qwen2.5:3b YTUI_VENDOR=ollama YTUI_PATTERN=extract_wisdom
-    local model_flags=""
-    [[ -n "${YTUI_MODEL:-}" ]] && model_flags="-m $YTUI_MODEL"
-    [[ -n "${YTUI_VENDOR:-}" ]] && model_flags="$model_flags --vendor $YTUI_VENDOR"
-    local pattern="${YTUI_PATTERN:-yt_summary}"
-    info "Fetching transcript and summarizing $url ..."
-    fabric-ai -y "$url" --transcript -p "$pattern" $model_flags --yt-dlp-args="--sleep-requests 1"
+	local video_id="$1"
+	local url
+	url=$(video_url "$video_id")
+	if ! command -v fabric-ai &>/dev/null; then
+		die "fabric-ai not found"
+	fi
+	# Override via env: YTUI_MODEL=qwen2.5:3b YTUI_VENDOR=ollama YTUI_PATTERN=extract_wisdom
+	local model_flags=""
+	[[ -n "${YTUI_MODEL:-}" ]] && model_flags="-m $YTUI_MODEL"
+	[[ -n "${YTUI_VENDOR:-}" ]] && model_flags="$model_flags --vendor $YTUI_VENDOR"
+	local pattern="${YTUI_PATTERN:-yt_summary}"
+	info "Fetching transcript and summarizing $url ..."
+	fabric-ai -y "$url" --transcript -p "$pattern" $model_flags --yt-dlp-args="--sleep-requests 1"
 }
 
 # ---------------------------------------------------------------------------
 # Watch Later
 # ---------------------------------------------------------------------------
 watchlater_add() {
-    local url="$1"
-    ensure_dirs
-    local video_id
-    if [[ "$url" =~ v=([A-Za-z0-9_-]{11}) ]]; then
-        video_id="${BASH_REMATCH[1]}"
-    elif [[ "$url" =~ ^[A-Za-z0-9_-]{11}$ ]]; then
-        video_id="$url"
-    else
-        die "Cannot parse video ID from: $url"
-    fi
+	local url="$1"
+	ensure_dirs
+	local video_id
+	if [[ "$url" =~ v=([A-Za-z0-9_-]{11}) ]]; then
+		video_id="${BASH_REMATCH[1]}"
+	elif [[ "$url" =~ ^[A-Za-z0-9_-]{11}$ ]]; then
+		video_id="$url"
+	else
+		die "Cannot parse video ID from: $url"
+	fi
 
-    info "Fetching video metadata..."
-    local meta
-    meta=$(yt-dlp -J --skip-download "$(video_url "$video_id")" 2>/dev/null) ||
-        die "yt-dlp failed"
-    local title duration channel upload_date views ts
-    title=$(printf '%s' "$meta" | jq -r '.title // "Unknown"')
-    duration=$(printf '%s' "$meta" | jq -r '.duration // 0')
-    channel=$(printf '%s' "$meta" | jq -r '.channel // .uploader // "Unknown"')
-    ts=$(printf '%s' "$meta" | jq -r '.timestamp // 0')
-    views=$(printf '%s' "$meta" | jq -r '.view_count // 0')
-    local display
-    display=$(fmt_display "$video_id" "$title" "$duration" "$channel" "$views" "$ts")
-    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$video_id" "$title" "$duration" "$channel" "$views" "$ts" "$display" \
-        >>"$YTUI_WATCHLATER_FILE"
-    ok "Added: $title"
+	info "Fetching video metadata..."
+	local meta
+	meta=$(yt-dlp -J --skip-download "$(video_url "$video_id")" 2>/dev/null) ||
+		die "yt-dlp failed"
+	local title duration channel upload_date views ts
+	title=$(printf '%s' "$meta" | jq -r '.title // "Unknown"')
+	duration=$(printf '%s' "$meta" | jq -r '.duration // 0')
+	channel=$(printf '%s' "$meta" | jq -r '.channel // .uploader // "Unknown"')
+	ts=$(printf '%s' "$meta" | jq -r '.timestamp // 0')
+	views=$(printf '%s' "$meta" | jq -r '.view_count // 0')
+	local display
+	display=$(fmt_display "$video_id" "$title" "$duration" "$channel" "$views" "$ts")
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+		"$video_id" "$title" "$duration" "$channel" "$views" "$ts" "$display" \
+		>>"$YTUI_WATCHLATER_FILE"
+	ok "Added: $title"
 }
 
 # ---------------------------------------------------------------------------
 # Subscriptions
 # ---------------------------------------------------------------------------
 subs_add() {
-    local handle="$1"
-    ensure_dirs
-    handle="${handle#@}"
-    local channel_url="https://www.youtube.com/@${handle}"
-    info "Resolving channel: $channel_url"
-    local meta
-    meta=$(yt-dlp --flat-playlist -J --playlist-end 1 --extractor-args "youtubetab:approximate_date" "$channel_url/videos" 2>/dev/null) ||
-        die "Could not reach channel: $channel_url"
-    local channel_id channel_name
-    channel_id=$(printf '%s' "$meta" | jq -r '.channel_id // .uploader_id // empty')
-    channel_name=$(printf '%s' "$meta" | jq -r '.channel // .uploader // empty')
-    [[ -z "$channel_id" ]] && die "Could not resolve channel ID for $handle"
-    if grep -q "^${channel_id}	" "$YTUI_SUBS_FILE" 2>/dev/null; then
-        warn "Already subscribed to $channel_name"
-        return
-    fi
-    printf '%s\t%s\t%s\n' "$channel_id" "${channel_name:-$handle}" "$handle" \
-        >>"$YTUI_SUBS_FILE"
-    ok "Subscribed to $channel_name ($channel_id)"
+	local handle="$1"
+	ensure_dirs
+	handle="${handle#@}"
+	local channel_url="https://www.youtube.com/@${handle}"
+	info "Resolving channel: $channel_url"
+	local meta
+	meta=$(yt-dlp --flat-playlist -J --playlist-end 1 --extractor-args "youtubetab:approximate_date" "$channel_url/videos" 2>/dev/null) ||
+		die "Could not reach channel: $channel_url"
+	local channel_id channel_name
+	channel_id=$(printf '%s' "$meta" | jq -r '.channel_id // .uploader_id // empty')
+	channel_name=$(printf '%s' "$meta" | jq -r '.channel // .uploader // empty')
+	[[ -z "$channel_id" ]] && die "Could not resolve channel ID for $handle"
+	if grep -q "^${channel_id}	" "$YTUI_SUBS_FILE" 2>/dev/null; then
+		warn "Already subscribed to $channel_name"
+		return
+	fi
+	printf '%s\t%s\t%s\n' "$channel_id" "${channel_name:-$handle}" "$handle" \
+		>>"$YTUI_SUBS_FILE"
+	ok "Subscribed to $channel_name ($channel_id)"
 }
 
 subs_remove() {
-    local input="$1"
-    [[ -f "$YTUI_SUBS_FILE" ]] || return
-    local tmp
-    tmp=$(mktemp)
-    grep -v "	${input}	\|^${input}	" "$YTUI_SUBS_FILE" >"$tmp" || true
-    mv "$tmp" "$YTUI_SUBS_FILE"
-    ok "Unsubscribed from $input"
+	local input="$1"
+	[[ -f "$YTUI_SUBS_FILE" ]] || return
+	local tmp
+	tmp=$(mktemp)
+	grep -v "	${input}	\|^${input}	" "$YTUI_SUBS_FILE" >"$tmp" || true
+	mv "$tmp" "$YTUI_SUBS_FILE"
+	ok "Unsubscribed from $input"
 }
 
 subs_list() {
-    [[ -f "$YTUI_SUBS_FILE" ]] || {
-        warn "No subscriptions. Add one with: ytui subs add @handle"
-        return
-    }
-    while IFS=$'\t' read -r channel_id channel_name handle; do
-        [[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
-        printf '  %-30s  %s\n' "$channel_name" "@${handle}"
-    done <"$YTUI_SUBS_FILE"
+	[[ -f "$YTUI_SUBS_FILE" ]] || {
+		warn "No subscriptions. Add one with: ytui subs add @handle"
+		return
+	}
+	while IFS=$'\t' read -r channel_id channel_name handle; do
+		[[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
+		printf '  %-30s  %s\n' "$channel_name" "@${handle}"
+	done <"$YTUI_SUBS_FILE"
 }
 
 # ---------------------------------------------------------------------------
 # Feed refresh
 # ---------------------------------------------------------------------------
 _fetch_one_channel() {
-    # Called in a subshell: args: channel_name handle tmp_dir
-    local channel_name="$1" handle="$2" tmp_dir="$3"
-    local tmp_out="$tmp_dir/${handle}.tsv"
+	# Called in a subshell: args: channel_name handle tmp_dir
+	local channel_name="$1" handle="$2" tmp_dir="$3"
+	local tmp_out="$tmp_dir/${handle}.tsv"
 
-    local raw
-    raw=$(yt-dlp --flat-playlist -J \
-        --playlist-end "$FEED_VIDEOS_PER_CHANNEL" \
-        --extractor-args "youtubetab:approximate_date" \
-        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) || {
-        warn "Failed to fetch $channel_name, skipping"
-        return
-    }
+	local raw
+	raw=$(yt-dlp --flat-playlist -J \
+		--playlist-end "$FEED_VIDEOS_PER_CHANNEL" \
+		--extractor-args "youtubetab:approximate_date" \
+		"https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) || {
+		warn "Failed to fetch $channel_name, skipping"
+		return
+	}
 
-    printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
+	printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
         .entries[]? |
         [
             (.id // ""),
@@ -276,70 +285,70 @@ _fetch_one_channel() {
             (.timestamp // 0 | tostring)
         ] | @tsv
     ' 2>/dev/null | while IFS=$'\t' read -r id title secs ch views ts; do
-        [[ -z "$id" ]] && continue
-        display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
-        printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-            "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
-    done >"$tmp_out"
+		[[ -z "$id" ]] && continue
+		display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
+		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+			"$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
+	done >"$tmp_out"
 }
 
 refresh_feed() {
-    ensure_dirs
-    [[ -f "$YTUI_SUBS_FILE" ]] || {
-        warn "No subscriptions. Add one with: ytui subs add @handle"
-        return
-    }
+	ensure_dirs
+	[[ -f "$YTUI_SUBS_FILE" ]] || {
+		warn "No subscriptions. Add one with: ytui subs add @handle"
+		return
+	}
 
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-    local pids=() handles=() names=()
-    local count=0
+	local tmp_dir
+	tmp_dir=$(mktemp -d)
+	local pids=() handles=() names=()
+	local count=0
 
-    # Launch all fetches in parallel
-    while IFS=$'\t' read -r channel_id channel_name handle; do
-        [[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
-        info "Fetching feed for $channel_name..."
-        _fetch_one_channel "$channel_name" "$handle" "$tmp_dir" &
-        pids+=($!)
-        handles+=("$handle")
-        names+=("$channel_name")
-        count=$((count + 1))
-    done <"$YTUI_SUBS_FILE"
+	# Launch all fetches in parallel
+	while IFS=$'\t' read -r channel_id channel_name handle; do
+		[[ "$channel_id" =~ ^#.*$ || -z "$channel_id" ]] && continue
+		info "Fetching feed for $channel_name..."
+		_fetch_one_channel "$channel_name" "$handle" "$tmp_dir" &
+		pids+=($!)
+		handles+=("$handle")
+		names+=("$channel_name")
+		count=$((count + 1))
+	done <"$YTUI_SUBS_FILE"
 
-    # Wait for all jobs
-    local i=0
-    for pid in "${pids[@]}"; do
-        wait "$pid" || warn "Failed: ${names[$i]}"
-        i=$((i + 1))
-    done
+	# Wait for all jobs
+	local i=0
+	for pid in "${pids[@]}"; do
+		wait "$pid" || warn "Failed: ${names[$i]}"
+		i=$((i + 1))
+	done
 
-    # Merge all per-channel TSVs into feed cache (sorted by timestamp desc)
-    cat "$tmp_dir"/*.tsv 2>/dev/null |
-        sort -t$'\t' -k6 -rn \
-            >"$YTUI_FEED_CACHE"
-    rm -rf "$tmp_dir"
+	# Merge all per-channel TSVs into feed cache (sorted by timestamp desc)
+	cat "$tmp_dir"/*.tsv 2>/dev/null |
+		sort -t$'\t' -k6 -rn \
+			>"$YTUI_FEED_CACHE"
+	rm -rf "$tmp_dir"
 
-    ok "Refreshed feed for $count channel(s) → $YTUI_FEED_CACHE"
+	ok "Refreshed feed for $count channel(s) → $YTUI_FEED_CACHE"
 }
 
 # ---------------------------------------------------------------------------
 # Fetch videos for a single channel
 # ---------------------------------------------------------------------------
 fetch_channel() {
-    local handle="${1#@}"
-    local limit="${2:-$CHANNEL_VIDEOS}"
-    info "Fetching channel: @${handle}"
-    local raw
-    raw=$(yt-dlp --flat-playlist -J \
-        --playlist-end "$limit" \
-        --extractor-args "youtubetab:approximate_date" \
-        "https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) ||
-        die "Could not fetch channel: $handle"
+	local handle="${1#@}"
+	local limit="${2:-$CHANNEL_VIDEOS}"
+	info "Fetching channel: @${handle}"
+	local raw
+	raw=$(yt-dlp --flat-playlist -J \
+		--playlist-end "$limit" \
+		--extractor-args "youtubetab:approximate_date" \
+		"https://www.youtube.com/@${handle}/videos?view=0&sort=dd" 2>/dev/null) ||
+		die "Could not fetch channel: $handle"
 
-    local channel_name
-    channel_name=$(printf '%s' "$raw" | jq -r '.channel // .uploader // "@'"$handle"'"')
+	local channel_name
+	channel_name=$(printf '%s' "$raw" | jq -r '.channel // .uploader // "@'"$handle"'"')
 
-    printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
+	printf '%s' "$raw" | jq -r --arg ch "$channel_name" '
         .entries[]? |
         [
             (.id // ""),
@@ -350,24 +359,24 @@ fetch_channel() {
             (.timestamp // 0 | tostring)
         ] | @tsv
     ' 2>/dev/null | while IFS=$'\t' read -r id title secs ch views ts; do
-        [[ -z "$id" ]] && continue
-        display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
-        printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-            "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
-    done
+		[[ -z "$id" ]] && continue
+		display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
+		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+			"$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
+	done
 }
 
 # ---------------------------------------------------------------------------
 # Search
 # ---------------------------------------------------------------------------
 do_search() {
-    local query="$1"
-    local limit="${2:-$SEARCH_RESULTS}"
-    info "Searching: $query"
-    yt-dlp --flat-playlist -J \
-        --playlist-end "$limit" \
-        "ytsearch${limit}:${query}" 2>/dev/null |
-        jq -r '
+	local query="$1"
+	local limit="${2:-$SEARCH_RESULTS}"
+	info "Searching: $query"
+	yt-dlp --flat-playlist -J \
+		--playlist-end "$limit" \
+		"ytsearch${limit}:${query}" 2>/dev/null |
+		jq -r '
         .entries[]? |
         [
             (.id // ""),
@@ -378,11 +387,11 @@ do_search() {
             (.timestamp // 0 | tostring)
         ] | @tsv
     ' 2>/dev/null | while IFS=$'\t' read -r id title secs ch views ts; do
-        [[ -z "$id" ]] && continue
-        display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
-        printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-            "$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
-    done
+		[[ -z "$id" ]] && continue
+		display=$(fmt_display "$id" "$title" "$secs" "$ch" "$views" "$ts")
+		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+			"$id" "$title" "$secs" "$ch" "$views" "$ts" "$display"
+	done
 }
 
 # ---------------------------------------------------------------------------
@@ -390,12 +399,12 @@ do_search() {
 # TSV fields: id, title, duration_secs, channel, views, timestamp, display
 # ---------------------------------------------------------------------------
 fzf_pick() {
-    local header_label="${1:-Videos}"
-    local extra_expect="${2:-}"
+	local header_label="${1:-Videos}"
+	local extra_expect="${2:-}"
 
-    local preview_script
-    preview_script=$(
-        cat <<'PREVIEW'
+	local preview_script
+	preview_script=$(
+		cat <<'PREVIEW'
 line="$1"
 id=$(printf '%s' "$line" | cut -f1)
 title=$(printf '%s' "$line" | cut -f2)
@@ -484,208 +493,208 @@ echo ""
 echo ""
 printf "\033[2menter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download\033[0m\n"
 PREVIEW
-    )
+	)
 
-    local expect="ctrl-s,ctrl-w,ctrl-y,ctrl-o,ctrl-d"
-    [[ -n "$extra_expect" ]] && expect="${expect},${extra_expect}"
+	local expect="ctrl-s,ctrl-w,ctrl-y,ctrl-o,ctrl-d"
+	[[ -n "$extra_expect" ]] && expect="${expect},${extra_expect}"
 
-    fzf \
-        --ansi \
-        --no-sort \
-        --delimiter=$'\t' \
-        --with-nth=7 \
-        --header="$header_label" \
-        --preview="bash -c $(printf '%q' "$preview_script") -- {}" \
-        --preview-window="right:45%:wrap" \
-        --height=100% \
-        --layout=reverse \
-        --border=rounded \
-        --prompt="  " \
-        --pointer="▶" \
-        --bind="enter:accept" \
-        --expect="$expect"
+	fzf \
+		--ansi \
+		--no-sort \
+		--delimiter=$'\t' \
+		--with-nth=7 \
+		--header="$header_label" \
+		--preview="bash -c $(printf '%q' "$preview_script") -- {}" \
+		--preview-window="right:45%:wrap" \
+		--height=100% \
+		--layout=reverse \
+		--border=rounded \
+		--prompt="  " \
+		--pointer="▶" \
+		--bind="enter:accept" \
+		--expect="$expect"
 }
 
 # ---------------------------------------------------------------------------
 # Handle fzf selection result
 # ---------------------------------------------------------------------------
 _handle_pick() {
-    local result="$1"
-    local key line video_id title
-    key=$(printf '%s' "$result" | head -1)
-    line=$(printf '%s' "$result" | tail -1)
-    [[ -z "$line" ]] && return 0
-    video_id=$(printf '%s' "$line" | cut -f1)
-    title=$(printf '%s' "$line" | cut -f2)
-    case "$key" in
-    ctrl-s) summarize_video "$video_id" ;;
-    ctrl-w)
-        ensure_dirs
-        printf '%s\n' "$line" >>"$YTUI_WATCHLATER_FILE"
-        ok "Added to watch later: $title"
-        ;;
-    ctrl-y)
-        video_url "$video_id" | pbcopy
-        ok "Copied: $(video_url "$video_id")"
-        ;;
-    ctrl-o) open "$(video_url "$video_id")" ;;
-    ctrl-d) download_and_play "$video_id" "$title" ;;
-    *) play_video "$video_id" ;;
-    esac
+	local result="$1"
+	local key line video_id title
+	key=$(printf '%s' "$result" | head -1)
+	line=$(printf '%s' "$result" | tail -1)
+	[[ -z "$line" ]] && return 0
+	video_id=$(printf '%s' "$line" | cut -f1)
+	title=$(printf '%s' "$line" | cut -f2)
+	case "$key" in
+	ctrl-s) summarize_video "$video_id" ;;
+	ctrl-w)
+		ensure_dirs
+		printf '%s\n' "$line" >>"$YTUI_WATCHLATER_FILE"
+		ok "Added to watch later: $title"
+		;;
+	ctrl-y)
+		video_url "$video_id" | pbcopy
+		ok "Copied: $(video_url "$video_id")"
+		;;
+	ctrl-o) open "$(video_url "$video_id")" ;;
+	ctrl-d) download_and_play "$video_id" "$title" ;;
+	*) play_video "$video_id" ;;
+	esac
 }
 
 # ---------------------------------------------------------------------------
 # Main picker loop
 # ---------------------------------------------------------------------------
 run_picker() {
-    local source_tsv="$1"
-    local label="${2:-Videos}"
-    [[ ! -f "$source_tsv" || ! -s "$source_tsv" ]] &&
-        die "No videos to show. Run: ytui refresh"
-    while true; do
-        local result
-        result=$(fzf_pick "$label" <"$source_tsv") || return 0
-        _handle_pick "$result"
-        [[ "$YTUI_LOOP" != "1" ]] && return 0
-    done
+	local source_tsv="$1"
+	local label="${2:-Videos}"
+	[[ ! -f "$source_tsv" || ! -s "$source_tsv" ]] &&
+		die "No videos to show. Run: ytui refresh"
+	while true; do
+		local result
+		result=$(fzf_pick "$label" <"$source_tsv") || return 0
+		_handle_pick "$result"
+		[[ "$YTUI_LOOP" != "1" ]] && return 0
+	done
 }
 
 # ---------------------------------------------------------------------------
 # Subcommands
 # ---------------------------------------------------------------------------
 cmd_feed() {
-    ensure_dirs
-    if [[ ! -f "$YTUI_FEED_CACHE" || ! -s "$YTUI_FEED_CACHE" ]]; then
-        info "Feed cache empty. Refreshing..."
-        refresh_feed
-    fi
-    # If cache is missing the display column (old format), refresh it
-    local fields
-    fields=$(head -1 "$YTUI_FEED_CACHE" | awk -F'\t' '{print NF}')
-    if [[ "$fields" -lt 7 ]]; then
-        info "Feed cache outdated format, refreshing..."
-        refresh_feed
-    fi
-    run_picker "$YTUI_FEED_CACHE" "Feed  |  enter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download"
+	ensure_dirs
+	if [[ ! -f "$YTUI_FEED_CACHE" || ! -s "$YTUI_FEED_CACHE" ]]; then
+		info "Feed cache empty. Refreshing..."
+		refresh_feed
+	fi
+	# If cache is missing the display column (old format), refresh it
+	local fields
+	fields=$(head -1 "$YTUI_FEED_CACHE" | awk -F'\t' '{print NF}')
+	if [[ "$fields" -lt 7 ]]; then
+		info "Feed cache outdated format, refreshing..."
+		refresh_feed
+	fi
+	run_picker "$YTUI_FEED_CACHE" "Feed  |  enter:play  C-s:summarize  C-w:watch-later  C-y:copy  C-o:browser  C-d:download"
 }
 
 cmd_search() {
-    local query="${*:-}"
-    if [[ -z "$query" ]]; then
-        printf "Search query: " >&2
-        read -r query
-        [[ -z "$query" ]] && return 0
-    fi
-    ensure_dirs
-    local limit=$SEARCH_RESULTS
-    while true; do
-        local tmp_results
-        tmp_results=$(mktemp)
-        do_search "$query" "$limit" >"$tmp_results"
-        local result
-        result=$(fzf_pick "Search: $query  [C-n: load more]" "ctrl-n" <"$tmp_results")
-        local fzf_exit=$?
-        rm -f "$tmp_results"
-        [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
-        local key
-        key=$(printf '%s' "$result" | head -1)
-        if [[ "$key" == "ctrl-n" ]]; then
-            limit=$((limit + SEARCH_RESULTS))
-            info "Loading $limit results..."
-            continue
-        fi
-        [[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
-        _handle_pick "$result"
-        break
-    done
+	local query="${*:-}"
+	if [[ -z "$query" ]]; then
+		printf "Search query: " >&2
+		read -r query
+		[[ -z "$query" ]] && return 0
+	fi
+	ensure_dirs
+	local limit=$SEARCH_RESULTS
+	while true; do
+		local tmp_results
+		tmp_results=$(mktemp)
+		do_search "$query" "$limit" >"$tmp_results"
+		local result
+		result=$(fzf_pick "Search: $query  [C-n: load more]" "ctrl-n" <"$tmp_results")
+		local fzf_exit=$?
+		rm -f "$tmp_results"
+		[[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
+		local key
+		key=$(printf '%s' "$result" | head -1)
+		if [[ "$key" == "ctrl-n" ]]; then
+			limit=$((limit + SEARCH_RESULTS))
+			info "Loading $limit results..."
+			continue
+		fi
+		[[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
+		_handle_pick "$result"
+		break
+	done
 }
 
 cmd_watch_later() {
-    ensure_dirs
-    if [[ ! -f "$YTUI_WATCHLATER_FILE" || ! -s "$YTUI_WATCHLATER_FILE" ]]; then
-        warn "Watch later list is empty."
-        printf "Add a video with: ytui add <url>\n"
-        return 0
-    fi
-    run_picker "$YTUI_WATCHLATER_FILE" "Watch Later  |  enter:play  C-s:summarize  C-y:copy  C-o:browser  C-d:download"
+	ensure_dirs
+	if [[ ! -f "$YTUI_WATCHLATER_FILE" || ! -s "$YTUI_WATCHLATER_FILE" ]]; then
+		warn "Watch later list is empty."
+		printf "Add a video with: ytui add <url>\n"
+		return 0
+	fi
+	run_picker "$YTUI_WATCHLATER_FILE" "Watch Later  |  enter:play  C-s:summarize  C-y:copy  C-o:browser  C-d:download"
 }
 
 cmd_channel() {
-    local handle="${1:-}"
-    if [[ -z "$handle" ]]; then
-        [[ -f "$YTUI_SUBS_FILE" ]] || die "No subscriptions. Add one with: ytui subs add @handle"
-        local chosen
-        chosen=$(subs_list | fzf --prompt="Channel: " --height=40% --layout=reverse --border=rounded) || return 0
-        handle=$(printf '%s' "$chosen" | awk '{print $NF}')
-        [[ -z "$handle" ]] && return 0
-    fi
-    ensure_dirs
-    local limit=$CHANNEL_VIDEOS
-    while true; do
-        local tmp_results
-        tmp_results=$(mktemp)
-        fetch_channel "$handle" "$limit" >"$tmp_results"
-        local result
-        result=$(fzf_pick "Channel: ${handle#@}  [C-n: load more  C-f: search]" "ctrl-n,ctrl-f" <"$tmp_results")
-        local fzf_exit=$?
-        rm -f "$tmp_results"
-        [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
-        local key
-        key=$(printf '%s' "$result" | head -1)
-        if [[ "$key" == "ctrl-n" ]]; then
-            limit=$((limit + CHANNEL_VIDEOS))
-            info "Loading $limit videos..."
-            continue
-        fi
-        if [[ "$key" == "ctrl-f" ]]; then
-            printf "Search in channel @%s: " "${handle#@}" >&2
-            local search_query
-            read -r search_query
-            [[ -z "$search_query" ]] && continue
-            local tmp_search
-            tmp_search=$(mktemp)
-            do_search "$search_query in:@${handle#@}" "$SEARCH_RESULTS" >"$tmp_search"
-            local sresult
-            sresult=$(fzf_pick "Search '@${handle#@}': $search_query" "" <"$tmp_search") || {
-                rm -f "$tmp_search"
-                continue
-            }
-            rm -f "$tmp_search"
-            [[ -z "$(printf '%s' "$sresult" | tail -1)" ]] && continue
-            _handle_pick "$sresult"
-            break
-        fi
-        [[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
-        _handle_pick "$result"
-        break
-    done
+	local handle="${1:-}"
+	if [[ -z "$handle" ]]; then
+		[[ -f "$YTUI_SUBS_FILE" ]] || die "No subscriptions. Add one with: ytui subs add @handle"
+		local chosen
+		chosen=$(subs_list | fzf --prompt="Channel: " --height=40% --layout=reverse --border=rounded) || return 0
+		handle=$(printf '%s' "$chosen" | awk '{print $NF}')
+		[[ -z "$handle" ]] && return 0
+	fi
+	ensure_dirs
+	local limit=$CHANNEL_VIDEOS
+	while true; do
+		local tmp_results
+		tmp_results=$(mktemp)
+		fetch_channel "$handle" "$limit" >"$tmp_results"
+		local result
+		result=$(fzf_pick "Channel: ${handle#@}  [C-n: load more  C-f: search]" "ctrl-n,ctrl-f" <"$tmp_results")
+		local fzf_exit=$?
+		rm -f "$tmp_results"
+		[[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
+		local key
+		key=$(printf '%s' "$result" | head -1)
+		if [[ "$key" == "ctrl-n" ]]; then
+			limit=$((limit + CHANNEL_VIDEOS))
+			info "Loading $limit videos..."
+			continue
+		fi
+		if [[ "$key" == "ctrl-f" ]]; then
+			printf "Search in channel @%s: " "${handle#@}" >&2
+			local search_query
+			read -r search_query
+			[[ -z "$search_query" ]] && continue
+			local tmp_search
+			tmp_search=$(mktemp)
+			do_search "$search_query in:@${handle#@}" "$SEARCH_RESULTS" >"$tmp_search"
+			local sresult
+			sresult=$(fzf_pick "Search '@${handle#@}': $search_query" "" <"$tmp_search") || {
+				rm -f "$tmp_search"
+				continue
+			}
+			rm -f "$tmp_search"
+			[[ -z "$(printf '%s' "$sresult" | tail -1)" ]] && continue
+			_handle_pick "$sresult"
+			break
+		fi
+		[[ -z "$(printf '%s' "$result" | tail -1)" ]] && return 0
+		_handle_pick "$result"
+		break
+	done
 }
 
 cmd_add() {
-    local url="${1:-}"
-    [[ -z "$url" ]] && die "Usage: ytui add <url>"
-    ensure_dirs
-    watchlater_add "$url"
+	local url="${1:-}"
+	[[ -z "$url" ]] && die "Usage: ytui add <url>"
+	ensure_dirs
+	watchlater_add "$url"
 }
 
 cmd_refresh() {
-    ensure_dirs
-    refresh_feed
+	ensure_dirs
+	refresh_feed
 }
 
 cmd_subs() {
-    local sub_cmd="${1:-list}"
-    shift || true
-    case "$sub_cmd" in
-    add) subs_add "${1:-}" ;;
-    remove) subs_remove "${1:-}" ;;
-    list) subs_list ;;
-    *) die "Usage: ytui subs [add|remove|list]" ;;
-    esac
+	local sub_cmd="${1:-list}"
+	shift || true
+	case "$sub_cmd" in
+	add) subs_add "${1:-}" ;;
+	remove) subs_remove "${1:-}" ;;
+	list) subs_list ;;
+	*) die "Usage: ytui subs [add|remove|list]" ;;
+	esac
 }
 
 cmd_help() {
-    cat <<EOF
+	cat <<EOF
 ytui — privacy-focused YouTube TUI
 
 Usage:
