@@ -32,26 +32,10 @@ then
     cache_enabled = false,
   }
 
--- SSH/remote: OSC 52 across the tunnel. Copy writes to local terminal
--- (Ghostty -> macOS pbcopy). Paste sends a read request back to local Ghostty.
+-- SSH/remote: OSC 52 across the tunnel. Nvim must write the escape sequence
+-- directly to its UI; an external clipboard command's stdout is captured by Nvim.
 elseif is_ssh then
-  -- Copy: stdin -> base64 -> OSC 52 escape via xargs printf (proven to work)
-  local osc_copy = {
-    "bash", "-c",
-    [[python3 -c 'import sys,base64; sys.stdout.write(base64.b64encode(sys.stdin.read().encode()).decode())' | xargs -I{} printf "\033]52;c;{}\a" ]],
-  }
-
-  -- Paste: send OSC 52 read request, decode Ghostty response
-  local osc_paste = {
-    "bash", "-c",
-    [[printf "\033]52;c;?\a" && read -r -t 3 LINE < /dev/tty && echo "${LINE#*c;}" | base64 -d 2>/dev/null]],
-  }
-
-  vim.g.clipboard = {
-    name = "osc52",
-    copy = { ["+"] = osc_copy, ["*"] = osc_copy },
-    paste = { ["+"] = osc_paste, ["*"] = osc_paste },
-  }
+  vim.g.clipboard = "osc52"
 
 -- Local macOS: native clipboard.
 elseif is_mac then
