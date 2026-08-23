@@ -22,7 +22,12 @@ vim.keymap.set("n", "<M-Up>", ":m -2<cr>==", { desc = "Move line up" })
 vim.keymap.set("v", "<M-Up>", ":m '>+<cr>gv=gv", { desc = "Move selection down" })
 vim.keymap.set("v", "<M-Down>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
 
--- Deletes → register "d" (paste with P), never system clipboard. Yanks go to clipboard provider.
+-- Deletes → register "d" (paste with P), never system clipboard.
+-- Explicitly target + for yanks: the configured provider sends OSC 52 over SSH.
+local clipboard_yank_opts = { noremap = true, silent = true }
+vim.keymap.set({ "n", "x" }, "y", '"+y', clipboard_yank_opts)
+vim.keymap.set("n", "Y", '"+Y', clipboard_yank_opts)
+
 local delete_map_opts = { noremap = true, silent = true }
 local delete_maps = {
   { "n", "d", '"_d' },
