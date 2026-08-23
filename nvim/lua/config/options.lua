@@ -17,7 +17,10 @@ vim.opt.autoindent = true -- Copy indent from current line when starting a new l
 local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
 local is_ssh = vim.env.SSH_TTY ~= nil or vim.env.SSH_CONNECTION ~= nil
-vim.g.is_homelab = is_linux and is_ssh
+-- Herdr keeps B-side panes alive independently of the SSH client, so those
+-- processes do not retain SSH_CONNECTION. Their terminal clipboard is still A.
+local use_osc52 = is_ssh or vim.env.HERDR_ENV == "1"
+vim.g.is_homelab = is_linux and use_osc52
 
 -- Termux: tablet SSH usage
 if
@@ -34,7 +37,7 @@ then
 
 -- SSH/remote: OSC 52 across the tunnel. Nvim must write the escape sequence
 -- directly to its UI; an external clipboard command's stdout is captured by Nvim.
-elseif is_ssh then
+elseif use_osc52 then
   vim.g.clipboard = "osc52"
 
 -- Local macOS: native clipboard.
