@@ -190,7 +190,7 @@ prompt_precmd() {
         PROMPT_LAST_DURATION=''
     fi
 
-    RPROMPT="$(prompt_build_right "$last_status")"
+    RPROMPT=''
     print ""
 }
 
