@@ -5,7 +5,8 @@ alias ahl="atuin history list"
 alias cat=bat
 alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
-alias d="zi"
+alias g="zi"
+alias d="z"
 alias zo="cd \$(zoxide query -i)"
 alias ls="eza --icons=always -s=time -la"
 alias yz=yazi
