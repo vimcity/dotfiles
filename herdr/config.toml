@@ -18,7 +18,7 @@ surface_dim = "#292c3c"
 overlay0 = "#626880"
 text = "#c6d0f5"
 subtext0 = "#a5adce"
-accent = "#bd93f9"
+accent = "#89b4fa"
 
 [keys]
 prefix = "ctrl+space"
@@ -89,8 +89,8 @@ description = "open floating shell"
 
 [[keys.command]]
 key = "prefix+ctrl+n"
-type = "shell"
-command = "$HOME/dotfiles/herdr/scripts/project-nvim.sh"
+type = "pane"
+command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim"
 description = "open Neovim in a Projects tab"
 
 [[keys.command]]
