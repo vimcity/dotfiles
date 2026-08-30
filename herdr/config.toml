@@ -229,7 +229,7 @@ description = "open today's org agenda"
 [[keys.command]]
 key = "prefix+shift+o"
 type = "popup"
-command = "exec $HOME/dotfiles/herdr/scripts/org-note-popup.sh"
+command = "exec $HOME/dotfiles/herdr/scripts/org-plans.sh"
 width = "85%"
 height = "80%"
 description = "create new org plans"
