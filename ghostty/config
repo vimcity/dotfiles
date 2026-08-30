@@ -12,6 +12,11 @@ mouse-hide-while-typing = true
 # Font settings
 font-feature = -calt
 # font-family = "CommitMono"
+# font-family = "FiraCode Nerd Font"
+# font-family = "GoogleSansCode Nerd Font"
+# font-family = "Hack Nerd Font"
+# font-family = "Reddit Mono"
+
 adjust-cell-height = 0%
 # font-family = "FiraCode Nerd Font"
 # adjust-cell-height = 40%

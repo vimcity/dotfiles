@@ -27,6 +27,7 @@ YTUI_SUBS_FILE="$YTUI_CONFIG_DIR/subscriptions.tsv"
 YTUI_WATCHLATER_FILE="$YTUI_CONFIG_DIR/watch-later.tsv"
 YTUI_FEED_CACHE="$YTUI_CACHE_DIR/feed.tsv"
 YTUI_THUMB_CACHE="$YTUI_CACHE_DIR/thumbnails"
+YTUI_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 FEED_VIDEOS_PER_CHANNEL=15 # how many recent videos to fetch per channel on refresh
 SEARCH_RESULTS=30          # max search results
@@ -36,6 +37,7 @@ YTUI_LOOP=1                # reopen same picker after playback/selection
 # aria2c flags for yt-dlp downloads
 # -x 16 = 16 connections per server, -s 16 = 16 splits, -k 1M = 1MiB chunk
 YTDLP_ARIA2_FLAGS=(--downloader aria2c --downloader-args "aria2c:-x 16 -s 16 -k 1M" --throttled-rate 100K --concurrent-fragments 5)
+YTUI_FORMAT="${YTUI_FORMAT:-bestvideo[height<=1080]+bestaudio/best}"
 
 # Colors (for non-fzf output)
 RED='\033[0;31m'
@@ -101,8 +103,15 @@ fmt_display() {
 	ch_display=$(printf '%-20.20s' "$channel")
 
 	# ANSI: dim date, green channel, yellow duration, normal title
-	printf '\033[2m%s\033[0m  \033[32m%s\033[0m  \033[33m%7s\033[0m  %s' \
-		"$date_str" "$ch_display" "$dur" "$title"
+	local views_str=""
+	if [[ -n "$views" && "$views" != "0" ]]; then
+		if ((views >= 1000000)); then views_str=$(printf '%.1fM' "$(awk "BEGIN {print $views/1000000}")")
+		elif ((views >= 1000)); then views_str=$(printf '%.0fK' "$(awk "BEGIN {print $views/1000}")")
+		else views_str="$views"
+		fi
+	fi
+	printf '\033[2m%s\033[0m  \033[32m%s\033[0m  \033[33m%7s\033[0m  \033[2m%8s views\033[0m  %s' \
+		"$date_str" "$ch_display" "$dur" "$views_str" "$title"
 }
 
 # Build the video URL from an id
@@ -117,11 +126,12 @@ play_video() {
 	url=$(video_url "$video_id")
 	info "Playing $url"
 	if command -v mpv &>/dev/null; then
-		mpv --ytdl-format="bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
-			--demuxer-max-bytes=150MiB \
-			--demuxer-readahead-secs=60 \
+		mpv --ytdl-format="$YTUI_FORMAT" \
+			--demuxer-max-bytes=64MiB \
+			--demuxer-readahead-secs=30 \
 			--cache=yes \
-			--cache-pause-wait=3 \
+			--cache-pause=no \
+			--network-timeout=10 \
 			--no-terminal \
 			--script-opts=ytdl_hook-ytdl_path=/opt/homebrew/bin/yt-dlp \
 			"$url" &
@@ -145,7 +155,7 @@ download_and_play() {
 	local downloaded
 	downloaded=$(yt-dlp \
 		"${YTDLP_ARIA2_FLAGS[@]}" \
-		--format "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[acodec^=mp4a]/bestvideo[height<=1080]+bestaudio/best" \
+		--format "$YTUI_FORMAT" \
 		--merge-output-format mp4 \
 		--output "$outfile" \
 		--print after_move:filepath "$url" 2>/dev/null)
@@ -191,6 +201,10 @@ watchlater_add() {
 		video_id="$url"
 	else
 		die "Cannot parse video ID from: $url"
+	fi
+	if grep -q "^${video_id}[[:space:]]" "$YTUI_WATCHLATER_FILE" 2>/dev/null; then
+		warn "Already in watch later: $video_id"
+		return 0
 	fi
 
 	info "Fetching video metadata..."
@@ -530,8 +544,13 @@ _handle_pick() {
 	ctrl-s) summarize_video "$video_id" ;;
 	ctrl-w)
 		ensure_dirs
-		printf '%s\n' "$line" >>"$YTUI_WATCHLATER_FILE"
-		ok "Added to watch later: $title"
+		ensure_dirs
+		if grep -q "^${video_id}[[:space:]]" "$YTUI_WATCHLATER_FILE" 2>/dev/null; then
+			warn "Already in watch later: $title"
+		else
+			printf '%s\n' "$line" >>"$YTUI_WATCHLATER_FILE"
+			ok "Added to watch later: $title"
+		fi
 		;;
 	ctrl-y)
 		video_url "$video_id" | pbcopy
@@ -592,8 +611,12 @@ cmd_search() {
 		tmp_results=$(mktemp)
 		do_search "$query" "$limit" >"$tmp_results"
 		local result
-		result=$(fzf_pick "Search: $query  [C-n: load more]" "ctrl-n" <"$tmp_results")
-		local fzf_exit=$?
+		local fzf_exit=0
+		if result=$(fzf_pick "Search: $query  [C-n: load more]" "ctrl-n" <"$tmp_results"); then
+			:
+		else
+			fzf_exit=$?
+		fi
 		rm -f "$tmp_results"
 		[[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
 		local key
@@ -635,8 +658,12 @@ cmd_channel() {
 		tmp_results=$(mktemp)
 		fetch_channel "$handle" "$limit" >"$tmp_results"
 		local result
-		result=$(fzf_pick "Channel: ${handle#@}  [C-n: load more  C-f: search]" "ctrl-n,ctrl-f" <"$tmp_results")
-		local fzf_exit=$?
+		local fzf_exit=0
+		if result=$(fzf_pick "Channel: ${handle#@}  [C-n: load more  C-f: search]" "ctrl-n,ctrl-f" <"$tmp_results"); then
+			:
+		else
+			fzf_exit=$?
+		fi
 		rm -f "$tmp_results"
 		[[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]] && return 0
 		local key
@@ -693,6 +720,28 @@ cmd_subs() {
 	esac
 }
 
+cmd_sync() {
+	local subcommand="${1:-}"
+	shift || true
+	case "$subcommand" in
+		subs|subscriptions) "$YTUI_BIN_DIR/ytui-sync" subs "${1:-}" ;;
+		watch-later|wl) "$YTUI_BIN_DIR/ytui-sync" watch-later "${1:-}" ;;
+		*) die "Usage: ytui sync subs|watch-later COOKIES_FILE" ;;
+	esac
+}
+
+cmd_export() {
+	case "${1:-watch-later}" in
+		watch-later|wl) "$YTUI_BIN_DIR/ytui-sync" export dummy ;;
+		*) die "Usage: ytui export watch-later" ;;
+	esac
+}
+
+cmd_import() {
+	[[ "${1:-}" == "watch-later" && -n "${2:-}" ]] || die "Usage: ytui import watch-later FILE"
+	"$YTUI_BIN_DIR/ytui-sync" import "$2"
+}
+
 cmd_help() {
 	cat <<EOF
 ytui — privacy-focused YouTube TUI
@@ -705,6 +754,10 @@ Usage:
   ytui channel <@handle>      browse a channel
   ytui add <url>              add video to watch later
   ytui refresh                refresh feed cache
+  ytui sync subs COOKIES      sync authenticated subscriptions
+  ytui sync watch-later COOKIES  sync authenticated Watch Later
+  ytui export watch-later    print Watch Later URLs
+  ytui import watch-later FILE  import URLs
   ytui subs                   list subscriptions
   ytui subs add <@handle>     subscribe to a channel
   ytui subs remove <handle>   unsubscribe
@@ -718,6 +771,11 @@ Picker keys:
   Ctrl-O      open in browser
   Ctrl-D      download then play in mpv
   Ctrl-N      load more results (search/channel)
+
+Sync:
+  ytui sync subs COOKIES
+  ytui sync watch-later COOKIES
+  ytui export watch-later > watch-later.txt
 
 Behavior:
   Loop        return to same list after selection/playback
@@ -742,6 +800,9 @@ watch-later | wl) cmd_watch_later ;;
 channel | c) cmd_channel "${1:-}" ;;
 add) cmd_add "${1:-}" ;;
 refresh | r) cmd_refresh ;;
+sync) cmd_sync "$@" ;;
+export) cmd_export "$@" ;;
+import) cmd_import "$@" ;;
 subs | sub) cmd_subs "$@" ;;
 help | --help | -h) cmd_help ;;
 *) die "Unknown command: $cmd. Run: ytui help" ;;

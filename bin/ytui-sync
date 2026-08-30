@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Authenticated YouTube sync/export helpers for ytui.
+set -euo pipefail
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ytui"
+SUBS="$CONFIG_DIR/subscriptions.tsv"
+WATCH="$CONFIG_DIR/watch-later.tsv"
+usage() { echo "Usage: ytui-sync subs|watch-later|export|import --cookies FILE|FILE" >&2; exit 2; }
+require() { command -v "$1" >/dev/null || { echo "error: $1 is required" >&2; exit 1; }; }
+[[ $# -ge 2 ]] || usage
+cmd="$1"; input="$2"; mkdir -p "$CONFIG_DIR"; require yt-dlp; require jq
+case "$cmd" in
+  subs)
+    [[ -f "$input" ]] || { echo "error: cookies file not found: $input" >&2; exit 1; }
+    tmp=$(mktemp)
+    yt-dlp --flat-playlist -j --no-warnings --cookies "$input" \
+      'https://www.youtube.com/feed/subscriptions' 2>/dev/null |
+      jq -r '[.channel_id // .uploader_id // "", .channel // .uploader // "", ((.channel_url // "") | sub(".*/@"; ""))] | @tsv' |
+      awk -F '\t' 'NF >= 2 && $1 != "" { key=$1; row[key]=$0 } END { for (key in row) print row[key] }' | sort -t$'\t' -k2 >"$tmp"
+    [[ -s "$tmp" ]] || { rm -f "$tmp"; echo "error: no subscriptions found" >&2; exit 1; }
+    { echo -e "# channel_id\tchannel_name\thandle"; cat "$tmp"; } >"$SUBS.tmp"; mv "$SUBS.tmp" "$SUBS"; rm -f "$tmp"
+    echo "Synced $(grep -vc '^#' "$SUBS") subscriptions to $SUBS" ;;
+  watch-later)
+    [[ -f "$input" ]] || { echo "error: cookies file not found: $input" >&2; exit 1; }
+    tmp=$(mktemp)
+    yt-dlp --flat-playlist -J --no-warnings --cookies "$input" \
+      'https://www.youtube.com/playlist?list=WL' 2>/dev/null |
+      jq -r '.entries[]? | [(.id//""),(.title//"Unknown"),(.duration//0|floor|tostring),(.channel//.uploader//"Unknown"),(.view_count//0|tostring),(.timestamp//0|tostring),""] | @tsv' >"$tmp"
+    [[ -s "$tmp" ]] || { rm -f "$tmp"; echo "error: Watch Later is empty or cookies are invalid" >&2; exit 1; }
+    awk -F '\t' '!seen[$1]++' "$tmp" >"$WATCH.tmp"; mv "$WATCH.tmp" "$WATCH"; rm -f "$tmp"
+    echo "Synced $(wc -l < "$WATCH" | tr -d ' ') Watch Later entries to $WATCH" ;;
+  export)
+    [[ -f "$WATCH" ]] || { echo "error: no watch-later file" >&2; exit 1; }
+    cut -f1 "$WATCH" | awk 'length($0)==11 { print "https://www.youtube.com/watch?v=" $0 }' ;;
+  import)
+    [[ -f "$input" ]] || { echo "error: file not found: $input" >&2; exit 1; }
+    while IFS= read -r url; do [[ -z "$url" || "$url" == \#* ]] && continue; "$0" add "$url"; done <"$input" ;;
+  add)
+    id=$(printf '%s' "$input" | sed -nE 's#.*([?&]v=|youtu\.be/)([A-Za-z0-9_-]{11}).*#\2#p'); [[ -n "$id" ]] || { echo "error: invalid URL: $input" >&2; exit 1; }
+    grep -q "^$id[[:space:]]" "$WATCH" 2>/dev/null || printf '%s\tImported\t0\tUnknown\t0\t0\t\n' "$id" >>"$WATCH" ;;
+  *) usage;;
+esac
