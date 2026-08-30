@@ -22,17 +22,16 @@
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
-    "npm:pi-lens",
     "npm:pi-web-access"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "low",
   "editorPaddingX": 1,
   "terminal": {
     "showTerminalProgress": true
   },
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "showHardwareCursor": false,
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna"
