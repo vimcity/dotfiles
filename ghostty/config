@@ -9,6 +9,14 @@ window-step-resize = true
 window-save-state = always
 mouse-hide-while-typing = true
 
+# Icons
+# macos-icon = custom
+# macos-custom-icon = ~/.config/ghostty/cat-ghostty.icns
+# macos-icon = retro
+# macos-icon = glass
+# macos-icon = holographic
+macos-icon = xray
+
 # Font settings
 font-feature = -calt
 # font-family = "CommitMono"
@@ -18,7 +26,6 @@ font-feature = -calt
 # font-family = "Reddit Mono"
 
 adjust-cell-height = 0%
-# font-family = "FiraCode Nerd Font"
 # adjust-cell-height = 40%
 # adjust-cell-height = 10%
 font-size = 16
