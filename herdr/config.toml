@@ -18,18 +18,18 @@ surface_dim = "#292c3c"
 overlay0 = "#626880"
 text = "#c6d0f5"
 subtext0 = "#a5adce"
-accent = "#89b4fa"
+accent = "#91a4fa"
 
 [keys]
 prefix = "ctrl+space"
 
 settings = "prefix+shift+s"
 reload_config = "prefix+,"
-toggle_sidebar = "prefix+e"
+toggle_sidebar = "alt+e"
 detach = "prefix+d"
 help = "prefix+?"
 workspace_picker = "prefix+q"
-goto = "prefix+ctrl+f"
+goto = "ctrl+f"
 edit_scrollback = ""
 resize_mode = "prefix+ctrl+z"
 new_worktree = "prefix+shift+w"
@@ -48,7 +48,7 @@ close_tab = "prefix+w"
 split_vertical = "prefix+v"
 split_horizontal = ["prefix+s", "prefix+minus"]
 close_pane = "prefix+x"
-zoom = "prefix+z"
+zoom = "alt+z"
 copy_mode = "prefix+b"
 
 # Pane focus is handled by the cross-pane Ctrl+h/j/k/l bindings below.
@@ -152,8 +152,8 @@ description = "review PRs in a floating popup"
 [[keys.command]]
 key = "prefix+shift+g"
 type = "pane"
-command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"${GH_PR_DASH_BIN:-$HOME/.local/bin/gh-pr-dash}\""
-description = "open gh-pr-dash PR dashboard"
+command = "exec lazygit"
+description = "open lazyzgit"
 
 [[keys.command]]
 key = "prefix+shift+t"
@@ -206,8 +206,8 @@ description = "open or create an org todo"
 [[keys.command]]
 key = "prefix+ctrl+c"
 type = "pane"
-command = "exec codex --yolo"
-description = "open codex"
+command = "exec fluence pick"
+description = "open confluence docs"
 
 # TODO: understand the use cases of this better, also herdr api for interacting with agents could replace the codex pi and this one 
 [[keys.command]]
@@ -289,7 +289,7 @@ sidebar_max_width = 44
 [ui.sidebar.agents]
 row_gap = 1
 rows = [
-  ["state_icon", "state_text", { token = "agent", fg = "#f2d5cf", bold = true }],
+  ["state_icon", "state_text", { token = "agent", fg = "#ca9ee6", bold = true }],
   [{ token = "workspace", fg = "#c6d0f5" }, { token = "tab", fg = "#babbf1" }],
 ]
 

@@ -13,7 +13,8 @@ define_catppuccin_theme() {
         # Main segments
         [user_bg]="#414559"
         [user_fg]="#c6d0f5"
-        [dir_bg]="#7287fd"
+        # [dir_bg]="#7287fd"
+        [dir_bg]="#91a4fa"
         [dir_fg]="#303446"
         [git_bg]="#292c3c"
         [git_fg]="#bd93f9"
