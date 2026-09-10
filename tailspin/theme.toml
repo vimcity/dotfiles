@@ -14,6 +14,16 @@ words = [
 ]
 style = { fg = "red", bold = true }
 
+# Keep UUIDs visually stable instead of coloring each hex digit and separator separately.
+[[regexes]]
+regex = '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b'
+style = { fg = "bright_yellow" }
+
+# Highlight fully-qualified Java classes such as com.example.orders.OrderService.
+[[regexes]]
+regex = '\b(?:[a-z_][A-Za-z0-9_$]*\.)+[A-Z][A-Za-z0-9_$]*(?:\$[A-Z][A-Za-z0-9_$]*)*\b'
+style = { fg = "cyan" }
+
 [[regexes]]
 regex = '\b([A-Za-z0-9_.$]+Exception)\b'
 style = { fg = "red", bold = true }

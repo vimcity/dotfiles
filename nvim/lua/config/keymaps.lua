@@ -74,7 +74,15 @@ vim.keymap.set("n", "<leader>fp", function()
 
   Snacks.picker.projects({
     dev = { projects_dir, dotfiles_dir },
-    recent = false, -- Show all projects, not just recently visited
+    recent = false,
+    on_confirm = function(entry)
+      if entry and entry.file then
+        local stat = vim.loop.fs_stat(entry.file)
+        if stat and stat.type == "directory" then
+          pcall(vim.cmd, "cd " .. entry.file)
+        end
+      end
+    end,
     -- Simple finder: just list all directories in Projects
     finder = function(opts, ctx)
       local dev_dirs = type(opts.dev) == "string" and { opts.dev } or opts.dev or {}

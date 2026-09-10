@@ -62,6 +62,28 @@ return {
     opts.dashboard.preset = opts.dashboard.preset or {}
     opts.dashboard.preset.header = header
 
+    -- Dashboard "c" key opens files from dotfiles instead of nvim config
+    local dotfiles_dir = vim.fn.expand("~/dotfiles")
+    if type(opts.dashboard.preset.keys) == "table" then
+      local found = false
+      for _, k in ipairs(opts.dashboard.preset.keys) do
+        if type(k) == "table" and k.key == "c" then
+          -- Snacks preset keys use { icon, key, desc, action } format
+          k.action = ":lua Snacks.dashboard.pick('files', {cwd = '" .. dotfiles_dir .. "'})"
+          found = true
+          break
+        end
+      end
+      if not found then
+        table.insert(opts.dashboard.preset.keys, {
+          icon = " ",
+          key = "c",
+          desc = "Config",
+          action = ":lua Snacks.dashboard.pick('files', {cwd = '" .. dotfiles_dir .. "'})",
+        })
+      end
+    end
+
     -- Picker configuration (primary navigation tool)
     opts.picker = vim.tbl_deep_extend("force", opts.picker or {}, {
       show_delay = 0,
