@@ -18,11 +18,13 @@
       "maxRetryDelayMs": 15000
     }
   },
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.84.4",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-lens",
+    "npm:@narumitw/pi-goal"
   ],
   "theme": "catppuccin-frappe",
   "outputPad": 1,
@@ -31,7 +33,7 @@
   "terminal": {
     "showTerminalProgress": true
   },
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "showHardwareCursor": false,
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna"

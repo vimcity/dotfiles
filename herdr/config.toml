@@ -29,7 +29,7 @@ toggle_sidebar = "alt+e"
 detach = "prefix+d"
 help = "prefix+?"
 workspace_picker = "prefix+q"
-goto = "ctrl+f"
+goto = "prefix+o"
 edit_scrollback = ""
 resize_mode = "prefix+ctrl+z"
 new_worktree = "prefix+shift+w"
@@ -118,7 +118,7 @@ command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh d
 description = "navigate down across Neovim splits and Herdr panes"
 
 [[keys.command]]
-key = "ctrl+k"
+key = "prefix+up"
 type = "shell"
 command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh up"
 description = "navigate up across Neovim splits and Herdr panes"
@@ -130,14 +130,11 @@ command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh r
 description = "navigate right across Neovim splits and Herdr panes"
 
 # Floating popups
-# TODO: change this to open pi new sesison in the projects dir 
 [[keys.command]]
 key = "prefix+shift+p"
-type = "popup"
-command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"$HOME/dotfiles/bin/ghprs\" review"
-width = "72%"
-height = "65%"
-description = "review PRs in a floating popup"
+type = "pane"
+command = "exec $HOME/.local/bin/gh-pr-dash"
+description = "review PRs"
 
 # TODO: remove this and have navidrome music be launched in a bg pane in a space or somethign for music 
 [[keys.command]]
