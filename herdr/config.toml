@@ -118,7 +118,7 @@ command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh d
 description = "navigate down across Neovim splits and Herdr panes"
 
 [[keys.command]]
-key = "prefix+up"
+key = "ctrl+k"
 type = "shell"
 command = "$HOME/dotfiles/herdr/plugins/vim-herdr-navigation-fixed/navigate.sh up"
 description = "navigate up across Neovim splits and Herdr panes"
