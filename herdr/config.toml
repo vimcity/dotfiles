@@ -29,7 +29,7 @@ toggle_sidebar = "alt+e"
 detach = "prefix+d"
 help = "prefix+?"
 workspace_picker = "prefix+q"
-goto = "prefix+o"
+goto = "ctrl+f"
 edit_scrollback = ""
 resize_mode = "prefix+ctrl+z"
 new_worktree = "prefix+shift+w"
@@ -80,11 +80,11 @@ command = "exec \"$HOME/dotfiles/herdr/scripts/scrollback-nvim.sh\""
 description = "scrollback in nvim with tailspin highlighting"
 
 [[keys.command]]
-key = "prefix+f"
+key = "prefix+ctrl+f"
 type = "popup"
 command = "exec \"${SHELL:-/bin/zsh}\" -l"
-width = "55%"
-height = "55%"
+width = "75%"
+height = "75%"
 description = "open floating shell"
 
 [[keys.command]]
@@ -131,7 +131,7 @@ description = "navigate right across Neovim splits and Herdr panes"
 
 # Floating popups
 [[keys.command]]
-key = "prefix+shift+p"
+key = "prefix+shift+g"
 type = "pane"
 command = "exec $HOME/.local/bin/gh-pr-dash"
 description = "review PRs"
@@ -147,18 +147,10 @@ description = "review PRs in a floating popup"
 
 # TODO: imrprove first pane loading render thingy by loading the list of prs first and their comments, descriptions ,and diff later lazy loading or like later async
 [[keys.command]]
-key = "prefix+shift+g"
+key = "prefix+ctrl+g"
 type = "pane"
 command = "exec lazygit"
 description = "open lazyzgit"
-
-[[keys.command]]
-key = "prefix+shift+t"
-type = "popup"
-command = "exec \"${SHELL:-/bin/zsh}\" -l"
-width = "75%"
-height = "75%"
-description = "open temporary floating shell"
 
 # TODO: understand what these systems do and whta to do and what could be removed from here 
 
