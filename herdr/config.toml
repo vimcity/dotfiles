@@ -193,10 +193,16 @@ height = "50%"
 description = "open or create an org todo"
 
 [[keys.command]]
-key = "prefix+ctrl+c"
+key = "prefix+shift+c"
 type = "pane"
 command = "exec fluence pick"
 description = "open confluence docs"
+
+[[keys.command]]
+key = "prefix+ctrl+c"
+type = "pane"
+command = "cd $HOME/Projects && exec \"${SHELL:-/bin/zsh}\" -l"
+description = "open quick window"
 
 # TODO: understand the use cases of this better, also herdr api for interacting with agents could replace the codex pi and this one 
 [[keys.command]]
