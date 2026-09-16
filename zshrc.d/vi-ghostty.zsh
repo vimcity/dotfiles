@@ -59,5 +59,15 @@ cursor_precmd() {
 }
 add-zsh-hook precmd cursor_precmd
 
+# Keep the standard vi find/till motions, plus ergonomic lowercase Alt aliases.
+# Alt-f/Alt-t find toward the previous character without requiring Shift.
+bindkey -M vicmd '^[f' vi-find-prev-char
+bindkey -M vicmd '^[t' vi-find-prev-char-skip
+
+# Ghostty sends Backspace as DEL (and Alt-Backspace as ESC DEL). Bind both
+# explicitly because vi keymaps otherwise differ between terminal builds.
+bindkey -M viins '^?' vi-backward-delete-char
+bindkey -M viins '^[^?' vi-backward-kill-word
+
 bindkey -M viins '^R' atuin-search
 bindkey -M vicmd 'A' undefined-key
