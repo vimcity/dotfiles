@@ -1,6 +1,40 @@
-# Additive error/exception highlighting on top of tspin defaults.
-# Built-in groups (dates, URLs, severities, etc.) stay as-is.
+# Catppuccin-friendly overrides for scrollback viewed inside Neovim.
+# Keep the terminal's muted ANSI palette instead of tspin's high-contrast defaults.
 # Docs: https://github.com/bensadeh/tailspin#customizing-highlight-groups
+
+[numbers]
+style = { fg = "cyan" }
+
+[uuids]
+number = { fg = "cyan" }
+letter = { fg = "cyan" }
+separator = { fg = "cyan" }
+
+[quotes]
+style = { fg = "yellow" }
+
+[dates]
+date = { fg = "magenta" }
+time = { fg = "blue" }
+zone = { fg = "red" }
+
+[durations]
+value = { fg = "blue" }
+separator = { fg = "magenta" }
+unit = { fg = "magenta" }
+
+[paths]
+segment = { fg = "green" }
+separator = { fg = "yellow" }
+
+[processes]
+name = { fg = "yellow" }
+id = { fg = "cyan" }
+bracket = { fg = "red" }
+
+[key_value_pairs]
+key = { faint = true }
+separator = { fg = "white" }
 
 [[keywords]]
 words = [
@@ -17,7 +51,7 @@ style = { fg = "red", bold = true }
 # Keep UUIDs visually stable instead of coloring each hex digit and separator separately.
 [[regexes]]
 regex = '\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b'
-style = { fg = "bright_yellow" }
+style = { fg = "yellow" }
 
 # Highlight fully-qualified Java classes such as com.example.orders.OrderService.
 [[regexes]]
