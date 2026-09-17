@@ -1,4 +1,5 @@
-# Ghostty Configuration 
+# vim: ft=conf
+# Ghostty Configuration
 # ==================================================
 
 theme = Catppuccin Frappe
@@ -42,7 +43,7 @@ font-size = 16
 # Cursor styling: mode-driven block/bar cursor.
 cursor-style = block
 adjust-cursor-thickness = 4
-custom-shader = shaders/cursor_smear_fade.glsl
+# custom-shader = shaders/cursor_smear_fade.glsl
 # Shell integration
 shell-integration = zsh
 
@@ -61,7 +62,7 @@ keybind = ctrl+shift+p=unbind
 
 
 
-config-file=?~/local.config
+config-file = ?~/local.config
 # Quick terminal toggle (Quake-style dropdown terminal)
 # keybind = global:cmd+shift+backquote=toggle_quick_terminal
 background-blur = false
