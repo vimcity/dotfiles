@@ -284,8 +284,8 @@ sidebar_max_width = 44
 [ui.sidebar.agents]
 row_gap = 1
 rows = [
-  ["state_icon", "state_text", { token = "agent", fg = "#ca9ee6", bold = true }],
-  [{ token = "workspace", fg = "#c6d0f5" }, { token = "tab", fg = "#babbf1" }],
+  ["state_icon", { token = "agent", fg = "#ca9ee6", bold = true }, { token = "terminal_title_stripped", fg = "#c6d0f5" }],
+  [{ token = "terminal_title", fg = "#babbf1", dim = true }],
 ]
 
 [ui.sidebar.spaces]

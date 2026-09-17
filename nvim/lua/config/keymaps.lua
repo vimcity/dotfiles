@@ -27,6 +27,12 @@ vim.keymap.set("v", "<M-Down>", ":m '<-2<cr>gv=gv", { desc = "Move selection up"
 local clipboard_yank_opts = { noremap = true, silent = true }
 vim.keymap.set({ "n", "x" }, "y", '"+y', clipboard_yank_opts)
 vim.keymap.set("n", "Y", '"+Y', clipboard_yank_opts)
+-- Paste from the same register used by y. This avoids OSC 52 clipboard reads;
+-- terminal paste (Ctrl-V) is separate input and does not populate a Vim register.
+vim.keymap.set("n", "p", '"+p', clipboard_yank_opts)
+vim.keymap.set("n", "P", '"+P', clipboard_yank_opts)
+vim.keymap.set("x", "p", '"+p', clipboard_yank_opts)
+vim.keymap.set("x", "P", '"+P', clipboard_yank_opts)
 
 local delete_map_opts = { noremap = true, silent = true }
 local delete_maps = {

@@ -16,10 +16,10 @@ vim.opt.autoindent = true -- Copy indent from current line when starting a new l
 -- Never use unnamedplus - it silently fails on remote hosts (no pbcopy).
 local is_mac = vim.fn.has("mac") == 1
 local is_linux = vim.fn.has("linux") == 1
-local is_ssh = vim.env.SSH_TTY ~= nil or vim.env.SSH_CONNECTION ~= nil
--- Herdr keeps B-side panes alive independently of the SSH client, so those
--- processes do not retain SSH_CONNECTION. Their terminal clipboard is still A.
-local use_osc52 = is_ssh or vim.env.HERDR_ENV == "1"
+-- Terminal UIs should always copy through the terminal. Ghostty receives OSC 52
+-- both locally and through SSH, so no SSH or Herdr state is needed.
+local is_gui = vim.fn.has("gui_running") == 1 or vim.g.neovide
+local use_osc52 = not is_gui
 vim.g.is_homelab = is_linux and use_osc52
 
 -- Termux: tablet SSH usage
