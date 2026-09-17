@@ -27,12 +27,12 @@ vim.keymap.set("v", "<M-Down>", ":m '<-2<cr>gv=gv", { desc = "Move selection up"
 local clipboard_yank_opts = { noremap = true, silent = true }
 vim.keymap.set({ "n", "x" }, "y", '"+y', clipboard_yank_opts)
 vim.keymap.set("n", "Y", '"+Y', clipboard_yank_opts)
--- Paste from the same register used by y. This avoids OSC 52 clipboard reads;
--- terminal paste (Ctrl-V) is separate input and does not populate a Vim register.
-vim.keymap.set("n", "p", '"+p', clipboard_yank_opts)
-vim.keymap.set("n", "P", '"+P', clipboard_yank_opts)
-vim.keymap.set("x", "p", '"+p', clipboard_yank_opts)
-vim.keymap.set("x", "P", '"+P', clipboard_yank_opts)
+-- Paste the last local yank, not the terminal clipboard. Reading register +
+-- asks OSC 52 to query Ghostty and can block in nested terminals.
+vim.keymap.set("n", "p", '"0p', clipboard_yank_opts)
+vim.keymap.set("n", "P", '"0P', clipboard_yank_opts)
+vim.keymap.set("x", "p", '"0p', clipboard_yank_opts)
+vim.keymap.set("x", "P", '"0P', clipboard_yank_opts)
 
 local delete_map_opts = { noremap = true, silent = true }
 local delete_maps = {
@@ -142,6 +142,9 @@ local function buffer_dir()
   end
   return vim.fn.fnamemodify(name, ":p:h")
 end
+
+-- Alt-f is the same backward character-find motion as Shift-f.
+vim.keymap.set("n", "<M-f>", "F", { noremap = true, desc = "Find backward character" })
 
 vim.keymap.set("n", "<leader>ff", function()
   Snacks.picker.files()
