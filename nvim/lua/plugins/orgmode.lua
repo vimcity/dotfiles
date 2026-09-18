@@ -61,24 +61,11 @@ return {
         org_agenda_span = "day",
         org_deadline_warning_days = 5,
         -- Orgmode's agenda/capture UI is easier to use as a normal bottom split.
-        -- org-super-agenda owns its own window and is intentionally unchanged here.
         win_split_mode = "horizontal",
         org_agenda_hide_empty_blocks = true,
         -- Native agenda views cover the common triage paths before we add any
         -- custom picker code. Open <leader>oa and choose one of these views.
         org_agenda_custom_commands = {
-          i = {
-            description = "Inbox: unscheduled, non-archived TODOs",
-            types = {
-              {
-                type = "tags_todo",
-                match = "-ARCHIVE",
-                org_agenda_overriding_header = "Inbox / unscheduled",
-                org_agenda_todo_ignore_scheduled = "all",
-                org_agenda_todo_ignore_deadlines = "all",
-              },
-            },
-          },
           o = {
             description = "Open TODOs: exclude archived headlines",
             types = {
@@ -154,10 +141,7 @@ return {
           -- Tag-specific colors
           vim.api.nvim_set_hl(0, "@org.tag", { fg = colors.cyan, bold = true })
 
-          -- Super agenda text colors
-          vim.api.nvim_set_hl(0, "OrgSuperAgendaText", { fg = colors.text })
-          vim.api.nvim_set_hl(0, "OrgSuperAgendaTodo", { fg = colors.lavender, bold = true })
-        end,
+          end,
       })
 
       -- Apply highlights immediately
@@ -170,6 +154,26 @@ return {
           vim.cmd([[syntax match OrgQuoteText /"[^"\r\n]\+"/]])
         end,
       })
+
+      vim.keymap.set("n", "<leader>oi", function()
+        require("config.org_actions").inbox_picker()
+      end, { desc = "Org inbox picker (unscheduled)" })
+      vim.keymap.set("n", "<leader>oD", function()
+        require("config.org_actions").bulk_archive_picker()
+      end, { desc = "Select completed Org tasks to archive" })
+      vim.keymap.set("n", "<leader>oo", function()
+        require("orgmode.api").tags_todo({
+          match_query = "-ARCHIVE",
+          header = "Open TODOs",
+          org_agenda_sorting_strategy = { "todo-state-up", "priority-down", "category-keep" },
+        })
+      end, { desc = "Org open TODOs" })
+      vim.keymap.set("n", "<leader>op", function()
+        require("config.org_ai").plan()
+      end, { desc = "Org AI plan" })
+      vim.keymap.set("n", "<leader>or", function()
+        require("config.org_ai").launch()
+      end, { desc = "Org AI launch with Pi" })
     end,
   },
   {
@@ -178,94 +182,6 @@ return {
     ft = { "org" },
     config = function()
       require("org-bullets").setup()
-    end,
-  },
-  {
-    "hamidi-dev/org-super-agenda.nvim",
-    -- event = "VeryLazy",
-    ft = { "org" },
-    config = function()
-      -- Get org path from environment variable
-      local org_path = vim.fn.expand(os.getenv("ORG_PATH") or "~/Documents")
-      local colors = {
-        yellow = "#e99b97",
-        green = "#a6da95",
-        rose_dark = "#eb6f92",
-      }
-
-      require("org-super-agenda").setup({
-        org_directories = { org_path },
-        exclude_directories = {
-          org_path .. "/deep-stash/",
-          org_path .. "/stocks/",
-          org_path .. "/projects/",
-        },
-        todo_states = {
-          {
-            name = "TODO",
-            keymap = "ot",
-            color = colors.rose_dark,
-            strike_through = false,
-          },
-          {
-            name = "PROGRESS",
-            keymap = "op",
-            color = colors.yellow,
-            strike_through = false,
-          },
-          {
-            name = "DONE",
-            keymap = "od",
-            color = colors.green,
-            strike_through = true,
-          },
-        },
-        groups = {
-          {
-            name = "📋 Unscheduled",
-            matcher = function(i)
-              return i.todo_state ~= "DONE" and not i.scheduled and not i.deadline
-            end,
-            sort = { by = "headline", order = "asc" },
-            header = { fg = colors.rose, bold = true },
-          },
-        },
-        view_mode = "compact",
-      })
-
-      -- Set up keybinding for org-super-agenda
-      vim.keymap.set("n", "<leader>os", "<cmd>OrgSuperAgenda<cr>", { desc = "open org super agenda" })
-      vim.keymap.set("n", "<leader>oD", function()
-        require("config.org_actions").bulk_archive_picker()
-      end, { desc = "Select completed Org tasks to archive" })
-      vim.keymap.set("n", "<leader>oI", function()
-        require("config.org_actions").inbox_picker()
-      end, { desc = "Org inbox picker (unscheduled)" })
-
-      -- Fast native agenda views. These use orgmode's public API rather than
-      -- introducing a second Org parser or another UI plugin.
-      vim.keymap.set("n", "<leader>oi", function()
-        require("orgmode.api").tags_todo({
-          match_query = "-ARCHIVE",
-          header = "Inbox / unscheduled",
-          org_agenda_todo_ignore_scheduled = "all",
-          org_agenda_todo_ignore_deadlines = "all",
-        })
-      end, { desc = "Org inbox (unscheduled TODOs)" })
-      vim.keymap.set("n", "<leader>oo", function()
-        require("orgmode.api").tags_todo({
-          match_query = "-ARCHIVE",
-          header = "Open TODOs",
-          org_agenda_sorting_strategy = { "todo-state-up", "priority-down", "category-keep" },
-        })
-      end, { desc = "Org open TODOs" })
-
-      vim.keymap.set("n", "<leader>op", function()
-        require("config.org_ai").plan()
-      end, { desc = "Org AI plan" })
-      vim.keymap.set("n", "<leader>or", function()
-        require("config.org_ai").launch()
-      end, { desc = "Org AI launch with Pi" })
     end,
   },
   {
