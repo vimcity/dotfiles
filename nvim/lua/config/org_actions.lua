@@ -50,7 +50,10 @@ local function picker_items()
       ),
       file = headline.file.filename,
       pos = { headline.position.start_line, 0 },
-      item = headline,
+      item = {
+        filename = headline.file.filename,
+        line = headline.position.start_line,
+      },
     }
   end
 
@@ -79,7 +82,10 @@ local function collect_inbox_headlines(headlines, items, tag_filter)
         ),
         file = headline.file.filename,
         pos = { headline.position.start_line, 0 },
-        item = headline,
+        item = {
+          filename = headline.file.filename,
+          line = headline.position.start_line,
+        },
       }
     end
     collect_inbox_headlines(headline.headlines, items, tag_filter)
@@ -95,12 +101,17 @@ local function open_headline(headline)
   vim.api.nvim_win_set_cursor(0, { headline.position.start_line, 0 })
 end
 
+local function load_headline(item)
+  local file = org_api().load(item.filename)
+  return file:get_headline_on_line(item.line)
+end
+
 local function run_serial(items, action, on_complete)
   local promise = require("orgmode.utils.promise").resolve()
 
   for _, item in ipairs(items) do
     promise = promise:next(function()
-      return action(item.item)
+      return action(load_headline(item.item))
     end)
   end
 
@@ -199,7 +210,7 @@ function M.inbox_picker(tag)
         picker:close()
         if selected then
           vim.schedule(function()
-            open_headline(selected.item)
+            open_headline(load_headline(selected.item))
           end)
         end
       end,
@@ -210,8 +221,9 @@ function M.inbox_picker(tag)
           return
         end
         vim.schedule(function()
-          open_headline(selected.item)
-          local current = org_api().current():get_headline_on_line(selected.item.position.start_line)
+          local headline = load_headline(selected.item)
+          open_headline(headline)
+          local current = org_api().current():get_headline_on_line(headline.position.start_line)
           current:set_scheduled():next(function()
             vim.notify("Scheduled: " .. current.title, vim.log.levels.INFO)
           end, notify_error)
