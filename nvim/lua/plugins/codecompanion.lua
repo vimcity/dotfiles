@@ -40,13 +40,16 @@ return {
             omlx = function()
               return require("codecompanion.adapters").extend("openai_compatible", {
                 env = {
-                  url = env("OMLX_CODECOMPANION_URL", "http://127.0.0.1:8000"),
+                  url = env("OMLX_CODECOMPANION_URL", env("OMLX_API_BASE", "http://127.0.0.1:8000")),
                   chat_url = env("OMLX_CODECOMPANION_CHAT_URL", "/v1/chat/completions"),
-                  api_key = env("OMLX_CODECOMPANION_API_KEY_ENV", "TERM"),
+                  api_key = env("OMLX_CODECOMPANION_API_KEY_ENV", "OPENAI_API_KEY"),
                 },
                 schema = {
                   model = {
-                    default = env("OMLX_CODECOMPANION_MODEL", "Qwen3.6-35B-A3B-OptiQ-4bit"),
+                    default = env(
+                      "OMLX_CODECOMPANION_MODEL",
+                      env("OMLX_DEFAULT_MODEL", "Qwen3.6-35B-A3B-OptiQ-4bit")
+                    ),
                   },
                 },
               })
