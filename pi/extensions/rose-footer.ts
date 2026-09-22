@@ -18,6 +18,17 @@ function formatCost(cost: number): string {
   return `$${cost.toFixed(3)}`;
 }
 
+function formatContext(tokens: number | null | undefined, contextWindow: number | undefined, percent: number | null | undefined): string {
+  if (!contextWindow || percent === null || percent === undefined || tokens === null || tokens === undefined) {
+    return "[?/?]";
+  }
+
+  const width = 10;
+  const filled = Math.min(width, Math.round((percent / 100) * width));
+  const bar = "█".repeat(filled) + "░".repeat(width - filled);
+  return `${Math.round(percent)}% ${bar} ${formatTokens(tokens)}/${formatTokens(contextWindow)}`;
+}
+
 export default function (pi: ExtensionAPI) {
   let invalidate: (() => void) | undefined;
   let modelLabel = "no model";
@@ -50,7 +61,7 @@ export default function (pi: ExtensionAPI) {
           }
 
           const context = ctx.getContextUsage();
-          const contextText = context?.percent === null || context?.percent === undefined ? "?" : `${Math.round(context.percent)}%`;
+          const contextText = formatContext(context?.tokens, context?.contextWindow, context?.percent);
           const sessionName = pi.getSessionName() ?? "";
           const sessionId = ctx.sessionManager.getSessionId().slice(0, 8);
           const directory = ctx.cwd.split("/").filter(Boolean).pop() ?? "~";
