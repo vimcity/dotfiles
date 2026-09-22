@@ -76,6 +76,12 @@ c.colors.tabs.selected.odd.bg = "#89b4fa"
 c.colors.tabs.selected.even.bg = "#89b4fa"
 c.colors.tabs.selected.odd.fg = "#1e1e2e"
 c.colors.tabs.selected.even.fg = "#1e1e2e"
+# Pinned tabs — muted theme colors, clearly not "selected"
+c.colors.tabs.pinned.odd.bg = "rgba(137, 180, 250, 0.15)"
+c.colors.tabs.pinned.odd.fg = "#a896d3"
+c.colors.tabs.pinned.even.bg = "rgba(137, 180, 250, 0.15)"
+c.colors.tabs.pinned.even.fg = "#a896d3"
+
 # Blue to purple gradient
 c.colors.tabs.indicator.start = "#89b4fa"
 c.colors.tabs.indicator.stop = "#cba6f7"
