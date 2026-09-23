@@ -215,10 +215,10 @@ description = "org task → Pi (org-pi launch)"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
-type = "pane"
+type = "popup"
 command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh"
-# width = "65%"
-# height = "65%"
+width = "65%"
+height = "60%"
 description = "open today's org agenda"
 
 [[keys.command]]

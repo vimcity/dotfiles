@@ -87,7 +87,11 @@ return {
         if type(original_jdtls) == "function" then
           jdtls_opts = original_jdtls(jdtls_opts, root_dir)
         end
-        
+
+        -- Keep JDTLS status in the statusline instead of echoing every lifecycle update.
+        jdtls_opts.handlers = jdtls_opts.handlers or {}
+        jdtls_opts.handlers["language/status"] = function() end
+
         -- jdtls needs Java 21+, while the project runtime may be older.
         local jdtls_java_home = vim.env.JDTLS_JAVA_HOME
         if jdtls_java_home and vim.fn.isdirectory(jdtls_java_home) == 1 then
@@ -146,7 +150,7 @@ return {
             asyncJDWP = "off",
             debugSupportOnDecompiledSource = "on",
           }) },
-        }, function(err, result)
+        }, function(err, _)
           if err then
             vim.notify("[java-debug] updateDebugSettings error: " .. vim.inspect(err), vim.log.levels.WARN)
           end

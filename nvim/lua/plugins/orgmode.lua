@@ -184,8 +184,4 @@ return {
       require("org-bullets").setup()
     end,
   },
-  {
-    "nvim-orgmode/telescope-orgmode.nvim",
-    dependencies = "nvim-telescope/telescope.nvim",
-  },
 }

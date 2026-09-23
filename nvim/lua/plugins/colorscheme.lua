@@ -66,7 +66,6 @@ return {
         noice = true,
         notify = true,
         snacks = true,
-        telescope = true,
         treesitter = true,
       },
     },

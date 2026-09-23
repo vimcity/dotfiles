@@ -93,6 +93,7 @@ return {
       }
 
       opts.sections.lualine_x = {
+        { "lsp_status" },
         {
           require("lazy.status").updates,
           cond = require("lazy.status").has_updates,
