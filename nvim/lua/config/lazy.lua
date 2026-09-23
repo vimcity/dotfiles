@@ -21,7 +21,6 @@ require("lazy").setup({
 
     -- 2. LazyVim extras (must come after base plugins)
     { import = "lazyvim.plugins.extras.dap.core" }, -- Enable debugging support
-    { import = "lazyvim.plugins.extras.test.core" }, -- Enable testing support
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.python" },
@@ -30,17 +29,15 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.kotlin" },
 
     -- Editor enhancements
-    { import = "lazyvim.plugins.extras.editor.illuminate" }, -- Highlight matching words
     { import = "lazyvim.plugins.extras.editor.inc-rename" }, -- Live preview for LSP rename
-    { import = "lazyvim.plugins.extras.editor.mini-move" }, -- Move lines/blocks with Alt+j/k
     { import = "lazyvim.plugins.extras.editor.mini-diff" }, -- Show git changes inline
+    { import = "lazyvim.plugins.extras.editor.mini-files" }, -- Lightweight file explorer
 
     -- Coding enhancements
     { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- Edit surrounding characters
 
     -- UI enhancements
     { import = "lazyvim.plugins.extras.ui.indent-blankline" }, -- Visual indentation guides
-    { import = "lazyvim.plugins.extras.ui.mini-indentscope" }, -- Highlight current indentation scope
 
     -- Utilities
     -- Project management is handled by snacks.picker.projects() in keymaps.lua

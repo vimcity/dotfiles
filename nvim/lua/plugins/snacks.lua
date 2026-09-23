@@ -3,13 +3,6 @@ return {
   "folke/snacks.nvim",
   keys = {
     {
-      "<leader>e",
-      function()
-        vim.cmd("NvimTreeFindFile")
-      end,
-      desc = "Open file explorer at current file",
-    },
-    {
       "<leader>n",
       function()
         Snacks.notifier.show_history()
@@ -32,6 +25,7 @@ return {
     },
   },
   opts = function(_, opts)
+    opts.explorer = vim.tbl_deep_extend("force", opts.explorer or {}, { enabled = false })
     opts.scroll.enabled = false
     local ascii = require("ascii")
     local header = table.concat(ascii.art.text.neovim.sharp, "\n")
@@ -55,10 +49,6 @@ return {
       return opts
     end
 
-    if vim.env.NVIM_NO_DASHBOARD == "1" then
-      opts.dashboard.enabled = false
-      return opts
-    end
     opts.dashboard.preset = opts.dashboard.preset or {}
     opts.dashboard.preset.header = header
 
@@ -145,6 +135,7 @@ return {
     opts.image = vim.tbl_deep_extend("force", opts.image or {}, {
       enabled = false,
     })
+    opts.dashboard.enabled = vim.env.NVIM_NO_DASHBOARD ~= "1"
 
     return opts
   end,

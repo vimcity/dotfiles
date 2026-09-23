@@ -203,6 +203,19 @@ c.content.unknown_url_scheme_policy = "allow-all"
 config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="normal")
 config.bind("<Shift-Tab>", "fake-key <Shift-Tab>", mode="insert")
 
+# Tab movement keybindings (leader: ,t)
+# Move tab to position: ,t1 through ,t9
+for _i in range(1, 10):
+    config.bind(",t" + str(_i), "tab-move " + str(_i))
+# Move tab to start/end
+config.bind(",ts", "tab-move start")
+config.bind(",te", "tab-move end")
+# Relative move
+config.bind(",tl", "tab-move +")  # move tab right
+config.bind(",tk", "tab-move -")  # move tab left
+# Previous/last focused tab (toggle between current and last-visited)
+config.bind("<Ctrl-Tab>", "tab-focus last")
+
 c.aliases["gpt"] = "open -t  https://chatgpt.com"
 config.set(
     "content.headers.user_agent",
