@@ -277,7 +277,7 @@ tab_bar_right = [
 prompt_new_tab_name = false
 prompt_new_workspace_name = true
 show_agent_labels_on_pane_borders = true
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 sidebar_width = 34
 sidebar_max_width = 44
 
