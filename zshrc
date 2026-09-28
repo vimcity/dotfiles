@@ -68,6 +68,7 @@ alias -g ....='../../..'
 alias -- -='cd -'
 
 source ~/dotfiles/prompt-themes.zsh
+export PATH="$HOME/dotfiles/bin:$PATH"
 source "$HOME/dotfiles/zshrc.d/vi-ghostty.zsh"
 
 source "$HOME/dotfiles/zshrc.d/highlight.zsh"
@@ -82,3 +83,4 @@ export LLM_OPENAI_API_KEY=none
 export LLM_OPENAI_MODEL="Qwen3.6-35B-A3B-OptiQ-4bit"
 alias gsp="git stash pop"
 alias boo='ghostty +boo'
+alias cc='claude'
