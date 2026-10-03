@@ -19,8 +19,10 @@ augroup YankToClipboard
   autocmd TextYankPost * if v:event.operator ==# 'y' | call setreg('+', getreg('0')) | endif
 augroup END
 
-nnoremap p "+p
-xnoremap p "+p
+" Normal-mode p uses Neovim's local yank register. Paste the host clipboard
+" with the terminal's native paste shortcut, which also works over SSH.
+nnoremap p "0p
+xnoremap p "0p
 
 " Keep change/cut operations out of clipboard.
 nnoremap c "_c
