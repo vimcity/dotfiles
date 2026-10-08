@@ -22,7 +22,7 @@ c.window.hide_decoration = True
 c.window.transparent = True
 c.tabs.last_close = "close"
 
-config.set("zoom.default", "120%")
+config.set("zoom.default", "125%")
 # Ad blocking (AdGuard/uBlock lists) to keep YouTube tidy
 c.content.blocking.enabled = True
 c.content.blocking.adblock.lists = [
@@ -42,6 +42,13 @@ c.content.autoplay = True
 c.content.headers.do_not_track = True
 # Open PDF files inside qutebrowser (PDF.js) instead of download prompt when possible.
 c.content.pdfjs = True
+
+# Ask sites for their native dark theme, then apply Chromium's dark filter everywhere.
+c.colors.webpage.preferred_color_scheme = "dark"
+c.colors.webpage.darkmode.enabled = false 
+c.colors.webpage.darkmode.policy.page = "always"
+c.colors.webpage.darkmode.policy.images = "smart"
+c.colors.webpage.darkmode.algorithm = "lightness-cielab"
 
 # Use Neovim for :edit-url / :edit-text.
 c.editor.command = ["/opt/homebrew/bin/nvim", "{file}"]
