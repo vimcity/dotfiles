@@ -76,7 +76,6 @@ source "$HOME/dotfiles/zshrc.d/git-aliases.zsh"
 source "$HOME/dotfiles/zshrc.d/session.zsh"
 source "$HOME/dotfiles/zshrc.d/omlx.zsh"
 source "$HOME/dotfiles/zshrc.d/helpers.zsh"
-source "$HOME/dotfiles/zshrc.d/rbw.zsh"
 source "$HOME/dotfiles/zshrc.d/org.zsh"
 export OMLX_API_BASE="${OMLX_URL:-http://127.0.0.1:8000}/v1"
 export LLM_OPENAI_API_BASE="$OMLX_API_BASE"
@@ -84,4 +83,4 @@ export LLM_OPENAI_API_KEY="${OMLX_API_KEY:-none}"
 export LLM_OPENAI_MODEL="${OMLX_MODEL:-Qwen3.6-35B-A3B-OptiQ-4bit}"
 alias gsp="git stash pop"
 alias boo='ghostty +boo'
-alias cc='claude'
+alias cc='claude --dangerously-skip-permissions'

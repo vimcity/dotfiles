@@ -47,8 +47,8 @@ return {
     end,
     opts = {
       flavour = "frappe",
-      transparent_background = false,
-      background = { light = "latte", dark = "frappe" },
+      transparent_background = true,
+      background = { light = "frappe", dark = "frappe" },
       integrations = {
         blink_cmp = true,
         gitsigns = true,

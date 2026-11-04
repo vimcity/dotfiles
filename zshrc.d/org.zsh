@@ -1,6 +1,4 @@
-# Org + optional ai-workbench PATH
-
-orgp() { "$HOME/dotfiles/bin/org-pi" "$@"; }
+# Optional ai-workbench PATH
 
 if [[ -d "$HOME/Projects/ai-workbench/bin" ]]; then
     export PATH="$HOME/Projects/ai-workbench/bin:$PATH"

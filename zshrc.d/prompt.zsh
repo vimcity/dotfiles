@@ -1,6 +1,10 @@
 # Custom prompt segments (colors from prompt-themes.zsh)
+#
+# Optimizations:
+#   - No PROMPT_SUBST: prompt segments computed in precmd, stored in globals
+#   - Single subshell for both git calls (status + stash): 2→1 fork
+#   - No subshell forks on every prompt render
 
-setopt PROMPT_SUBST
 zmodload zsh/datetime
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
@@ -8,18 +12,25 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 typeset -gF PROMPT_CMD_START=0
 typeset -g PROMPT_LAST_DURATION=''
 
+# Accumulated prompt segments (set by precmd, read by PROMPT/RPROMPT)
+typeset -g _PROMPT_LEFT=''     # left prompt, single line
+typeset -g _PROMPT_RIGHT=''    # right prompt
+typeset -g _PROMPT_DIR_DISPLAY=''  # dir display result (avoids subshell)
+typeset -g _PROMPT_GIT_COMBINED=''  # combined git status+stash output
+typeset -g PROMPT_HAS_SHOWN=0
+
+# ── Segment helpers (append to _PROMPT_LEFT directly, no subshells) ──
+
 prompt_segment() {
-    local bg="$1"
-    local fg="$2"
-    local text="$3"
-    print -n "%K{$bg}%F{$fg} ${text} %f%k"
+    local bg="$1" fg="$2" text="$3"
+    _PROMPT_LEFT+="%K{$bg}%F{$fg} ${text} %f%k"
 }
 
 prompt_context_segment() {
     if [[ -n "$SSH_CONNECTION" ]]; then
-        prompt_segment "#313244" "#fab387" "󰢹 %m"
+        prompt_segment "#313244" "#fab387" "ssh:%m"
     elif [[ "$EUID" -eq 0 ]]; then
-        prompt_segment "#bf616a" "#f5f5f5" "󰚌 root"
+        prompt_segment "#bf616a" "#f5f5f5" "root"
     fi
 }
 
@@ -27,12 +38,12 @@ prompt_dir_display() {
     local path="$PWD"
 
     if [[ "$path" == "$HOME" ]]; then
-        print -r -- "~"
+        _PROMPT_DIR_DISPLAY="~"
         return
     fi
 
     if [[ "$path" != "$HOME"/* ]]; then
-        print -r -- "$path"
+        _PROMPT_DIR_DISPLAY="$path"
         return
     fi
 
@@ -43,12 +54,12 @@ prompt_dir_display() {
     local part
     for part in "${path_parts[@]}"; do
         if [[ "$part" == .* ]]; then
-            print -r -- "~/${rel_path}"
+            _PROMPT_DIR_DISPLAY="~/${rel_path}"
             return
         fi
     done
 
-    print -r -- "${path_parts[-1]}"
+    _PROMPT_DIR_DISPLAY="${path_parts[-1]}"
 }
 
 prompt_format_duration() {
@@ -67,34 +78,44 @@ prompt_venv_segment() {
     fi
 }
 
-prompt_git_recent_stash() {
-    local stash_output stash_epoch stash_subject
-    local week_seconds=604800
+prompt_dir_segment() {
+    prompt_dir_display
+    prompt_segment "${THEME_COLORS[dir_bg]}" "${THEME_COLORS[dir_fg]}" "%B${_PROMPT_DIR_DISPLAY}%b"
+}
 
-    stash_output="$(__git_prompt_git stash list -1 --date=unix --format='%ct%x1f%gs' 2>/dev/null)" || return
-    [[ -z "$stash_output" ]] && return
+# ── Single subshell: both git calls in one fork ──
+# Output format: STATUS_LINES<\x00>STASH_LINE
 
-    stash_epoch="${stash_output%%$'\x1f'*}"
-    stash_subject="${stash_output#*$'\x1f'}"
+_prompt_git_combined() {
+    local combined_output
+    combined_output="$({
+        __git_prompt_git status --porcelain -b 2>/dev/null
+        print -r $'\x00'
+        __git_prompt_git stash list -1 --date=unix --format='%ct%x1f%gs' 2>/dev/null
+    })" || return 1
+    _PROMPT_GIT_COMBINED="${combined_output}"
+}
 
-    [[ -z "$stash_epoch" || -z "$stash_subject" ]] && return
-    (( EPOCHSECONDS - stash_epoch > week_seconds )) && return
+# ── Parse combined output ──
 
-    stash_subject="${stash_subject#*: }"
-    stash_subject="${stash_subject//\%/%%}"
+_prompt_git_status_lines() {
+    print -r -- "${_PROMPT_GIT_COMBINED%%$'\x00'*}"
+}
 
-    print -n -- "%F{${THEME_COLORS[git_stash]}}≡ ${stash_subject}%f"
+_prompt_git_stash_line() {
+    print -r -- "${_PROMPT_GIT_COMBINED##*$'\x00'}"
 }
 
 prompt_git_segment() {
-    local git_output
-    git_output="$(__git_prompt_git status --porcelain -b 2>/dev/null)" || return
+    local -a lines branch_line branch segment
+    local has_staged=0 has_unstaged=0 line xy week_seconds=604800
 
-    local -a lines
-    lines=("${(@f)git_output}")
+    # No git data = not in a repo, skip silently
+    [[ -n "$_PROMPT_GIT_COMBINED" ]] || return 0
+
+    lines=("${(@f)$(_prompt_git_status_lines)}")
     [[ ${#lines[@]} -eq 0 ]] && return
 
-    local branch_line branch segment
     branch_line="${lines[1]#\#\# }"
     branch="${branch_line%%...*}"
     branch="${branch%% *}"
@@ -102,7 +123,6 @@ prompt_git_segment() {
     if [[ "$branch" == "HEAD" || "$branch" == "" ]]; then
         branch="detached"
     fi
-
     branch="${branch//\%/%%}"
 
     segment="%F{${THEME_COLORS[git_icon]}} %f%F{${THEME_COLORS[git_fg]}}%B${branch}%b%f"
@@ -115,20 +135,12 @@ prompt_git_segment() {
         segment+=" %F{${THEME_COLORS[git_behind]}}⇣${match[1]}%f"
     fi
 
-    local has_staged=0
-    local has_unstaged=0
-    local line xy
-
     for line in "${lines[@]:1}"; do
         [[ -z "$line" ]] && continue
-
         xy="${line[1,2]}"
-
         if [[ "$xy" == '??' ]]; then
-            has_unstaged=1
-            continue
+            has_unstaged=1; continue
         fi
-
         [[ "${xy[1]}" != ' ' ]] && has_staged=1
         [[ "${xy[2]}" != ' ' ]] && has_unstaged=1
     done
@@ -136,18 +148,27 @@ prompt_git_segment() {
     (( has_staged )) && segment+=" %F{${THEME_COLORS[git_added]}}●%f"
     (( has_unstaged )) && segment+=" %F{${THEME_COLORS[git_modified]}}%f"
 
-    local stash_segment
-    stash_segment="$(prompt_git_recent_stash)"
-    [[ -n "$stash_segment" ]] && segment+=" ${stash_segment}"
+    # Parse stash from combined output
+    local stash_output stash_epoch stash_subject
+    stash_output="$(_prompt_git_stash_line)"
+    if [[ -n "$stash_output" ]]; then
+        stash_epoch="${stash_output%%$'\x1f'*}"
+        stash_subject="${stash_output#*$'\x1f'}"
+        if [[ -n "$stash_epoch" && -n "$stash_subject" ]] &&
+           (( EPOCHSECONDS - stash_epoch <= week_seconds )); then
+            stash_subject="${stash_subject#*: }"
+            stash_subject="${stash_subject//\%/%%}"
+            segment+=" %F{${THEME_COLORS[git_stash]}}≡ ${stash_subject}%f"
+        fi
+    fi
 
     prompt_segment "${THEME_COLORS[git_bg]}" "${THEME_COLORS[git_fg]}" "$segment"
 }
 
-prompt_dir_segment() {
-    prompt_segment "${THEME_COLORS[dir_bg]}" "${THEME_COLORS[dir_fg]}" "%B$(prompt_dir_display)%b"
-}
+# ── Build prompt segments into globals (no subshells) ──
 
 prompt_build_left() {
+    _PROMPT_LEFT=''
     prompt_context_segment
     prompt_dir_segment
     prompt_venv_segment
@@ -155,8 +176,7 @@ prompt_build_left() {
 }
 
 prompt_build_right() {
-    local last_status="$1"
-    local out=''
+    local last_status="$1" out=''
 
     if [[ -n "$PROMPT_LAST_DURATION" ]]; then
         out+="%K{${THEME_COLORS[right_bg]}}%F{${THEME_COLORS[right_fg]}}  ${PROMPT_LAST_DURATION} %f%k "
@@ -172,8 +192,10 @@ prompt_build_right() {
         out+="%K{${THEME_COLORS[right_bg]}}%F{${THEME_COLORS[error_fg]}} ✘ ${last_status} %f%k"
     fi
 
-    print -n "$out"
+    _PROMPT_RIGHT="$out"
 }
+
+# ── Precmd: compute everything once per render ──
 
 prompt_precmd() {
     local last_status="$?"
@@ -190,8 +212,23 @@ prompt_precmd() {
         PROMPT_LAST_DURATION=''
     fi
 
-    RPROMPT=''
-    print ""
+    # Add a spacer before subsequent prompts, not before the initial prompt.
+    if (( PROMPT_HAS_SHOWN )); then
+        print
+    else
+        PROMPT_HAS_SHOWN=1
+    fi
+
+    # Single subshell for both git calls, then build all segments (no more $())
+    _PROMPT_GIT_COMBINED=''
+    _prompt_git_combined 2>/dev/null || _PROMPT_GIT_COMBINED=''
+    prompt_build_left
+    prompt_build_right "$last_status"
+
+    # Build final PROMPT — no $() expansion on render, just variable reference
+    local prompt_char_color="${THEME_COLORS[prompt_char]}"
+    PROMPT="${_PROMPT_LEFT}"$'\n'"%F{${prompt_char_color}}"'$'"%f "
+    RPROMPT="${_PROMPT_RIGHT}"
 }
 
 prompt_preexec() {
@@ -201,6 +238,3 @@ prompt_preexec() {
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd prompt_precmd
 add-zsh-hook preexec prompt_preexec
-
-PROMPT='$(prompt_build_left)'
-PROMPT+=$'\n''%F{${THEME_COLORS[prompt_char]}}$%f '

@@ -35,16 +35,9 @@ Use Herdr sidebar / `cmd+j` `cmd+k` to jump agents. Use native resume inside eac
 - **Codex:** `co resume <id>` / `col resume <id>` (optional)
 - **Cursor:** Cursor Agent resume in IDE
 
-### Org → Pi
+### Org
 
-```bash
-org-pi plan
-org-pi launch
-```
-
-Herdr: `prefix+shift+i` (org task → Pi tab)
-
-Neovim org buffer: `:OrgAiPlan`, `:OrgAiLaunch`
+Herdr: `prefix+ctrl+a` opens the standard Org TODO capture.
 
 ### Durable notes
 
@@ -107,7 +100,7 @@ This configuration emphasizes:
 - **Agents**: Pi is the default coding agent; Herdr tracks pane-bound sessions
 - **Session restore**: `resume_agents_on_restore = true` rebuilds layout and resumes agents after restart
 - **Navigation**: `Cmd+j` / `Cmd+k` between agents; `Ctrl+h/j/k/l` across Neovim splits and panes
-- **Org → Pi**: `prefix+shift+i` runs `org-pi launch`
+- **Org capture**: `prefix+ctrl+a` opens the standard TODO capture
 
 ### Shell Environment
 
@@ -165,7 +158,8 @@ This configuration emphasizes:
 
 - **Language Support**: TypeScript, Python, Java, Go, Kotlin, JSON with full LSP
 - **AI in-editor**: GitHub Copilot (`Alt-y` / `<leader>cp`), CodeCompanion → oMLX (`<leader>aa/ac/ap`)
-- **Org glue**: `:OrgAiPlan`, `:OrgAiLaunch` → `org-pi` in Herdr
+- **Floating AI terminal**: `<leader>ai` defaults to Pi; switch with `:AiBackend` or `NVIM_AGENT_BACKEND`; use `:AiResume` for native session pickers. Claude also supports `:AiBackground`, `:AiAgents`, and `:AiAttach <id>`.
+- **Org**: capture, agenda, and plans remain available through Orgmode and Herdr
 - **Herdr-aware splits**: `Ctrl+h/j/k/l` uses Herdr navigation
 - **Testing / debugging**: Neotest, DAP
 - **Theme**: Catppuccin Frappé
@@ -218,9 +212,8 @@ Custom functions for fuzzy finding:
 
 ### AI Integration
 
-- **Pi** — primary coding agent (terminal + org tasks)
+- **Pi** — primary coding agent in the terminal
 - **Herdr** — layout, agent sidebar, session restore (see **Herdr + Pi workflow** above)
-- **Org + Pi (`org-pi`)** — org task → plan → Pi; Herdr `prefix+shift+i`
 - **Cursor Agent** — in-editor when needed
 - **Codex** (`co` / `col`) — optional secondary CLI agent
 - **Neovim**: Copilot inline, CodeCompanion chat/actions
@@ -237,7 +230,7 @@ Custom functions for fuzzy finding:
 
 ```
 dotfiles/
-├── bin/                # org-pi, note, herdr helpers
+├── bin/                # note, herdr-context, and other helpers
 ├── herdr/              # Herdr config + plugins (primary multiplexer)
 ├── harness/            # Harness config and local oMLX profile
 ├── pi/                 # Pi agent config, skills, extensions, SYSTEM.md
@@ -291,3 +284,15 @@ The install script handles:
 - Symlinks for Harness, Herdr, Pi, Neovim, shell, and tool configs
 
 Note: The install script assumes the above tools are already installed via Homebrew on macOS, or via apt on Debian/Ubuntu Linux dev machines.
+
+## Org schedule notifications (macOS)
+
+`bin/org-notify` runs Neovim headlessly and uses the configured `nvim-orgmode` parser to find scheduled `TODO` and `PROGRESS` entries, then sends a native macOS notification once at the scheduled minute.
+
+```sh
+org-notify test                 # verify macOS notifications
+org-notify install              # install a 60-second launchd agent
+org-notify uninstall
+```
+
+The launch agent stores its duplicate-prevention state in `~/.local/state/org-notify.sent`. Override the source directory with `ORG_PATH=~/Documents/org bin/org-notify install`. Date-only schedules notify at 09:00 local time.

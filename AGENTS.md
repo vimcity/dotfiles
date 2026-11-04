@@ -11,7 +11,7 @@ Guidance for coding agents working in this dotfiles repository.
 | IDE agent | **Cursor Agent** | When user works in Cursor |
 | Optional CLI | **Codex** | `zshrc.d/codex.zsh`; secondary to Pi |
 
-Herdr + Pi workflow is documented in **README.md** (session restore, org-pi, delegation). Do not reintroduce custom orchestrators, session indexes, or compression middleware.
+Herdr + Pi workflow is documented in **README.md** (session restore and delegation). Do not reintroduce custom orchestrators, session indexes, or compression middleware.
 
 ## Local LLM (OMLX)
 
@@ -28,7 +28,6 @@ Primary areas:
 - `install.sh` - bootstrap script and symlink setup
 - `nvim/` - LazyVim-based Neovim config in Lua
 - `pi/` - Pi agent extensions, skills, themes, SYSTEM.md
-- `bin/org-pi` - org task → plan → Pi in Herdr
 - `bin/note` - durable bullets → `~/Documents/org/notes.md`
 - `herdr/` - Herdr config (`resume_agents_on_restore = true`); **primary multiplexer**
 - `ghostty/`, `atuin/`, `fastfetch/`, `yazi/`, `qutebrowser/` - tool-specific config
@@ -47,7 +46,7 @@ Run from repo root:
 ./install.sh                         # full install/bootstrap on a real machine
 bash -n install.sh                  # validate install script syntax
 zsh -n zshrc                        # validate zsh config syntax
-bash -n bin/note bin/org-pi         # shell script syntax
+bash -n bin/note                    # shell script syntax
 python3 -m py_compile qutebrowser/config.py
 nvim -c "checkhealth"              # manual Neovim health check
 ```
