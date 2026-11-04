@@ -1,7 +1,7 @@
 return {
   {
     "0xferrous/ansi.nvim",
-    ft = { "log", "ansi" },
+    lazy = false,
     config = function()
       require("ansi").setup({
         auto_enable = false,

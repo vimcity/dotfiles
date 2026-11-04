@@ -2,10 +2,8 @@
 # Ghostty Configuration
 # ==================================================
 
-theme = Catppuccin Frappe
-# Launch maximized
+theme = "Catppuccin Frappe"
 window-decoration = false
-macos-titlebar-style = hidden
 window-step-resize = true
 window-save-state = always
 mouse-hide-while-typing = true
@@ -14,9 +12,9 @@ mouse-hide-while-typing = true
 # macos-icon = custom
 # macos-custom-icon = ~/.config/ghostty/cat-ghostty.icns
 # macos-icon = retro
-# macos-icon = glass
+macos-icon = glass
 # macos-icon = holographic
-macos-icon = xray
+# macos-icon = xray
 
 # Font settings
 font-feature = -calt
@@ -36,13 +34,13 @@ font-size = 16
 # background-image = ~/dotfiles/ghostty/bag.jpg
 # background-image-fit = cover
 # background-image-position = center
-# background-image-opacity = 0.20
+# background-image-opacity = 0.10
 # background-blur=true
-# background-opacity = 0.95
+# background-opacity = 0.98
 
 cursor-style = block
 adjust-cursor-thickness = 4
-# custom-shader = shaders/cursor_smear_fade.glsl
+custom-shader = shaders/cursor_smear_fade.glsl
 
 shell-integration = zsh
 
@@ -61,8 +59,7 @@ keybind = ctrl+shift+p=unbind
 
 
 
-config-file = ?~/local.config
 # Quick terminal toggle (Quake-style dropdown terminal)
-# keybind = global:cmd+shift+backquote=toggle_quick_terminal
-background-blur = false
+keybind = global:cmd+shift+backquote=toggle_quick_terminal
+background-blur = true
 mouse-scroll-multiplier = 1

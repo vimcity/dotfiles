@@ -27,5 +27,6 @@ herdr pane read "$pane_id" \
     --format text >"$tmp"
 
 tspin --theme "$HOME/dotfiles/tailspin/theme.toml" -p "$tmp" | "${NVIM_BIN:-nvim}" - \
-    -c 'setlocal buftype=nofile nomodifiable nomodified bufhidden=wipe nowrap signcolumn=no' \
-    -c 'AnsiEnable'
+    -c 'setlocal filetype=ansi' \
+    -c 'AnsiEnable' \
+    -c 'setlocal buftype=nofile nomodifiable nomodified bufhidden=wipe nowrap signcolumn=no'

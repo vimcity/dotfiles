@@ -57,7 +57,11 @@ return {
         org_agenda_files = org_agenda_files,
         org_default_notes_file = org_path .. "/todos.org",
         org_highlight_latex_and_related = "entities",
-        org_agenda_sorting_strategy = { 'priority-down','time-down', "todo-state-up" },
+        org_agenda_sorting_strategy = {
+          agenda = { "time-up", "priority-down", "todo-state-up" },
+          todo = { "priority-down", "todo-state-up" },
+          tags = { "priority-down", "todo-state-up" },
+        },
         org_agenda_span = "day",
         org_deadline_warning_days = 5,
         -- Orgmode's agenda/capture UI is easier to use as a normal bottom split.
@@ -73,12 +77,12 @@ return {
                 type = "tags_todo",
                 match = "-ARCHIVE",
                 org_agenda_overriding_header = "Open TODOs",
-                org_agenda_sorting_strategy = { "todo-state-up", "priority-down", "category-keep" },
+                org_agenda_sorting_strategy = { "priority-down", "todo-state-up", "category-keep" },
               },
             },
           },
         },
-        org_todo_keywords = { "TODO", "PROGRESS", "|", "DONE" },
+        org_todo_keywords = { "PROGRESS", "TODO", "|", "DONE" },
         org_todo_keyword_faces = {
           TODO = ":foreground " .. colors.red .. ":weight bold",
           PROGRESS = ":foreground " .. colors.yellow .. ":weight bold",
@@ -101,6 +105,10 @@ return {
         org_log_done = true,
         org_log_done_repeat_create_time = true,
       })
+
+      vim.api.nvim_create_user_command("OrgNotify", function()
+        require("config.org_notify").run()
+      end, { desc = "Notify about due Org schedules" })
 
       -- Set up proper highlights for org-mode after colorscheme loads
       vim.api.nvim_create_autocmd("ColorScheme", {
@@ -168,12 +176,6 @@ return {
           org_agenda_sorting_strategy = { "todo-state-up", "priority-down", "category-keep" },
         })
       end, { desc = "Org open TODOs" })
-      vim.keymap.set("n", "<leader>op", function()
-        require("config.org_ai").plan()
-      end, { desc = "Org AI plan" })
-      vim.keymap.set("n", "<leader>or", function()
-        require("config.org_ai").launch()
-      end, { desc = "Org AI launch with Pi" })
     end,
   },
   {

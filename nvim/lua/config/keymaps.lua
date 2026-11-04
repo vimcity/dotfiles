@@ -23,9 +23,10 @@ vim.keymap.set("v", "<M-Up>", ":m '>+<cr>gv=gv", { desc = "Move selection down" 
 vim.keymap.set("v", "<M-Down>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
 
 -- Deletes → register "d" (paste with P), never system clipboard.
--- Explicitly target + for yanks: the configured provider sends OSC 52 over SSH.
+-- Yanks in visual mode only go to + (OSC 52 over SSH); normal-mode y stays
+-- on register "" so macro recording/replay isn't broken by missing clipboard.
 local clipboard_yank_opts = { noremap = true, silent = true }
-vim.keymap.set({ "n", "x" }, "y", '"+y', clipboard_yank_opts)
+vim.keymap.set("x", "y", '"+y', clipboard_yank_opts)
 vim.keymap.set("n", "Y", '"+Y', clipboard_yank_opts)
 -- Paste the last local yank, not the terminal clipboard. Reading register +
 -- asks OSC 52 to query Ghostty and can block in nested terminals.

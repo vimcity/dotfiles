@@ -18,7 +18,7 @@
       "maxRetryDelayMs": 15000
     }
   },
-  "lastChangelogVersion": "0.84.4",
+  "lastChangelogVersion": "0.87.1",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
@@ -37,5 +37,5 @@
   "showHardwareCursor": true,
   "tuiMode": "fullscreen",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna"
+  "defaultModel": "gpt-6-luna"
 }

@@ -5,7 +5,6 @@ c.scrolling.smooth = True
 # Sessions (native qutebrowser behavior + small config hooks):
 # - _autosave.yml: written periodically while browsing (auto_save.interval + tab loads)
 # - main.yml: written on quit (auto_save.session + session.default_name)
-# - --backup on :ss/:wq keeps the previous main.yml before each overwrite (built into :session-save)
 c.auto_save.session = True
 c.auto_save.interval = (
     15000  # native default; governs _autosave + config/cookies flush rate
@@ -44,11 +43,11 @@ c.content.headers.do_not_track = True
 c.content.pdfjs = True
 
 # Ask sites for their native dark theme, then apply Chromium's dark filter everywhere.
-c.colors.webpage.preferred_color_scheme = "dark"
-c.colors.webpage.darkmode.enabled = false 
-c.colors.webpage.darkmode.policy.page = "always"
-c.colors.webpage.darkmode.policy.images = "smart"
-c.colors.webpage.darkmode.algorithm = "lightness-cielab"
+# c.colors.webpage.preferred_color_scheme = "dark"
+# c.colors.webpage.darkmode.enabled = false 
+# c.colors.webpage.darkmode.policy.page = "always"
+# c.colors.webpage.darkmode.policy.images = "smart"
+# c.colors.webpage.darkmode.algorithm = "lightness-cielab"
 
 # Use Neovim for :edit-url / :edit-text.
 c.editor.command = ["/opt/homebrew/bin/nvim", "{file}"]
@@ -170,12 +169,12 @@ c.hints.chars = "abcdefghijklmnopqrstuvwxyz"
 c.aliases["qm"] = "quickmark-load"
 c.aliases["qmt"] = "quickmark-load -t"
 c.aliases["qma"] = "quickmark-add"
-# Snapshots + quit. :q still uses native auto_save on quit; these add --backup first.
-c.aliases["ss"] = "session-save --backup --force main"
-c.aliases["sb"] = "session-save --backup --force"
+# Session saves + quit. :q still uses native auto_save on quit.
+c.aliases["ss"] = "session-save --force main"
+c.aliases["sb"] = "session-save --force"
 c.aliases["sl"] = "session-load main"
-c.aliases["wq"] = "session-save --backup --force main;; quit"
-c.aliases["wqa"] = "session-save --backup --force main;; quit --all"
+c.aliases["wq"] = "session-save --force main;; quit"
+c.aliases["wqa"] = "session-save --force main;; quit --all"
 c.aliases["g"] = "open -t  https://google.com"
 c.aliases["t"] = "tab-focus"
 
@@ -186,22 +185,13 @@ config.bind("u", "cmd-run-with-count 20 scroll up")
 config.bind("X", "undo")
 config.bind(",r", "config-source")
 # Native _autosave ignores tab closes (#8219); flush main using built-in :session-save.
-config.bind("x", "tab-close;; session-save --backup --force main")
+config.bind("x", "tab-close;; session-save --force main")
 
 # Quickmark helper keybinds (prefill command line).
 config.bind(",m", "cmd-set-text -s :quickmark-load ")
 config.bind(",M", "cmd-set-text -s :quickmark-load -t ")
 
 config.bind(",h", "config-cycle tabs.show never multiple")
-
-# rbw password helpers (insert mode on login forms)
-config.bind(",pw", "spawn --userscript rbw-autofill both", mode="insert")
-config.bind(",pu", "spawn --userscript rbw-autofill username", mode="insert")
-config.bind(",pp", "spawn --userscript rbw-autofill password", mode="insert")
-config.bind(",pt", "spawn --userscript rbw-autofill totp", mode="insert")
-config.bind(",Pc", "spawn --userscript rbw-autofill password")
-config.bind(",Pu", "spawn --userscript rbw-autofill username")
-config.bind(",Pt", "spawn --userscript rbw-autofill totp")
 
 # Allow clicking links with custom URI schemes (e.g. slack://) to open in macOS default app
 c.content.unknown_url_scheme_policy = "allow-all"
