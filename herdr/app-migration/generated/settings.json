@@ -1,0 +1,21 @@
+{
+  "zoom": 1.0,
+  "sounds": {
+    "enabled": false
+  },
+  "minimum_contrast": 1.0,
+  "appearance": "dark",
+  "colors": {
+    "background": "#303446",
+    "chrome": "#303446",
+    "canvas": "#292c3c",
+    "surface": "#414559",
+    "raised": "#51576d",
+    "selected": "#51576d",
+    "selection": "#626880",
+    "border": "#626880",
+    "foreground": "#c6d0f5",
+    "muted": "#a5adce",
+    "accent": "#91a4fa"
+  }
+}

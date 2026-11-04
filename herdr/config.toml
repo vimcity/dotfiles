@@ -1,7 +1,7 @@
 onboarding = false
 
 [theme]
-name = "catppuccin"
+name = "terminal"
 
 auto_switch = false
 
@@ -23,7 +23,7 @@ accent = "#91a4fa"
 [keys]
 prefix = "ctrl+space"
 
-settings = "prefix+shift+s"
+settings = "prefix+ctrl+,"
 reload_config = "prefix+,"
 toggle_sidebar = "alt+e"
 detach = "prefix+d"
@@ -80,7 +80,7 @@ command = "exec \"$HOME/dotfiles/herdr/scripts/scrollback-nvim.sh\""
 description = "scrollback in nvim with tailspin highlighting"
 
 [[keys.command]]
-key = "prefix+ctrl+f"
+key = "prefix+ctrl+p"
 type = "popup"
 command = "exec \"${SHELL:-/bin/zsh}\" -l"
 width = "75%"
@@ -88,10 +88,37 @@ height = "75%"
 description = "open floating shell"
 
 [[keys.command]]
+key = "prefix+ctrl+c"
+type = "pane"
+command = "exec \"${SHELL:-/bin/zsh}\" -l"
+description = "open floating shell"
+
+[[keys.command]]
 key = "prefix+ctrl+n"
 type = "pane"
 command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim"
 description = "open Neovim in a Projects tab"
+
+[[keys.command]]
+key = "prefix+alt+j"
+type = "popup"
+command = "exec \"$HOME/dotfiles/herdr/scripts/jarvis-action.sh\""
+width = "80%"
+height = "70%"
+description = "preview a Jarvis terminal action"
+
+[[keys.command]]
+key = "prefix+alt+v"
+type = "pane"
+command = "exec \"$HOME/dotfiles/bin/jv\""
+description = "start local Jarvis voice (Ctrl-C to stop)"
+
+[[keys.command]]
+key = "prefix+shift+s"
+type = "pane"
+command = "exec ~/.local/bin/lzk"
+description = "start lazy splunk tui"
+
 
 [[keys.command]]
 key = "prefix+g"
@@ -199,26 +226,25 @@ command = "exec fluence pick"
 description = "open confluence docs"
 
 [[keys.command]]
-key = "prefix+ctrl+c"
+key = "prefix+ctrl+f"
 type = "pane"
-command = "cd $HOME/Projects && exec \"${SHELL:-/bin/zsh}\" -l"
-description = "open quick window"
+command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'"
+description = "pick a directory with g"
 
-# TODO: understand the use cases of this better, also herdr api for interacting with agents could replace the codex pi and this one 
 [[keys.command]]
-key = "prefix+shift+i"
+key = "prefix+ctrl+s"
 type = "popup"
-command = "exec $HOME/dotfiles/bin/org-pi launch"
-width = "72%"
-height = "70%"
-description = "org task → Pi (org-pi launch)"
+command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md"
+width = "65%"
+height = "60%"
+description = "checkout stash"
 
 [[keys.command]]
 key = "prefix+ctrl+o"
 type = "popup"
 command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh"
-width = "65%"
-height = "60%"
+width = "75%"
+height = "75%"
 description = "open today's org agenda"
 
 [[keys.command]]
@@ -230,7 +256,7 @@ height = "80%"
 description = "create new org plans"
 
 [[keys.command]]
-key = "prefix+ctrl+p"
+key = "prefix+p"
 type = "pane"
 command = "exec posting --env \"$HOME/.local/share/posting/default/posting.env\""
 description = "open Posting"
@@ -267,9 +293,10 @@ description = "open lmstat"
 
 [ui]
 pane_borders = true
+copy_on_select = true
 pane_outer_borders = true
 pane_gaps = true
-status_indicators = "symbols"
+status_indicators = "dots"
 tab_bar_right = [
   { type = "command", command = "$HOME/dotfiles/herdr/scripts/status-right.sh", interval_seconds = 5, timeout_seconds = 2 },
   { type = "text", text = " " },
@@ -277,7 +304,7 @@ tab_bar_right = [
 prompt_new_tab_name = false
 prompt_new_workspace_name = true
 show_agent_labels_on_pane_borders = true
-agent_panel_sort = "priority"
+# agent_panel_sort = "priority"
 sidebar_width = 34
 sidebar_max_width = 44
 
@@ -293,8 +320,11 @@ row_gap = 1
 rows = [["state_icon", "workspace"], ["branch", "git_status"]]
 
 [ui.toast]
-delivery = "herdr"
+delivery = "terminal"
 
 [experimental]
 kitty_graphics = true
 switch_ascii_input_source_in_prefix = false
+
+[ui.sound]
+enabled = false
