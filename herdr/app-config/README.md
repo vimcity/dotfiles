@@ -30,5 +30,7 @@ Existing live files are moved under `HERDR_BACKUP_HOME` before links are created
 - `mods/minimal-picker`: the Cmd-P / Ctrl-F navigation popup.
 - `mods/minimal-pane`: pane header controls.
 - `mods/changes-close`: the layout's Changes panel.
+- `mods/minimal-palette`, `mods/minimal-rename`, `mods/review-toggle`, and `mods/legacy-prefix`: custom commands referenced by `keys.json`.
+- `mods/recap`: custom key handlers for the recap mod.
 
 Generated Herdr files such as `gpui-kit.d.ts` and `jsconfig.json` are intentionally not stored here; Herdr regenerates them locally.
