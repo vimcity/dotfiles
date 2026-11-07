@@ -73,7 +73,6 @@
       },
       "min": 44,
       "max": 480,
-      "hidden": true,
       "background": "chrome",
       "resizable": false
     },
