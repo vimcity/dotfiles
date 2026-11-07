@@ -84,14 +84,24 @@ local function launch(ctx, item)
       return string.char(tonumber(hex, 16))
     end)
   end
+  local home = os.getenv("HOME")
   local options = {
     shell = "none",
-    command = item.command or { "/bin/zsh", "-lc", item.shell_command },
+    login = item.interactive_shell == true,
+    command = item.command or {
+      "/bin/zsh", item.interactive_shell and "-lc" or "-c", item.shell_command,
+    },
     cwd = cwd,
   }
+  if not item.interactive_shell then
+    options.path_prepend = {
+      home .. "/.local/bin", home .. "/dotfiles/bin",
+      "/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin",
+    }
+  end
   if item.scrollback then
     options.command = {
-      "/bin/zsh", "-lc", 'exec /bin/bash "$@"', "rex-scrollback",
+      "/bin/zsh", "-c", 'exec /bin/bash "$@"', "rex-scrollback",
       os.getenv("HOME") .. "/.config/rex/scripts/scrollback-nvim.sh", ctx.session_id, ctx.block_id,
     }
   end
@@ -121,8 +131,8 @@ end
 
 local launchers = {
   { name = "launch_scrollback", key = "ctrl+space>/", title = "scrollback in nvim with tailspin highlighting", scrollback = true },
-  { name = "launch_popup_shell", key = "ctrl+space>ctrl+p", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l", popup = true, width = 0.75, height = 0.75 },
-  { name = "launch_shell_tab", key = "ctrl+space>ctrl+c", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l" },
+  { name = "launch_popup_shell", interactive_shell = true, key = "ctrl+space>ctrl+p", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l", popup = true, width = 0.75, height = 0.75 },
+  { name = "launch_shell_tab", interactive_shell = true, key = "ctrl+space>ctrl+c", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l" },
   { name = "launch_projects_editor", key = "ctrl+space>ctrl+n", title = "open Neovim in a Projects tab", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim" },
   { name = "launch_splunk", key = "ctrl+space>shift+s", title = "start lazy splunk tui", shell_command = "exec ~/.local/bin/lzk" },
   { name = "launch_review_prs", key = "ctrl+space>shift+g", title = "review PRs", shell_command = "exec $HOME/.local/bin/gh-pr-dash" },
@@ -130,7 +140,7 @@ local launchers = {
   { name = "launch_lazygit", key = "ctrl+space>ctrl+g", title = "open lazyzgit", shell_command = "exec lazygit" },
   { name = "launch_org_task", key = "ctrl+space>ctrl+a", title = "open or create an org todo", shell_command = "exec $HOME/dotfiles/herdr/scripts/quick-org-task.sh", popup = true, width = 0.55, height = 0.5 },
   { name = "launch_confluence", key = "ctrl+space>shift+c", title = "open confluence docs", shell_command = "exec fluence pick" },
-  { name = "launch_directory_picker", key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'" },
+  { name = "launch_directory_picker", interactive_shell = true, key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'" },
   { name = "launch_stash", key = "ctrl+space>ctrl+s", title = "checkout stash", shell_command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md", popup = true, width = 0.65, height = 0.6 },
   { name = "launch_agenda", key = "ctrl+space>ctrl+o", title = "open today's org agenda", shell_command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh", popup = true, width = 0.75, height = 0.75 },
   { name = "launch_org_plans", key = "ctrl+space>shift+o", title = "create new org plans", shell_command = "exec $HOME/dotfiles/herdr/scripts/org-plans.sh", popup = true, width = 0.85, height = 0.8 },

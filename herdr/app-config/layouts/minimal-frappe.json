@@ -1,0 +1,198 @@
+{
+  "id": "root",
+  "cloned_from": {
+    "name": "main",
+    "version": "0.1.13"
+  },
+  "type": "row",
+  "children": [
+    {
+      "id": "sidebar",
+      "type": "column",
+      "children": [
+        {
+          "id": "brand",
+          "type": "block",
+          "content": {
+            "mod": "minimal-metrics"
+          },
+          "size": {
+            "px": 30
+          },
+          "window_drag": true
+        },
+        {
+          "id": "sidebar-lists",
+          "type": "column",
+          "children": [
+            {
+              "id": "spaces",
+              "type": "block",
+              "content": {
+                "mod": "minimal-sidebar"
+              },
+              "size": {
+                "px": 546
+              },
+              "min": 90
+            },
+            {
+              "id": "agents",
+              "type": "block",
+              "content": {
+                "mod": "minimal-agents"
+              },
+              "size": {
+                "weight": 1
+              },
+              "min": 90
+            }
+          ],
+          "divider": {
+            "width": 0,
+            "color": "chrome"
+          }
+        },
+        {
+          "id": "sidebar-footer",
+          "type": "block",
+          "content": {
+            "mod": "workspace-chrome",
+            "props": {
+              "footer": true
+            }
+          },
+          "size": {
+            "px": 69
+          },
+          "hidden": true
+        }
+      ],
+      "size": {
+        "px": 295
+      },
+      "min": 44,
+      "max": 480,
+      "hidden": true,
+      "background": "chrome",
+      "resizable": false
+    },
+    {
+      "id": "work",
+      "type": "column",
+      "children": [
+        {
+          "id": "tabs",
+          "type": "block",
+          "content": {
+            "mod": "tabs"
+          },
+          "size": {
+            "px": 42
+          },
+          "hidden": true,
+          "window_drag": true
+        },
+        {
+          "id": "work-body",
+          "type": "row",
+          "children": [
+            {
+              "id": "main",
+              "type": "block",
+              "content": {
+                "tab": "active",
+                "pane": {
+                  "header": {
+                    "content": {
+                      "mod": "minimal-pane"
+                    },
+                    "reveal": "always",
+                    "height": 34,
+                    "position": "top"
+                  },
+                  "background": "background",
+                  "border": {
+                    "width": 1,
+                    "color": "#414559"
+                  },
+                  "focus": {
+                    "width": 1,
+                    "color": "#00000000"
+                  },
+                  "radius": 0,
+                  "gap": 6,
+                  "lone": true
+                }
+              }
+            },
+            {
+              "id": "panel",
+              "type": "column",
+              "children": [
+                {
+                  "id": "panel-body",
+                  "type": "stack",
+                  "children": [
+                    {
+                      "id": "files",
+                      "type": "block",
+                      "content": {
+                        "mod": "files"
+                      }
+                    },
+                    {
+                      "id": "changes",
+                      "type": "block",
+                      "content": {
+                        "mod": "changes-close"
+                      }
+                    }
+                  ],
+                  "active": "changes"
+                }
+              ],
+              "size": {
+                "px": 182
+              },
+              "min": 280,
+              "max": 3000,
+              "hidden": true
+            }
+          ],
+          "padding": 0,
+          "gap": 12
+        },
+        {
+          "id": "status",
+          "type": "block",
+          "content": {
+            "mod": "workspace-status"
+          },
+          "size": {
+            "px": 28
+          },
+          "hidden": true
+        }
+      ],
+      "resizable": false
+    }
+  ],
+  "background": "canvas",
+  "theme": {
+    "light": "catppuccin-frappe",
+    "dark": "catppuccin-frappe"
+  },
+  "colors": {
+    "cursor": "#ef9f76"
+  },
+  "terminal_padding": [
+    0,
+    12
+  ],
+  "titlebar": "none",
+  "traffic_lights": [
+    12,
+    11
+  ]
+}

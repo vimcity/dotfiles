@@ -12,13 +12,14 @@ mouse-hide-while-typing = true
 # macos-icon = custom
 # macos-custom-icon = ~/.config/ghostty/cat-ghostty.icns
 # macos-icon = retro
-macos-icon = glass
+# macos-icon = glass
 # macos-icon = holographic
 # macos-icon = xray
 
 # Font settings
 font-feature = -calt
 # font-family = "CommitMono"
+font-family = "JetBrainsMono NF"
 # font-family = "FiraCode Nerd Font"
 # font-family = "GoogleSansCode Nerd Font"
 # font-family = "Hack Nerd Font"

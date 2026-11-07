@@ -25,10 +25,10 @@ settings.setdefault('colors', {}).update({
 actions = {}
 mapping = {
     'settings': 'app.settings', 'toggle_sidebar': 'layout.toggle:sidebar',
-    'help': 'app.help', 'workspace_picker': 'mod.open:picker', 'goto': 'mod.open:picker',
+    'help': 'app.help', 'workspace_picker': 'mod.open:minimal-picker', 'goto': 'mod.open:minimal-picker',
     'previous_agent': 'agent.prev', 'next_agent': 'agent.next',
     'new_tab': 'tab.new', 'previous_tab': 'tab.prev', 'next_tab': 'tab.next',
-    'rename_tab': 'tab.rename', 'close_tab': 'tab.close',
+    'rename_tab': 'mod.open:minimal-rename', 'close_tab': 'tab.close',
     'split_vertical': 'pane.split:right', 'split_horizontal': 'pane.split:down',
     'close_pane': 'pane.close', 'zoom': 'pane.zoom',
     'new_workspace': 'space.new', 'rename_workspace': 'space.rename',
@@ -52,10 +52,20 @@ for i in range(1, 10):
     bind(f'prefix+shift+{i}', f'space.select:{i}')
 for item in old['keys']['command']:
     if item['type'] in ('pane', 'popup') and 'scrollback-nvim' not in item['command']:
-        bind(item['key'], {'shell': item['command'], 'name': item['description']})
+        bind(item['key'], {
+            'shell': item['command'], 'name': item['description'],
+            'popup': item['type'] == 'popup',
+        })
+actions['shift-r'] = 'mod.open:recap'
 actions['shift-w'] = {'worktree': 'new'}
 actions['ctrl-w'] = {'worktree': 'open'}
 keys['global']['ctrl-space'] = 'mod.open:legacy-prefix'
+if keys['global'].get('f2') == 'tab.rename':
+    keys['global']['f2'] = 'mod.open:minimal-rename'
+for chord, action in keys['global'].items():
+    if action == 'app.palette':
+        keys['global'][chord] = 'mod.open:minimal-palette'
+keys['global']['ctrl-shift-p'] = 'mod.open:minimal-palette'
 output = root / 'generated'
 output.mkdir(exist_ok=True)
 for name, data in [('keys.json', keys), ('settings.json', settings)]:

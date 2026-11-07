@@ -127,6 +127,12 @@ command = "persiyanov.reviewr.toggle"
 description = "toggle the reviewr sidebar"
 
 [[keys.command]]
+key = "prefix+shift+r"
+type = "plugin_action"
+command = "herdr-recap.open"
+description = "open agent recaps"
+
+[[keys.command]]
 key = "prefix+t"
 type = "plugin_action"
 command = "hotchpotch.herdr-tiny-fingers.open"
@@ -292,7 +298,7 @@ command = "exec $HOME/.local/bin/lmstat"
 description = "open lmstat"
 
 [ui]
-pane_borders = true
+pane_borders = false
 copy_on_select = true
 pane_outer_borders = true
 pane_gaps = true

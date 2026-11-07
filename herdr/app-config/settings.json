@@ -1,0 +1,15 @@
+{
+  "zoom": 1.2,
+  "sounds": {
+    "enabled": false
+  },
+  "font_size": 14,
+  "font_ligatures": false,
+  "ui_font": "Geist Mono",
+  "telemetry": false,
+  "minimum_contrast": 1,
+  "option_as_alt": "auto",
+  "appearance": "dark",
+  "theme": "catppuccin-frappe",
+  "font": "JetBrainsMono Nerd Font"
+}
