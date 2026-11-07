@@ -1,6 +1,8 @@
 import { View, div, image, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { home, layout, nextCommand, panes, props, run, settings, theme, window } from "herdr";
+import { agents, home, layout, nextCommand, panes, props, run, settings, spaces, theme, window } from "herdr";
+
+import { sessionLabel } from "./session-label.js";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -28,6 +30,7 @@ export default class CompactPane extends View {
   init(_props, cx) {
     this.lastFocused = false;
     this.flashTask = null;
+    this.highlighted = false;
     this.navigating = false;
     cx.spawn(async (cx) => {
       for (;;) {
@@ -62,23 +65,13 @@ export default class CompactPane extends View {
     });
   }
 
-  setBorder(color) {
-    const tree = JSON.parse(JSON.stringify(layout()));
-    const frame = find(tree, "main")?.content?.pane;
-    if (!frame || frame.focus?.color === color) return;
-    frame.focus = { width: 1, color };
-    run("layout.set", { layout: tree });
-  }
-
   flash(cx) {
     this.flashTask?.cancel();
-    this.flashTask = cx.timer.after(0, (cx) => {
-      if (!this.pane()?.focused) return;
-      this.setBorder("#ef9f76");
-      this.flashTask = cx.timer.after(220, () => {
-        if (this.pane()?.focused) this.setBorder("#00000000");
-        this.flashTask = null;
-      });
+    this.highlighted = true;
+    this.flashTask = cx.timer.after(700, (cx) => {
+      this.highlighted = false;
+      this.flashTask = null;
+      cx.notify();
     });
   }
 
@@ -94,7 +87,9 @@ export default class CompactPane extends View {
     if (pane.focused && !this.lastFocused) this.flash(cx);
     if (!pane.focused && this.lastFocused) {
       this.flashTask?.cancel();
-      }
+      this.flashTask = null;
+      this.highlighted = false;
+    }
     this.lastFocused = pane.focused;
 
     const root = layout();
@@ -108,21 +103,34 @@ export default class CompactPane extends View {
     // Reserve titlebar space only when the sidebar is not already holding the traffic lights.
     const lightsPadding = trafficLights ? Math.max(10, (root.traffic_lights[0] + 64) / settings().zoom) : 10;
     const rowHeight = trafficLights ? 2 * (root.traffic_lights[1] + 6) / settings().zoom : "100%";
-    const title = (pane.title ?? "").replace(/^[^\p{L}\p{N}~/]+/u, "").trim();
-    const sessionTitle = pane.program?.agent && title && title !== pane.program.name
-      && title.toLowerCase() !== pane.app && !/^[~/]/.test(title);
-    const name = sessionTitle ? title : pane.program?.name || title || "Terminal";
-    const programIcon = icon(pane.program, t.muted);
+    const tab = spaces().flatMap(space => space.tabs).find(tab => tab.id === pane.tab);
+    const label = sessionLabel(tab, pane, agents().find(agent => agent.address === pane.terminal), folder);
+    const name = label.name;
+    const gold = "#EFAB65";
+    const highlight = pane.focused && this.highlighted;
+    const programIcon = icon(pane.program, t.foreground);
+    const goldIcon = icon(pane.program, gold);
 
     return div().size_full().bg(t.background)
       .child(h_flex().id(`pane-head-${pane.pane}`).w_full().h(rowHeight).pl(lightsPadding).pr(10).gap(8).items_center()
       .text_size(12).line_height(1)
       .on_click(() => run("pane.focus", { pane: pane.pane }))
-      .child(h_flex().id(`pane-focus-mark-${pane.pane}`).relative().flex_none().p(3).gap(6).items_center().rounded(4)
+      .child(h_flex().id(`pane-focus-mark-${pane.pane}`).relative().min_w(0).px(10).py(5).gap(6).items_center().rounded(16)
+        .bg(pane.focused ? t.selected : t.background)
         .when(Boolean(programIcon), el => el.child(programIcon))
-        .child(div().flex_none().truncate().max_w(220).font_medium().text_color(t.foreground).child(name))
-        .child(div().min_w(0).max_w(340).truncate().text_color(t.ansi4).child(folder(pane.cwd))))
-      .when(Boolean(pane.branch), el => el.child(div().min_w(0).truncate().text_color(t.ansi5).child(`⑂ ${pane.branch}`)))
+        .child(div().flex_none().truncate().max_w(label.isAgent ? 500 : 220).font_medium().text_color(t.foreground).child(name))
+        .when(Boolean(label.detail), el => el.child(div().min_w(0).max_w(340).truncate().text_color(t.muted).child(label.detail)))
+        .when(pane.focused, el => el.child(div().size(5).flex_none().rounded(3).bg(gold)))
+        .child(h_flex().id(`pane-gold-fade-${pane.pane}`).absolute().inset_0()
+          .px(10).py(5).gap(6).items_center().rounded(16).bg("#EFAB6526")
+          .opacity(highlight ? 1 : 0)
+          .transition("opacity", { duration: highlight ? 0 : 150, easing: "ease-out" })
+          .when(Boolean(goldIcon), el => el.child(goldIcon))
+          .child(div().flex_none().truncate().max_w(label.isAgent ? 500 : 220).font_medium().text_color(gold).child(name))
+          .when(Boolean(label.detail), el => el.child(div().min_w(0).max_w(340).truncate().text_color(gold).child(label.detail)))))
+      .when(Boolean(pane.branch), el => el.child(h_flex().min_w(0).gap(5).items_center().text_color(t.ansi5)
+        .child(svg("mods/workspace-chrome/git-branch.svg").size(14).flex_none())
+        .child(div().min_w(0).truncate().child(pane.branch))))
       .when(pane.status === "working", el => el.child(svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900)))
       .child(div().flex_1())
       .when(pane.status === "blocked", el => el.child(div().flex_none().px(6).h(18).flex().items_center().rounded(0).bg(t.blocked + "26").text_size(10.5).font_semibold().text_color(t.blocked).child("Needs you")))

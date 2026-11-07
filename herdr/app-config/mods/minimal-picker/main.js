@@ -1,6 +1,8 @@
 import { View, div, svg, image } from "gpui-kit";
-import { v_flex, h_flex, InputState, Input } from "gpui-base";
-import { agents, spaces, panes, machines, home, run, theme, props, closeOverlay } from "herdr";
+import { v_flex, h_flex, InputState, Input, v_virtual_list, Scrollbar, VirtualListScrollHandle } from "gpui-base";
+import { agents, spaces, panes, machines, home, run, theme, props, closeOverlay, settings } from "herdr";
+import { sessionLabel } from "./session-label.js";
+import { revealTarget } from "./navigation.js";
 
 function folder(cwd) {
   const h = home();
@@ -8,218 +10,199 @@ function folder(cwd) {
 }
 
 function programIcon(program, color) {
-  if (!program?.icon) return svg("mods/workspace-chrome/terminal.svg").size(14).flex_none().text_color(color);
+  if (!program?.icon) return svg("mods/workspace-chrome/terminal.svg").size(18).flex_none().text_color(color);
   return program.tint
-    ? svg(program.icon).size(14).flex_none().text_color(color)
-    : image(program.icon).w(14).h(14).flex_none();
+    ? svg(program.icon).size(18).flex_none().text_color(color)
+    : image(program.icon).w(18).h(18).flex_none();
 }
+
+const pickable = row => ["ctx", "new", "space"].includes(row.kind);
+const rowKey = row => row.kind === "machine" ? `machine-${row.machine ?? "local"}` : row.kind === "head" ? `head-${row.w.id}`
+  : row.kind === "ctx" ? `ctx-${row.current?.pane ?? row.ctx.id}`
+  : row.kind === "space" ? `space-${row.machine ?? "local"}` : "new";
+const rowHeight = row => row.kind === "machine" ? 32 : row.kind === "head" ? 24 : row.kind === "ctx" ? row.label.isAgent ? 44 : 56 : 36;
 
 export default class Picker extends View {
   init(_props, cx) {
     this.filter = "";
-    this.input = InputState.new({ placeholder: "Go to a tab, space or agent…" });
-    this.input.on("change", (_e, cx) => { this.filter = this.input.value(); this.at = 0; cx.notify(); });
-    this.input.on("submit", () => this.go(this.rows().filter(r => r.kind === "ctx" || r.kind === "new" || r.kind === "space")[this.at]));
-    this.input.focus();
-    cx.timer.after(600, () => this.input.focus());
     this.at = null;
-    this.scroll = 0;
-
+    this.selectedKey = null;
+    this.revealPending = true;
+    this.scrollOffset = null;
+    this.scrollHandle = VirtualListScrollHandle.new();
+    this.input = InputState.new({ placeholder: "Search sessions…" });
+    this.input.on("change", (_event, cx) => {
+      this.filter = this.input.value();
+      this.at = 0;
+      this.selectedKey = null;
+      this.scrollOffset = null;
+      this.revealPending = true;
+      this.pendingReveal?.cancel();
+      cx.notify();
+    });
+    this.input.on("submit", () => this.go(this.rows().find(row => rowKey(row) === this.selectedKey)));
+    cx.timer.after(0, () => this.input.focus());
     this.handle = cx.focus_handle();
   }
 
-  close() {
+  dismiss() {
     closeOverlay(props().overlay);
   }
 
+  close() {
+    this.pendingReveal?.cancel();
+    this.scrollHandle?.release();
+  }
+
+  manualScroll() {
+    this.pendingReveal?.cancel();
+    this.pendingReveal = null;
+    this.revealPending = false;
+    this.scrollOffset = null;
+  }
+
   rows() {
-    const f = this.filter.toLowerCase();
+    const query = this.filter.toLowerCase();
     const all = agents();
     const allPanes = panes();
-    const groups = spaces().map((w) => {
-      const ctxs = w.tabs.flatMap((ctx) => {
-        const items = allPanes.filter((p) => p.tab === ctx.id);
+    const groups = spaces().map(w => {
+      const ctxs = w.tabs.flatMap(ctx => {
+        const items = allPanes.filter(pane => pane.tab === ctx.id);
         return (items.length ? items : [null]).map((current, index) => {
-          const agent = all.find((a) => current && (a.pane === current.pane || a.address === current.terminal));
-          return { w, ctx, current, index, count: items.length, agent, status: current?.status ?? agent?.status ?? null };
+          const agent = all.find(agent => current && (agent.pane === current.pane || agent.address === current.terminal));
+          return { w, ctx, current, index, count: items.length, agent,
+            label: sessionLabel(ctx, current, agent, folder), status: current?.status ?? agent?.status ?? null };
         });
-      }).filter((r) => !f || [w.name, r.ctx.name, r.current?.cwd, folder(r.current?.cwd),
-        r.current?.title, r.current?.branch, r.current?.program?.name, r.agent?.title, r.agent?.program?.name]
-        .join(" ").toLowerCase().includes(f));
+      }).filter(row => !query || [w.name, row.ctx.name, row.label.name, row.current?.cwd, folder(row.current?.cwd),
+        w.machine ?? "local", row.current?.title, row.current?.branch, row.current?.program?.name, row.agent?.title, row.agent?.program?.name]
+        .join(" ").toLowerCase().includes(query));
       return { w, ctxs };
     });
-    const busy = groups.filter((p) => p.w.status && p.ctxs.length);
-    const quiet = groups.filter((p) => !p.w.status && p.ctxs.length);
-    busy.sort((a, b) => (b.w.status === "blocked") - (a.w.status === "blocked"));
-    const out = [];
-    const add = (p) => {
-      out.push({ kind: "head", w: p.w });
-      for (const c of p.ctxs) out.push({ kind: "ctx", ...c });
-    };
-    busy.forEach(add);
-    quiet.forEach(add);
-    out.push({ kind: "new" });
-    out.push({ kind: "space", machine: null });
-    for (const m of machines().filter((m) => m.name && m.layout === "ready")) out.push({ kind: "space", machine: m.name });
-    return out;
-  }
-
-  go(r) {
-    if (!r) return;
-    this.close();
-    if (r.kind === "ctx") {
-      if (!r.w.active) run("space.select", { id: r.w.id });
-      run("tab.select", { id: r.ctx.id });
-      if (r.current) run("pane.focus", { pane: r.current.pane });
+    const rows = [];
+    let previousMachine;
+    for (const group of groups.filter(group => group.ctxs.length)) {
+      const machine = group.w.machine ?? null;
+      if (machine !== previousMachine) rows.push({ kind: "machine", machine });
+      previousMachine = machine;
+      rows.push({ kind: "head", w: group.w });
+      rows.push(...group.ctxs.map(row => ({ kind: "ctx", ...row })));
     }
-    else if (r.kind === "new") run("tab.new");
-    else if (r.kind === "space") run("space.new", { machine: r.machine ?? "" });
+    rows.push({ kind: "new" }, { kind: "space", machine: null });
+    rows.push(...machines().filter(machine => machine.name && machine.layout === "ready").map(machine => ({ kind: "space", machine: machine.name })));
+    return rows;
   }
 
-  glyph(t, st) {
-    if (st === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900);
-    return div().w(12).flex_none().text_color(t[st] ?? t.dim).child(st === "idle" ? "○" : st ? "●" : "·");
+  go(row) {
+    if (!row || !pickable(row)) return;
+    this.dismiss();
+    if (row.kind === "ctx") {
+      if (!row.w.active) run("space.select", { id: row.w.id });
+      run("tab.select", { id: row.ctx.id });
+      if (row.current) run("pane.focus", { pane: row.current.pane });
+    } else if (row.kind === "new") run("tab.new");
+    else run("space.new", { machine: row.machine ?? "" });
   }
 
-  render() {
+  glyph(t, status) {
+    if (status === "working") return svg("mods/workspace-chrome/spinner.svg").size(12).flex_none().text_color(t.working).spin(900);
+    return div().w(12).flex_none().text_color(t[status] ?? t.dim).child("●");
+  }
+
+  row(row, selected, t) {
+    if (row.kind === "machine") return h_flex().h(32).px(12).gap(8).items_center()
+      .text_color(row.machine ? t.ansi6 : t.ansi4)
+      .child(svg(`mods/workspace-chrome/${row.machine ? "server" : "monitor"}.svg`).size(15).flex_none())
+      .child(div().text_size(12).font_semibold().child(row.machine || "This Mac"));
+    if (row.kind === "head") return h_flex().h(24).pl(42).pr(24).items_center()
+      .child(div().min_w(0).truncate().text_size(12).font_semibold().text_color(t.muted).child(row.w.name));
+    const on = rowKey(row) === selected;
+    if (row.kind !== "ctx") return h_flex().h(36).px(12).pr(24).gap(8).items_center().text_color(t.muted)
+      .cursor_pointer().rounded(4).when(on, el => el.bg(t.selected))
+      .child(div().w(18).child("+"))
+      .child(row.kind === "new" ? "new tab" : row.machine ? `new space on ${row.machine}` : "new space");
+    const pane = row.current;
+    const program = pane?.program ?? row.agent?.program;
+    const label = row.label;
+    return h_flex().h(rowHeight(row)).px(12).pr(24).gap(12).items_center()
+      .rounded(4).cursor_pointer().when(on, el => el.bg(t.selected))
+      .child(programIcon(program, t.muted))
+      .child(v_flex().flex_1().min_w(0).gap(3)
+        .child(h_flex().min_w(0).gap(8).items_center()
+          .child(div().min_w(0).truncate().font_medium().text_color(t.foreground).child(label.name))
+          .when(row.count > 1, el => el.child(div().flex_none().text_size(10.5).text_color(t.dim).child(`· ${row.index + 1}`)))
+          .when(["working", "blocked", "done"].includes(row.status), el => el.child(this.glyph(t, row.status))))
+        .when(Boolean(label.detail), el => el.child(h_flex().min_w(0).gap(10).text_size(13).items_center()
+          .child(div().min_w(0).truncate().text_color(t.ansi4).child(label.detail))
+          .when(Boolean(pane?.branch), el => el.child(h_flex().min_w(0).gap(5).items_center().text_color(t.ansi5)
+            .child(svg("mods/workspace-chrome/git-branch.svg").size(14).flex_none())
+            .child(div().min_w(0).truncate().child(pane.branch)))))));
+  }
+
+  render(cx) {
     const t = theme();
     const rows = this.rows();
-    const pickable = rows.filter((r) => r.kind === "ctx" || r.kind === "new" || r.kind === "space");
-    // Opens on where you are.
+    const choices = rows.filter(pickable);
+    if (this.selectedKey) {
+      const index = choices.findIndex(row => rowKey(row) === this.selectedKey);
+      if (index >= 0) this.at = index;
+    }
     if (this.at === null) {
-      const focused = pickable.findIndex((r) => r.kind === "ctx" && r.current?.focused);
-      const active = pickable.findIndex((r) => r.kind === "ctx" && r.w.active && r.ctx.active);
+      const focused = choices.findIndex(row => row.current?.focused);
+      const active = choices.findIndex(row => row.w?.active && row.ctx?.active);
       this.at = Math.max(0, focused >= 0 ? focused : active);
     }
-    this.at = Math.min(this.at, pickable.length - 1);
-    const sel = pickable[this.at];
-    // One continuous strip: each row (and the group title before it) at a fixed
-    // y. Scrolling moves the strip only as far as it takes to keep the selected
-    // row in view, so the arrows can't run the selection off the list.
-    const H = { head: 28, new: 30, ctx: 48, space: 30 };
-    const tops = [];
-    let y = 0;
-    rows.forEach((r) => { tops.push(y); y += H[r.kind] ?? 32; });
-    const total = y;
-    const height = Math.min(320, this.listHeight ?? 320);
-    const fixed = total > height;
-    const maxScroll = Math.max(0, total - height);
-    this.scroll = Math.max(0, Math.min(this.scroll, maxScroll));
-    const si = rows.indexOf(sel);
-    if (si >= 0) {
-      if (tops[si] < this.scroll) this.scroll = tops[si];
-      if (tops[si] + (H[sel.kind] ?? 32) > this.scroll + height) this.scroll = tops[si] + (H[sel.kind] ?? 32) - height;
+    this.at = Math.max(0, Math.min(this.at, choices.length - 1));
+    const selected = choices[this.at];
+    const selectedKey = rowKey(selected);
+    this.selectedKey = selectedKey;
+    const sizes = rows.map(rowHeight);
+    const total = sizes.reduce((sum, height) => sum + height, 0);
+    const height = Math.min(total, Math.max(120, Math.min(520, window.viewport_size().height * 0.72 / (Number(settings().zoom) || 1) - 70)));
+    if (this.revealPending) {
+      this.revealPending = false;
+      const target = revealTarget(sizes, rows.indexOf(selected), height, this.scrollOffset);
+      if (target) {
+        this.scrollOffset = target.offset;
+        this.pendingReveal?.cancel();
+        this.pendingReveal = cx.timer.after(0, () => {
+          this.pendingReveal = null;
+          this.scrollHandle.scroll_to_item(target.index, "top");
+        });
+      }
     }
-    const place = (el, i) =>
-      fixed
-        ? el.absolute().left(0).right(0).top(tops[i] - this.scroll).bottom(height - (tops[i] + (H[rows[i].kind] ?? 32) - this.scroll))
-        : el;
-    const visible = (i) => !fixed || (tops[i] + (H[rows[i].kind] ?? 32) > this.scroll && tops[i] < this.scroll + height);
 
-    const row = (r) => {
-      if (r.kind === "head") {
-        return h_flex().h(28).flex_none().px(10).gap(8).items_center().text_size(10.5)
-          .text_color(t.muted)
-          .child(div().font_semibold().child(r.w.name))
-          .when(Boolean(r.w.machine), el => el.child(div().text_color(t.dim).child(r.w.machine)));
-      }
-      const on = r === sel;
-      if (r.kind === "new" || r.kind === "space") {
-        const label = r.kind === "new" ? "new tab" : r.machine ? `new space on ${r.machine}` : "new space";
-        return h_flex()
-          .id(r.kind === "new" ? "pk-new" : `pk-space-${r.machine ?? "here"}`)
-          .px(10)
-          .h(30).flex_none()
-          .items_center()
-          .rounded(0)
-          .gap(8)
-          .text_color(t.muted)
-          .cursor_pointer()
-          .when(on, (el) => el.bg(t.hover))
-          .hover((s) => s.bg(t.hover))
-          .on_click(() => this.go(r))
-          .child(div().w(12).child("+"))
-          .child(label);
-      }
-      const p = r.current;
-      const program = p?.program ?? r.agent?.program;
-      const name = program?.name ?? p?.title ?? "Terminal";
-      const title = (r.agent?.title || p?.title || "").replace(/^[^\p{L}\p{N}~/]+/u, "").trim();
-      const session = program?.agent && title && title !== name && title.toLowerCase() !== p?.app
-        && !/^[~/]/.test(title) ? title : "";
-      const detail = folder(p?.cwd || r.w.folder);
-      return h_flex().id(`pk-${p?.pane ?? r.ctx.id}`).h(48).flex_none().px(10).gap(10).items_center()
-        .border_l(2).border_color(on ? t.accent : t.popover)
-        .cursor_pointer().when(on, el => el.bg(t.selected)).hover(s => s.bg(t.hover))
-        .on_click(() => this.go(r))
-        .child(programIcon(program, t.muted))
-        .child(v_flex().flex_1().min_w(0).gap(2)
-          .child(h_flex().gap(8).items_center()
-            .child(div().truncate().font_medium().text_color(t.foreground).child(name))
-            .when(Boolean(session), el => el.child(div().min_w(0).truncate().text_color(t.muted).child(session)))
-            .child(div().flex_none().text_size(10).text_color(t.dim).child(`tab ${r.ctx.name}${r.count > 1 ? ` · pane ${r.index + 1}` : ""}`))
-            .when(p?.zoomed, el => el.child(div().text_size(10).text_color(t.accent).child("ZOOM"))))
-          .child(h_flex().gap(10).text_size(11).items_center()
-            .child(div().min_w(0).truncate().text_color(t.ansi4).child(detail))
-            .when(Boolean(p?.branch), el => el.child(div().truncate().text_color(t.ansi5).child(`⑂ ${p.branch}`)))))
-        .when(Boolean(r.status), el => el.child(this.glyph(t, r.status)))
-        .when(Boolean(r.status), el => el.child(div().flex_none().text_size(10)
-          .text_color(["working", "blocked", "done"].includes(r.status) ? t[r.status] : t.dim)
-          .child(({ working: "working", blocked: "needs you", done: "finished", idle: "ready", unknown: "unknown" })[r.status] ?? r.status)));
-
-
-    };
-
-    return v_flex()
-      .id("picker")
-      .track_focus(this.handle)
-      .w_full()
-      .min_h(0)
-      .p(10)
-      .gap(8)
-      .border_1().border_color(t.border)
-      .bg(t.popover)
-      .text_size(12).line_height(1.2)
-      .on_key_down((e, cx) => {
-        const k = e.key;
-        if (k === "escape") return this.close();
-        if (k === "down") this.at = (this.at + 1) % pickable.length;
-        else if (k === "up") this.at = (this.at + pickable.length - 1) % pickable.length;
-        else if (k === "d" && e.modifiers.control) {
-          if (sel?.kind === "ctx") {
-            this.close();
-            if (sel.current) run("pane.close", { pane: sel.current.pane });
-            else run("tab.close", { id: sel.ctx.id });
+    return v_flex().id("picker").track_focus(this.handle).w_full().h(height + 70).min_h(0)
+      .px(10).pt(6).pb(10).gap(8).border_1().border_color(t.border).rounded(8).bg(t.popover).text_size(14.5).line_height(1.25)
+      .on_key_down((event, cx) => {
+        if (event.key === "escape") return this.dismiss();
+        if (event.key === "down") this.at = Math.min(this.at + 1, choices.length - 1);
+        else if (event.key === "up") this.at = Math.max(0, this.at - 1);
+        else if (event.key === "pagedown") this.at = Math.min(this.at + Math.max(1, Math.floor(height / 48)), choices.length - 1);
+        else if (event.key === "pageup") this.at = Math.max(0, this.at - Math.max(1, Math.floor(height / 48)));
+        else if (event.key === "d" && event.modifiers.control) {
+          if (selected.kind === "ctx") {
+            this.dismiss();
+            if (selected.current) run("pane.close", { pane: selected.current.pane });
+            else run("tab.close", { id: selected.ctx.id });
           }
         } else return;
+        this.selectedKey = rowKey(choices[this.at]);
+        this.revealPending = true;
+        this.pendingReveal?.cancel();
+        this.pendingReveal = null;
         cx.stop_propagation();
         cx.notify();
       })
-      .child(h_flex().items_center().child(div().flex_1().text_size(11).font_semibold().text_color(t.foreground).child("GO TO")).child(div().text_size(11).text_color(t.dim).child("Esc")))
-      .child(
-        h_flex().h(36).flex_none().px(10).gap(8).items_center().rounded(0).border_1().border_color(t.border).bg(t.background)
-          .child(svg("mods/workspace-chrome/search.svg").size(15).text_color(t.dim))
-          .child(Input.new(this.input).flex_1().h_full().text_size(12.8).text_color(t.foreground)),
-      )
-      .child(
-        v_flex()
-          .id("pk-list").relative()
-          .on_size_change((size, cx) => {
-            this.listHeight = size.height;
-            cx.notify();
-          })
-          .h(Math.min(320, total))
-          .min_h(0)
-          .mb(6)
-          .when(fixed, (el) =>
-            el.overflow_hidden().on_scroll_wheel((e, cx) => {
-              this.scroll = Math.max(0, Math.min(this.scroll - e.delta.y, maxScroll));
-              // The selection follows the wheel, so the next frame doesn't scroll back to it.
-              while (this.at < pickable.length - 1 && tops[rows.indexOf(pickable[this.at])] < this.scroll) this.at++;
-              while (this.at > 0 && tops[rows.indexOf(pickable[this.at])] + (H[pickable[this.at].kind] ?? 32) > this.scroll + height) this.at--;
-              cx.notify();
-            }))
-          .children(rows.map((r, i) => (visible(i) ? place(row(r), i) : null)).filter(Boolean)),
-      );
+      .child(h_flex().h(40).flex_none().px(10).gap(8).items_center().border_b(1).border_color(t.border).bg(t.popover)
+        .child(svg("mods/workspace-chrome/search.svg").size(15).text_color(t.dim))
+        .child(Input.new(this.input).flex_1().h_full().text_size(15).text_color(t.foreground)))
+      .child(v_flex().relative().h(height).flex_none().mb(6)
+        .on_scroll_wheel(() => this.manualScroll())
+        .on_mouse_down("left", () => this.manualScroll())
+        .child(v_virtual_list("pk-list", rows.length, sizes, index => rowKey(rows[index]),
+          range => rows.slice(range.start, range.end).map(row => this.row(row, selectedKey, t)))
+          .size_full().track_scroll(this.scrollHandle)
+          .on_item_click(key => this.go(this.rows().find(row => rowKey(row) === key))))
+        .when(total > height, el => el.child(Scrollbar.vertical("pk-list").absolute().inset_0().mode("always"))));
   }
 }

@@ -35,11 +35,5 @@
   "showHardwareCursor": true,
   "tuiMode": "fullscreen",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-luna",
-  "extensionChangelogVersions": {
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.86.0",
-    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
-    "{\"source\":\"npm:pi-lens\",\"scope\":\"user\"}": "4.4.9",
-    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.54.15"
-  }
+  "defaultModel": "gpt-6-luna"
 }

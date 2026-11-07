@@ -37,6 +37,8 @@ const NAMED = [
   ["mod.clone", {}, "Layout", "Duplicate mod", "clone copy customize"],
   ["terminal.open", {}, "Terminal", "New terminal", "shell"],
   ["terminal.copy", {}, "Terminal", "Copy", "clipboard"],
+  ["mod.open", { name: "terminal-hints" }, "Terminal", "Copy text with hints", "thumbs fingers regex path uuid email account"],
+  ["mod.open", { name: "recap" }, "Agent", "Agent recaps", "summary recap reply"],
   ["terminal.paste", {}, "Terminal", "Paste", "clipboard"],
   ["agent.next", {}, "Agent", "Next agent", ""],
   ["agent.prev", {}, "Agent", "Previous agent", ""],
@@ -261,7 +263,7 @@ export default class Palette extends View {
       .track_focus(this.handle)
       .w_full()
       .min_h(0)
-      .p(10)
+      .px(10).pt(6).pb(10)
       .gap(8)
       .border_1().border_color(t.border)
       .text_size(12).line_height(1.2)

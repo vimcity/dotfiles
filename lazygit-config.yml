@@ -1,6 +1,5 @@
 os:
   editPreset: "nvim-remote"
-
 customCommands:
   - key: "C"
     command: "ai-commit"
@@ -9,14 +8,6 @@ customCommands:
     output: popup
 gui:
   nerdFontsVersion: "3"
-  authorColors:
-    "*": "#babbf1"
-  branchColorPatterns:
-    "^main$": "#a6d189"
-    "^master$": "#a6d189"
-    "^feat(ure)?/": "#8caaee"
-    "^fix/": "#e78284"
-    "^hotfix/": "#e78284"
   theme:
     # Catppuccin Frappe theme
     activeBorderColor:
@@ -45,6 +36,14 @@ gui:
       - "#e78284"
     defaultFgColor:
       - "#c6d0f5"
+    authorColors:
+      "*": "#babbf1"
+    branchColorPatterns:
+      "^main$": "#a6d189"
+      "^master$": "#a6d189"
+      "^feat(ure)?/": "#8caaee"
+      "^fix/": "#e78284"
+      "^hotfix/": "#e78284"
 git:
   diffRenderers:
     - colorArg: always
