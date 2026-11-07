@@ -1,0 +1,9 @@
+{
+  "place": "none",
+  "title": "Copy hints",
+  "overlay": {
+    "kind": "dialog",
+    "width": 0.9,
+    "height": 0.85
+  }
+}

@@ -14,7 +14,15 @@ link_config() {
 
   mkdir -p "$(dirname "$target")"
 
-  if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+  local copy_module=false
+  case "$relative" in
+    mods/*/*.js|mods/*/mod.json) copy_module=true ;;
+  esac
+  if $copy_module && [ -f "$target" ] && [ ! -L "$target" ] && cmp -s "$source" "$target"; then
+    return
+  fi
+
+  if ! $copy_module && [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
     return
   fi
 
@@ -28,8 +36,13 @@ link_config() {
     printf 'Backed up %s -> %s\n' "$target" "$backup"
   fi
 
-  ln -s "$source" "$target"
-  printf 'Linked %s -> %s\n' "$target" "$source"
+  if $copy_module; then
+    cp "$source" "$target"
+    printf 'Copied module %s -> %s\n' "$source" "$target"
+  else
+    ln -s "$source" "$target"
+    printf 'Linked %s -> %s\n' "$target" "$source"
+  fi
 }
 
 link_config "$SOURCE_ROOT/keys.json" "$HERDR_APP_HOME/keys.json"
@@ -41,12 +54,16 @@ link_config "$SOURCE_ROOT/mods/minimal-metrics/mod.json" "$HERDR_APP_HOME/mods/m
 link_config "$SOURCE_ROOT/mods/minimal-metrics/cpu.svg" "$HERDR_APP_HOME/mods/minimal-metrics/cpu.svg"
 link_config "$SOURCE_ROOT/mods/minimal-metrics/memory.svg" "$HERDR_APP_HOME/mods/minimal-metrics/memory.svg"
 link_config "$SOURCE_ROOT/themes/catppuccin-frappe.json" "$HERDR_APP_HOME/themes/catppuccin-frappe.json"
+link_config "$SOURCE_ROOT/mods/minimal-sidebar/session-label.js" "$HERDR_APP_HOME/mods/minimal-sidebar/session-label.js"
 link_config "$SOURCE_ROOT/mods/minimal-sidebar/main.js" "$HERDR_APP_HOME/mods/minimal-sidebar/main.js"
 link_config "$SOURCE_ROOT/mods/minimal-sidebar/mod.json" "$HERDR_APP_HOME/mods/minimal-sidebar/mod.json"
 link_config "$SOURCE_ROOT/mods/minimal-agents/main.js" "$HERDR_APP_HOME/mods/minimal-agents/main.js"
 link_config "$SOURCE_ROOT/mods/minimal-agents/mod.json" "$HERDR_APP_HOME/mods/minimal-agents/mod.json"
+link_config "$SOURCE_ROOT/mods/minimal-picker/session-label.js" "$HERDR_APP_HOME/mods/minimal-picker/session-label.js"
+link_config "$SOURCE_ROOT/mods/minimal-picker/navigation.js" "$HERDR_APP_HOME/mods/minimal-picker/navigation.js"
 link_config "$SOURCE_ROOT/mods/minimal-picker/main.js" "$HERDR_APP_HOME/mods/minimal-picker/main.js"
 link_config "$SOURCE_ROOT/mods/minimal-picker/mod.json" "$HERDR_APP_HOME/mods/minimal-picker/mod.json"
+link_config "$SOURCE_ROOT/mods/minimal-pane/session-label.js" "$HERDR_APP_HOME/mods/minimal-pane/session-label.js"
 link_config "$SOURCE_ROOT/mods/minimal-pane/main.js" "$HERDR_APP_HOME/mods/minimal-pane/main.js"
 link_config "$SOURCE_ROOT/mods/minimal-pane/mod.json" "$HERDR_APP_HOME/mods/minimal-pane/mod.json"
 link_config "$SOURCE_ROOT/mods/minimal-pane/close.svg" "$HERDR_APP_HOME/mods/minimal-pane/close.svg"
@@ -70,5 +87,17 @@ link_config "$SOURCE_ROOT/mods/recap/main.js" "$HERDR_APP_HOME/mods/recap/main.j
 link_config "$SOURCE_ROOT/mods/recap/look.js" "$HERDR_APP_HOME/mods/recap/look.js"
 link_config "$SOURCE_ROOT/mods/recap/demo.js" "$HERDR_APP_HOME/mods/recap/demo.js"
 link_config "$SOURCE_ROOT/mods/recap/mod.json" "$HERDR_APP_HOME/mods/recap/mod.json"
+
+link_config "$SOURCE_ROOT/mods/legacy-prefix/keys.js" "$HERDR_APP_HOME/mods/legacy-prefix/keys.js"
+link_config "$SOURCE_ROOT/mods/terminal-copy/mod.json" "$HERDR_APP_HOME/mods/terminal-copy/mod.json"
+link_config "$SOURCE_ROOT/mods/terminal-copy/main.js" "$HERDR_APP_HOME/mods/terminal-copy/main.js"
+link_config "$SOURCE_ROOT/mods/terminal-copy/copy-mode.sh" "$HERDR_APP_HOME/mods/terminal-copy/copy-mode.sh"
+link_config "$SOURCE_ROOT/mods/terminal-hints/rules.js" "$HERDR_APP_HOME/mods/terminal-hints/rules.js"
+link_config "$SOURCE_ROOT/mods/terminal-hints/mod.json" "$HERDR_APP_HOME/mods/terminal-hints/mod.json"
+link_config "$SOURCE_ROOT/mods/terminal-hints/matches.js" "$HERDR_APP_HOME/mods/terminal-hints/matches.js"
+link_config "$SOURCE_ROOT/mods/terminal-hints/main.js" "$HERDR_APP_HOME/mods/terminal-hints/main.js"
+
+link_config "$SOURCE_ROOT/mods/tool-popup/mod.json" "$HERDR_APP_HOME/mods/tool-popup/mod.json"
+link_config "$SOURCE_ROOT/mods/tool-popup/main.js" "$HERDR_APP_HOME/mods/tool-popup/main.js"
 
 printf 'Herdr app configuration installed at %s\n' "$HERDR_APP_HOME"

@@ -17,7 +17,7 @@
             "mod": "minimal-metrics"
           },
           "size": {
-            "px": 30
+            "px": 36
           },
           "window_drag": true
         },
@@ -32,7 +32,7 @@
                 "mod": "minimal-sidebar"
               },
               "size": {
-                "px": 546
+                "px": 385
               },
               "min": 90
             },
@@ -49,8 +49,8 @@
             }
           ],
           "divider": {
-            "width": 0,
-            "color": "chrome"
+            "width": 1,
+            "color": "border"
           }
         },
         {
@@ -69,11 +69,10 @@
         }
       ],
       "size": {
-        "px": 295
+        "px": 275
       },
       "min": 44,
       "max": 480,
-      "hidden": true,
       "background": "chrome",
       "resizable": false
     },
@@ -113,11 +112,11 @@
                   },
                   "background": "background",
                   "border": {
-                    "width": 1,
-                    "color": "#414559"
+                    "width": 0,
+                    "color": "#00000000"
                   },
                   "focus": {
-                    "width": 1,
+                    "width": 0,
                     "color": "#00000000"
                   },
                   "radius": 0,
@@ -184,7 +183,10 @@
     "dark": "catppuccin-frappe"
   },
   "colors": {
-    "cursor": "#ef9f76"
+    "cursor": "#C6D0F5",
+    "dim": "#838BA7",
+    "foreground": "#C6D0F5",
+    "muted": "#A5ADCE"
   },
   "terminal_padding": [
     0,

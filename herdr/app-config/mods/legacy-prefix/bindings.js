@@ -1,6 +1,7 @@
 export default {
   "ctrl-,": "app.settings",
   "g": { "panel": "changes" },
+  "t": "mod.open:terminal-hints",
   "?": "app.help",
   "q": "mod.open:minimal-picker",
   "c": "tab.new",
