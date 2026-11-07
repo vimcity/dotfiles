@@ -25,6 +25,7 @@ Existing live files are moved under `HERDR_BACKUP_HOME` before links are created
 - `layouts/minimal-frappe.json`: the custom layout structure.
 - `themes/catppuccin-frappe.json`: the custom Catppuccin Frappé theme used by the layout and settings.
 - `mods/minimal-sidebar`: space and tab navigation/sidebar presentation.
+- `mods/minimal-metrics`: compact resource metrics shown in the layout header.
 - `mods/minimal-agents`: agent list presentation.
 
 Generated Herdr files such as `gpui-kit.d.ts` and `jsconfig.json` are intentionally not stored here; Herdr regenerates them locally.
