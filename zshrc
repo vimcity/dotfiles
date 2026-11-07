@@ -84,3 +84,4 @@ export LLM_OPENAI_MODEL="${OMLX_MODEL:-Qwen3.6-35B-A3B-OptiQ-4bit}"
 alias gsp="git stash pop"
 alias boo='ghostty +boo'
 alias cc='claude --dangerously-skip-permissions'
+# zprof

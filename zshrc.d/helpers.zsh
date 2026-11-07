@@ -3,7 +3,6 @@ export ATUIN_FILTER_MODE=global
 eval "$(atuin init zsh --disable-up-arrow)" 2>/dev/null
 alias ahl="atuin history list"
 alias cat=bat
-alias post="posting --env ~/.local/share/posting/default/posting.env"
 alias zz="z"
 alias g="zi"
 alias d="z"
@@ -173,6 +172,10 @@ fdir() {
 fo() {
   _fzf_file_picker opener "$@"
 }
+# Alt+F → fzf file picker (same as `fo`)
+zle -N fo-widget
+bindkey -M viins '\e[F' fo-widget
+bindkey -M emacs '\e[F' fo-widget
 alias rg='rg --smart-case --ignore-file ~/dotfiles/rgignore'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export BAT_PAGER="less -RF"

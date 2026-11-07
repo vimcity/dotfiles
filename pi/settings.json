@@ -18,12 +18,10 @@
       "maxRetryDelayMs": 15000
     }
   },
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.5.0",
   "packages": [
-    "npm:pi-mcp-adapter",
     "npm:pi-subagents",
     "npm:pi-web-access",
-    "npm:pi-lens",
     "npm:@narumitw/pi-goal"
   ],
   "theme": "catppuccin-frappe",
@@ -33,9 +31,15 @@
   "terminal": {
     "showTerminalProgress": true
   },
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "showHardwareCursor": true,
   "tuiMode": "fullscreen",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-luna"
+  "defaultModel": "gpt-6-luna",
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.86.0",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-lens\",\"scope\":\"user\"}": "4.4.9",
+    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.54.15"
+  }
 }

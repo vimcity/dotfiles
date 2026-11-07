@@ -25,7 +25,7 @@ return {
     },
   },
   opts = function(_, opts)
-    opts.explorer = vim.tbl_deep_extend("force", opts.explorer or {}, { enabled = false })
+    -- opts.explorer = vim.tbl_deep_extend("force", opts.explorer or {}, { enabled = false })
     opts.scroll.enabled = false
     local ascii = require("ascii")
     local header = table.concat(ascii.art.text.neovim.sharp, "\n")

@@ -1,9 +1,10 @@
 export default {
   "ctrl-,": "app.settings",
   "?": "app.help",
-  "q": "mod.open:picker",
+  "q": "mod.open:minimal-picker",
   "c": "tab.new",
-  "r": "tab.rename",
+  "r": "mod.open:minimal-rename",
+  "shift-r": "mod.open:recap",
   "w": "tab.close",
   "v": "pane.split:right",
   "s": "pane.split:down",
@@ -31,87 +32,108 @@ export default {
   "shift-9": "space.select:9",
   "ctrl-p": {
     "shell": "exec \"${SHELL:-/bin/zsh}\" -l",
-    "name": "open floating shell"
+    "name": "open floating shell",
+    "popup": true
   },
   "ctrl-c": {
     "shell": "exec \"${SHELL:-/bin/zsh}\" -l",
-    "name": "open floating shell"
+    "name": "open floating shell",
+    "popup": false
   },
   "ctrl-n": {
     "shell": "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim",
-    "name": "open Neovim in a Projects tab"
+    "name": "open Neovim in a Projects tab",
+    "popup": false
   },
   "alt-j": {
     "shell": "exec \"$HOME/dotfiles/herdr/scripts/jarvis-action.sh\"",
-    "name": "preview a Jarvis terminal action"
+    "name": "preview a Jarvis terminal action",
+    "popup": true
   },
   "alt-v": {
     "shell": "exec \"$HOME/dotfiles/bin/jv\"",
-    "name": "start local Jarvis voice (Ctrl-C to stop)"
+    "name": "start local Jarvis voice (Ctrl-C to stop)",
+    "popup": false
   },
   "shift-s": {
     "shell": "exec ~/.local/bin/lzk",
-    "name": "start lazy splunk tui"
+    "name": "start lazy splunk tui",
+    "popup": false
   },
   "shift-g": {
     "shell": "exec $HOME/.local/bin/gh-pr-dash",
-    "name": "review PRs"
+    "name": "review PRs",
+    "popup": false
   },
   "shift-m": {
     "shell": "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"$HOME/dotfiles/bin/ghprs\" mine",
-    "name": "review PRs in a floating popup"
+    "name": "review PRs in a floating popup",
+    "popup": true
   },
   "ctrl-g": {
     "shell": "exec lazygit",
-    "name": "open lazyzgit"
+    "name": "open lazyzgit",
+    "popup": false
   },
   "ctrl-a": {
     "shell": "exec $HOME/dotfiles/herdr/scripts/quick-org-task.sh",
-    "name": "open or create an org todo"
+    "name": "open or create an org todo",
+    "popup": true
   },
   "shift-c": {
     "shell": "exec fluence pick",
-    "name": "open confluence docs"
+    "name": "open confluence docs",
+    "popup": false
   },
   "ctrl-f": {
     "shell": "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'",
-    "name": "pick a directory with g"
+    "name": "pick a directory with g",
+    "popup": false
   },
   "ctrl-s": {
     "shell": "/opt/homebrew/bin/nvim ~/Documents/org/stash.md",
-    "name": "checkout stash"
+    "name": "checkout stash",
+    "popup": true
   },
   "ctrl-o": {
     "shell": "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh",
-    "name": "open today's org agenda"
+    "name": "open today's org agenda",
+    "popup": true
   },
   "shift-o": {
     "shell": "exec $HOME/dotfiles/herdr/scripts/org-plans.sh",
-    "name": "create new org plans"
+    "name": "create new org plans",
+    "popup": true
   },
   "p": {
     "shell": "exec posting --env \"$HOME/.local/share/posting/default/posting.env\"",
-    "name": "open Posting"
+    "name": "open Posting",
+    "popup": false
   },
   "ctrl-j": {
     "shell": "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"",
-    "name": "open Jira TUI"
+    "name": "open Jira TUI",
+    "popup": false
   },
   "ctrl-b": {
     "shell": "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\"",
-    "name": "open btop"
+    "name": "open btop",
+    "popup": false
   },
   "ctrl-y": {
     "shell": "exec \"${YAZI_BIN:-yazi}\"",
-    "name": "open yazi"
+    "name": "open yazi",
+    "popup": false
   },
   "ctrl-d": {
     "shell": "exec /opt/homebrew/bin/lazydocker",
-    "name": "open lazydocker"
+    "name": "open lazydocker",
+    "popup": false
   },
   "ctrl-l": {
     "shell": "exec $HOME/.local/bin/lmstat",
-    "name": "open lmstat"
+    "name": "open lmstat",
+    "popup": false
   },
   "shift-w": {
     "worktree": "new"

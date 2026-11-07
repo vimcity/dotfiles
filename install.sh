@@ -107,7 +107,7 @@ install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 # ============================================================================
 if [ "$IS_MAC" -eq 1 ]; then
 	echo "󰌶 Installing macOS tools via Homebrew..."
-	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa rbw ripgrep fd atuin aria2; do
+	for formula in lazygit lazydocker git-delta yt-dlp fzf jq chafa ripgrep fd atuin aria2; do
 		if brew list "$formula" &>/dev/null; then
 			echo "󰄵 $formula already installed"
 		else
@@ -219,6 +219,7 @@ mkdir -p "$HOME_DIR/.config"
 mkdir -p "$HOME_DIR/.config/lazygit"
 mkdir -p "$HOME_DIR/.config/btop/themes"
 mkdir -p "$HOME_DIR/.config/herdr"
+mkdir -p "$HOME_DIR/.config/rex/scripts"
 mkdir -p "$HOME_DIR/.local/share/harness"
 mkdir -p "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr"
 mkdir -p "$HOME_DIR/.config/tailspin"
@@ -248,6 +249,8 @@ link_dotfile() {
 }
 
 link_dotfile "$DOTFILES_DIR/zshrc" "$HOME_DIR/.zshrc"
+link_dotfile "$DOTFILES_DIR/rex/init.lua" "$HOME_DIR/.config/rex/init.lua"
+link_dotfile "$DOTFILES_DIR/rex/scripts/scrollback-nvim.sh" "$HOME_DIR/.config/rex/scripts/scrollback-nvim.sh"
 link_dotfile "$DOTFILES_DIR/vimrc" "$HOME_DIR/.vimrc"
 # tmux symlinks removed (Herdr-only workflow)
 link_dotfile "$DOTFILES_DIR/lazygit-config.yml" "$HOME_DIR/.config/lazygit/config.yml"
@@ -372,18 +375,11 @@ if [ "$IS_MAC" -eq 1 ]; then
 	link_dotfile "$DOTFILES_DIR/qutebrowser/main.py" "$QUTE_CONFIG_DIR/main.py"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/greasemonkey" "$QUTE_CONFIG_DIR/greasemonkey"
 	link_dotfile "$DOTFILES_DIR/qutebrowser/quickmarks" "$QUTE_CONFIG_DIR/quickmarks"
-	for userscript in rbw-autofill _rbw-common.sh; do
-		link_dotfile "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" "$QUTE_DATA_DIR/userscripts/$userscript"
-		chmod +x "$DOTFILES_DIR/qutebrowser/userscripts/$userscript" 2>/dev/null || true
-	done
+	link_dotfile "$DOTFILES_DIR/qutebrowser/scripts/reading-list" "$QUTE_DATA_DIR/userscripts/reading-list"
 	chmod +x "$DOTFILES_DIR/qutebrowser/scripts/session-guard" 2>/dev/null || true
 
 	if command -v llm >/dev/null 2>&1; then
 		bash "$DOTFILES_DIR/llm/setup.sh"
-	fi
-
-	if command -v rbw >/dev/null 2>&1 && [ -f "$DOTFILES_DIR/rbw/configure.sh" ]; then
-		bash "$DOTFILES_DIR/rbw/configure.sh"
 	fi
 
 	# Pi MCP config is intentionally machine-local; do not install a shared file.
