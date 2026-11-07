@@ -23,6 +23,7 @@ Existing live files are moved under `HERDR_BACKUP_HOME` before links are created
 - `keys.json`: app shortcuts, including Alt+J/K vertical tab navigation.
 - `settings.json`: portable appearance and keyboard settings.
 - `layouts/minimal-frappe.json`: the custom layout structure.
+- `themes/catppuccin-frappe.json`: the custom Catppuccin Frappé theme used by the layout and settings.
 - `mods/minimal-sidebar`: space and tab navigation/sidebar presentation.
 - `mods/minimal-agents`: agent list presentation.
 

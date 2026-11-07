@@ -35,6 +35,7 @@ link_config() {
 link_config "$SOURCE_ROOT/keys.json" "$HERDR_APP_HOME/keys.json"
 link_config "$SOURCE_ROOT/settings.json" "$HERDR_APP_HOME/settings.json"
 link_config "$SOURCE_ROOT/layouts/minimal-frappe.json" "$HERDR_APP_HOME/layouts/minimal-frappe.json"
+link_config "$SOURCE_ROOT/themes/catppuccin-frappe.json" "$HERDR_APP_HOME/themes/catppuccin-frappe.json"
 link_config "$SOURCE_ROOT/mods/minimal-sidebar/main.js" "$HERDR_APP_HOME/mods/minimal-sidebar/main.js"
 link_config "$SOURCE_ROOT/mods/minimal-sidebar/mod.json" "$HERDR_APP_HOME/mods/minimal-sidebar/mod.json"
 link_config "$SOURCE_ROOT/mods/minimal-agents/main.js" "$HERDR_APP_HOME/mods/minimal-agents/main.js"

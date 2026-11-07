@@ -102,6 +102,12 @@ install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 
 # TPM removed (Herdr-only workflow)
 
+# Herdr app layout/mod configuration. This links only the dotfiles-owned
+# settings; Herdr's generated and per-machine state stays in ~/.config/herdr-app.
+if [ -x "$DOTFILES_DIR/herdr/app-config/install.sh" ]; then
+	"$DOTFILES_DIR/herdr/app-config/install.sh"
+fi
+
 # ============================================================================
 # OS-specific package installation
 # ============================================================================
