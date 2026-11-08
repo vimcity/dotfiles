@@ -77,7 +77,7 @@ function icon(p, size, color) {
 export default class Agents extends View {
   init(_props, cx) {
     if (props()?.sortMenu) return;
-    this.folded = new Set();
+    this.folded = new Set(["sec-1"]);
     // Each agent's last state and when it changed (ms), kept across restarts.
     this.changed = JSON.parse(localStorage.getItem("changed") ?? "{}");
     this.pendingPins = JSON.parse(localStorage.getItem("pins") ?? "[]");
@@ -167,6 +167,13 @@ export default class Agents extends View {
         .when(s.id === on, (el) => el.child(svg("mods/workspace-chrome/check.svg").size(14).flex_none().text_color(t.foreground)))));
   }
 
+  showAgent(agent) {
+    if (props()?.overlay) closeOverlay(props().overlay);
+    run("space.select", { id: agent.space });
+    run("tab.select", { id: agent.tab });
+    run("pane.focus", { pane: agent.pane });
+  }
+
   peek(addr) {
     run("terminal.peek", { terminal: addr });
   }
@@ -223,7 +230,7 @@ export default class Agents extends View {
   render(cx) {
     const t = theme();
     if (props()?.sortMenu) return this.sortMenu(t);
-    const collapsed = narrow();
+    const collapsed = !props()?.overlay && narrow();
     const sort = sortOf();
     let list = agents();
     this.listed = new Map(list.map((a) => [a.address, a.status]));
@@ -237,9 +244,11 @@ export default class Agents extends View {
     const urgency = new Map(list.map((a) => [a.address, Math.max(this.rank(a), ...this.tree(all, a.address).map((s) => RANK[kidStatus(s.t, this.listed)] ?? 0))]));
     const rankOf = (a) => urgency.get(a.address);
     if (byPriority) list = [...list].sort((x, y) => rankOf(y) - rankOf(x) || this.since(y) - this.since(x) || y.seq - x.seq);
-    const pinned = list.filter((a) => a.pinned);
-    const rest = list.filter((a) => !a.pinned);
-    list = [...pinned, ...rest];
+    const idle = list.filter((a) => (rankOf(a) || RANK.idle) === RANK.idle);
+    const active = list.filter((a) => (rankOf(a) || RANK.idle) !== RANK.idle);
+    const pinned = active.filter((a) => a.pinned);
+    const rest = active.filter((a) => !a.pinned);
+    list = [...pinned, ...rest, ...idle];
     setAgentOrder(list.map((a) => a.address));
 
     const withKids = (a, i) => {
@@ -304,7 +313,7 @@ export default class Agents extends View {
           .items_center()
           .gap(4)
           .hover((s) => s.bg(t.hover))
-          .on_click(() => run("pane.focus", { pane: a.pane }))
+          .on_click(() => this.showAgent(a))
           .child(div().flex_1().min_w(0).whitespace_nowrap().text_right().text_color(t.muted).child(String(i + 1)))
           .child(h_flex().w(14).flex_none().items_center().justify_center().child(this.status(t, a, true)));
       }
@@ -335,7 +344,7 @@ export default class Agents extends View {
       return h_flex()
         .id(`ag-${a.address}`)
         .px(8)
-        .h(28)
+        .h(32)
         .flex_none()
         
         .items_center()
@@ -348,7 +357,7 @@ export default class Agents extends View {
           else if (this.hovered === a.address) this.hovered = null;
           cx.notify();
         })
-        .on_click(() => run("pane.focus", { pane: a.pane }))
+        .on_click(() => this.showAgent(a))
         .when(Boolean(pic), el => el.child(div().id(`agent-fold-${a.address}`)
           .when(subs.length > 0, el => el.on_click((_e, cx) => {
             cx.stop_propagation();
@@ -356,7 +365,7 @@ export default class Agents extends View {
             cx.notify();
           })).child(pic)))
         .child(h_flex().flex_1().min_w(0).gap(5).items_center()
-          .child(div().min_w(0).max_w(full && more ? 120 : 200).truncate().font_family("Geist").font_semibold().text_color(idle ? t.muted : t.ansi5).child(name))
+          .child(div().min_w(0).max_w(full && more ? 120 : 200).truncate().font_family("Geist").font_semibold().text_color(idle ? t.muted : t.foreground).child(name))
           .when(full && Boolean(more), el => el.child(div().flex_1().min_w(0).truncate().text_color(t.muted).child(`\u00b7 ${more}`))))
         .when(Boolean(machine), el => el.child(div().text_size(10).text_color(t.dim).child(machine)))
         .when(subs.length > 0, el => el.child(fold(a, subs)))
@@ -375,9 +384,11 @@ export default class Agents extends View {
       else groups.push({ id, label: byPriority ? SECTION[r] : a.space_name || "", status: byPriority ? SECTION_STATUS[r] : null, members: [a] });
     }
 
+    if (idle.length) groups.push({ id: "sec-1", label: "Idle", status: null, members: idle });
+
     // A group's header; it folds the group. Folded, it says how many and the most urgent state.
     const header = (g) => {
-      const open = !this.folded.has(g.id);
+      const open = g.id === "sec-1" ? Boolean(this.showIdle) : !this.folded.has(g.id);
       const top = g.members.reduce((m, a) => ((RANK[a.status] ?? 0) > (RANK[m] ?? 0) ? a.status : m), null);
       return h_flex()
         .id(g.id)
@@ -392,25 +403,27 @@ export default class Agents extends View {
         .cursor_pointer()
         .hover((s) => s.text_color(t.foreground))
         .on_click((_e, cx) => {
-          open ? this.folded.add(g.id) : this.folded.delete(g.id);
+          if (g.id === "sec-1") this.showIdle = !open;
+          else open ? this.folded.add(g.id) : this.folded.delete(g.id);
           cx.notify();
         })
         .child(div().truncate().text_color(t[g.status] ?? t.dim).child(g.label))
-        .when(byPriority || !open, (el) => el.child(div().text_color(t.dim).child(String(g.members.length))))
+        .when(byPriority || !open || g.id === "sec-1", (el) => el.child(div().text_color(t.dim).child(String(g.members.length))))
         .child(div().flex_1())
         .when(!open, (el) => el
           .when(!byPriority && top && top !== "idle", (el) => el.child(this.status(t, { status: top }, true)))
           .child(svg("mods/workspace-chrome/chevron-right.svg").size(11).flex_none().text_color(t.dim)));
     };
     const rows = collapsed
-      ? list.flatMap(withKids)
-      : groups.flatMap((g) => [header(g), ...(this.folded.has(g.id) ? [] : g.members.flatMap(withKids))]);
+      ? [...pinned, ...rest, ...(this.showIdle ? idle : [])].flatMap(withKids)
+      : groups.flatMap((g) => [header(g), ...((g.id === "sec-1" ? !this.showIdle : this.folded.has(g.id)) ? [] : g.members.flatMap(withKids))]);
 
     return v_flex()
       .size_full()
       .min_h(0)
       .bg(t.chrome)
-      .text_size(13)
+      .when(Boolean(props()?.overlay), el => el.h(Math.min(480, Math.max(150, 48 + rows.length * 32))).border_1().border_color(t.border))
+      .text_size(14)
       .when(!collapsed, (el) =>
         el.child(
           h_flex()

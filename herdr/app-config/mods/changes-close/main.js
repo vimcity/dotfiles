@@ -16,130 +16,16 @@ const key = () => JSON.stringify(location());
 const READ = ["--no-optional-locks", "-c", "core.fsmonitor=false", "-c", "diff.autoRefreshIndex=false"];
 const countLines = (text) => text ? text.split("\n").length - Number(text.endsWith("\n")) : 0;
 
-const LANG = { ts: "js", tsx: "js", mts: "js", cts: "js", jsx: "js", mjs: "js", cjs: "js", py: "py", rs: "rs", go: "go", toml: "toml", jsonc: "json", yml: "yaml", sh: "sh", bash: "sh", zsh: "sh", h: "c", cxx: "cpp", cc: "cpp", hpp: "cpp", md: "markdown" };
-const KEYWORDS = {
-  js: new Set("async await break case catch class const continue debugger default delete do else export extends finally for from function if import in instanceof let new of return static super switch this throw try typeof var void while with yield true false null undefined".split(" ")),
-  py: new Set("and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield True False None self".split(" ")),
-  rs: new Set("as async await break const continue crate dyn else enum extern false fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait true type unsafe use where while".split(" ")),
-  go: new Set("break case chan const continue default defer else fallthrough for func go goto if import interface map package range return select struct switch type var true false nil".split(" ")),
-  java: new Set("abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while true false null record sealed permits var yield".split(" ")),
-  json: new Set("true false null".split(" ")),
-  toml: new Set("true false".split(" ")),
-  yaml: new Set("true false null yes no on off".split(" ")),
-  sh: new Set("if then else elif fi for while in do done case esac function export local readonly return exit set source".split(" ")),
-};
+import { languageFor, codeText } from "./syntax.js";
+import { fileTreeRows, diffRows, splitDiffRows } from "./diff-model.js";
 
-function languageFor(path) {
-  const name = path?.split("/").pop()?.toLowerCase();
-  if ([".bashrc", ".zshrc", ".profile", "makefile"].includes(name)) return name === "makefile" ? "make" : "sh";
-  const ext = name?.split(".").pop();
-  const language = LANG[ext] ?? ext;
-  return Object.hasOwn(KEYWORDS, language) || ["c", "cpp", "java", "html", "css", "sql", "xml", "php", "lua", "make"].includes(language)
-    ? language
-    : "plain";
-}
-
-function codeSegments(text, language, t) {
-  if (!language || language === "plain" || language === "markdown") return [{ text, color: t.foreground }];
-  const hashComments = ["py", "toml", "yaml", "sh"].includes(language);
-  const comment = hashComments ? "#.*" : "(?:\\/\\/.*|\\/\\*.*?\\*\\/)";
-  const pattern = new RegExp(`(?:\\"(?:\\\\.|[^\\"\\\\])*\\"|'(?:\\\\.|[^'\\\\])*'|\\x60(?:\\\\.|[^\\x60\\\\])*\\x60|${comment}|<\\/?[A-Za-z][^>]*>|\\b\\d+(?:\\.\\d+)?\\b|\\b[A-Za-z_$][\\w$]*\\b)`, "g");
-  const keywords = KEYWORDS[language] ?? KEYWORDS.js;
-  const out = [];
-  let cursor = 0, match;
-  while ((match = pattern.exec(text))) {
-    if (match.index > cursor) out.push({ text: text.slice(cursor, match.index), color: t.foreground });
-    const token = match[0];
-    const color = token.startsWith("//") || token.startsWith("#") || token.startsWith("/*") ? t.dim
-      : token.startsWith("\"") || token.startsWith("'") || token.startsWith("`") ? t.ansi2
-      : token.startsWith("<") ? t.ansi5
-      : /^\d/.test(token) ? t.ansi1
-      : keywords.has(token) ? t.ansi5
-      : /^[A-Z]/.test(token) ? t.ansi3
-      : text[pattern.lastIndex] === "(" ? t.ansi4
-      : t.foreground;
-    out.push({ text: token, color });
-    cursor = pattern.lastIndex;
-  }
-  if (cursor < text.length) out.push({ text: text.slice(cursor), color: t.foreground });
-  return out;
-}
-
-function codeText(text, language, t) {
-  return h_flex().flex_1().min_w(0).children(codeSegments(text, language, t).map(part =>
-    div().flex_none().text_color(part.color).child(part.text)));
-}
-
-function fileTreeRows(files, collapsed) {
-  const root = { dirs: new Map(), files: [] };
-  for (const file of files) {
-    const parts = file.path.split("/").filter(Boolean), name = parts.pop();
-    let node = root, path = "";
-    for (const part of parts) {
-      path = path ? `${path}/${part}` : part;
-      if (!node.dirs.has(part)) node.dirs.set(part, { path, dirs: new Map(), files: [] });
-      node = node.dirs.get(part);
-    }
-    node.files.push({ ...file, name });
-  }
-  const rows = [];
-  const walk = (node, depth) => {
-    for (const [name, dir] of [...node.dirs].sort(([a], [b]) => a.localeCompare(b))) {
-      const expanded = !collapsed.has(dir.path);
-      rows.push({ type: "directory", name, path: dir.path, depth, expanded });
-      if (expanded) walk(dir, depth + 1);
-    }
-    for (const file of node.files.sort((a, b) => a.name.localeCompare(b.name))) {
-      rows.push({ type: "file", ...file, depth });
-    }
-  };
-  walk(root, 0);
-  return rows;
-}
-
-// Numbers each diff line once, so a frame only draws the rows on screen.
-function diffRows(lines) {
-  let old = 0, next = 0;
-  return lines.map((line) => {
-    const match = /^@@ -(\d+)(?:,\d+)? \+(\d+)/.exec(line);
-    if (match) { old = +match[1]; next = +match[2]; return { kind: "@", text: line }; }
-    const kind = line[0];
-    if (kind === "-") return { kind, number: old++, text: line.slice(1) || " " };
-    if (kind === "+") return { kind, number: next++, text: line.slice(1) || " " };
-    if (kind === " ") { old++; return { kind, number: next++, text: line.slice(1) || " " }; }
-    return { kind: "", text: line };
-  });
-}
-
-function splitDiffRows(lines) {
-  let old = 0, next = 0, removed = [], added = [];
-  const rows = [];
-  const flush = () => {
-    for (let i = 0; i < Math.max(removed.length, added.length); i++) {
-      const before = removed[i], after = added[i];
-      rows.push({ kind: "split", oldNumber: before?.number, oldText: before?.text ?? "", oldKind: before ? "-" : "", newNumber: after?.number, newText: after?.text ?? "", newKind: after ? "+" : "" });
-    }
-    removed = []; added = [];
-  };
-  for (const line of lines) {
-    const match = /^@@ -(\d+)(?:,\d+)? \+(\d+)/.exec(line);
-    if (match) {
-      flush(); old = +match[1]; next = +match[2]; rows.push({ kind: "@", text: line });
-    } else if (line[0] === "-") removed.push({ number: old++, text: line.slice(1) || " " });
-    else if (line[0] === "+") added.push({ number: next++, text: line.slice(1) || " " });
-    else if (line[0] === " ") {
-      flush(); rows.push({ kind: "split", oldNumber: old++, oldText: line.slice(1) || " ", newNumber: next++, newText: line.slice(1) || " " });
-    } else {
-      flush(); rows.push({ kind: "", text: line });
-    }
-  }
-  flush();
-  return rows;
-}
+// File-tree row height, in px. Shared by the list, the page size and the wheel.
+const ROW_H = 30;
 
 export default class Changes extends View {
   init(_props, cx) {
     this.files = []; this.rows = []; this.rawLines = []; this.diffWidth = 0; this.message = ""; this.viewMode = localStorage.getItem("changes-view") ?? "unified"; this.handle = cx.focus_handle();
+    this.navScroll = VirtualListScrollHandle.new();
     this.collapsedDirs = new Set(); this.navCursor = 0; this.navStart = 0; this.navHeight = 0; this.diffCursor = 0; this.diffHeight = 0; this.reviewFocus = "files";
     this.navigatorVisible = true; this.splitSide = "new"; this.showKeys = false; this.composingNote = false;
     this.diffScroll = VirtualListScrollHandle.new();
@@ -298,7 +184,7 @@ export default class Changes extends View {
 
   pageMove(delta, half, cx) {
     const page = this.reviewFocus === "files"
-      ? Math.max(1, Math.floor((this.navHeight || 560) / 28))
+      ? Math.max(1, Math.floor((this.navHeight || 560) / ROW_H))
       : Math.max(1, Math.floor((this.diffHeight || 560) / 20));
     const step = Math.max(1, Math.floor(page * (half ? 0.5 : 1)));
     if (this.reviewFocus === "files") this.moveNavigator(delta * step, cx);
@@ -337,11 +223,8 @@ export default class Changes extends View {
     this.openFile(files[next].row.path, cx);
   }
 
-  keepNavigatorCursorVisible(count) {
-    const visible = Math.max(1, Math.floor((this.navHeight || 560) / 28));
-    if (this.navCursor < this.navStart) this.navStart = this.navCursor;
-    else if (this.navCursor >= this.navStart + visible) this.navStart = this.navCursor - visible + 1;
-    this.navStart = Math.max(0, Math.min(this.navStart, Math.max(0, count - visible)));
+  keepNavigatorCursorVisible() {
+    this.navScroll.scroll_to_item(this.navCursor, "center");
   }
 
   toggleDirectory(path, cx) {
@@ -426,7 +309,11 @@ export default class Changes extends View {
       : 10;
     if (focusedReview && !this.inReview) {
       this.inReview = true; this.reviewFocus = "files";
+      // Showing the panel hands focus to the pane it just hid, so take it once
+      // the layout change has settled. Recap does the same for its input.
       cx.spawn(async () => this.handle.focus());
+      cx.timer.after(60, () => this.handle.focus());
+      cx.timer.after(600, () => this.handle.focus());
     }
     if (!focusedReview) this.inReview = false;
     const notes = this.notes.filter(note => note.root === this.root && note.path === this.open);
@@ -446,28 +333,30 @@ export default class Changes extends View {
       const index = treeRows.findIndex(row => row.type === "file" && row.path === this.open);
       if (index >= 0) { this.navCursor = index; this.navPath = this.open; }
     }
-    const fileTree = v_flex().id("review-file-tree").w(360).h_full().flex_none().min_h(0).gap(6)
-      .child(h_flex().h(28).flex_none().px(8).items_center().text_size(11).font_semibold().text_color(t.dim).child("CHANGED FILES").child(div().flex_1()).child(String(treeRows.length)))
-      .child(v_flex().id("review-file-rows").flex_1().min_h(0).relative().overflow_hidden()
-        .on_size_change((size, cx) => { this.navHeight = size.height; this.keepNavigatorCursorVisible(treeRows.length); cx.notify(); })
-        .on_scroll_wheel((e, cx) => this.moveNavigator(Math.sign(e.delta.y) * Math.max(1, Math.round(Math.abs(e.delta.y) / 28)), cx))
-        .children(treeRows.slice(this.navStart, this.navStart + Math.max(1, Math.floor((this.navHeight || 560) / 28))).map((row, index) => {
-          const i = this.navStart + index, selected = i === this.navCursor && this.reviewFocus === "files";
-          const base = h_flex().id(`review-row-${i}`).absolute().left(0).right(0).top(index * 28).h(28).px(6).gap(6).items_center().rounded(0)
-            .bg(selected ? t.selected : t.background).hover(el => el.bg(t.hover)).cursor_pointer()
-            .on_click((_e, cx) => {
-              this.reviewFocus = "files"; this.navCursor = i; this.handle.focus();
-              if (row.type === "directory") this.toggleDirectory(row.path, cx);
-              else this.openFile(row.path, cx);
-            })
-            .child(div().w(row.depth * 12).flex_none());
-          if (row.type === "directory") return base.child(div().w(12).flex_none().text_color(t.dim).child(row.expanded ? "▾" : "▸"))
-            .child(div().flex_1().min_w(0).truncate().text_color(t.muted).child(row.name));
-          return base.child(div().w(12).flex_none().text_size(10).text_color(row.status === "A" ? t.ansi2 : row.status === "D" ? t.ansi1 : row.status === "U" ? t.ansi1 : t.blocked).child(row.status))
-            .child(div().flex_1().min_w(0).truncate().text_color(t.foreground).child(row.name))
-            .when(row.add > 0, el => el.child(div().text_size(10).text_color(t.ansi2).child(`+${row.add}`)))
-            .when(row.del > 0, el => el.child(div().text_size(10).text_color(t.ansi1).child(`−${row.del}`)));
-        })));
+    const fileTree = v_flex().id("review-file-tree").w(370).h_full().flex_none().min_h(0).gap(6)
+      .child(h_flex().h(ROW_H).flex_none().px(8).items_center().text_size(13).font_semibold().text_color(t.dim).child("CHANGED FILES"))
+      .child(v_flex().id("review-file-rows-x").flex_1().min_h(0).relative().overflow_hidden()
+        .on_size_change((size, cx) => { this.navHeight = size.height; cx.notify(); })
+        .on_scroll_wheel((e, cx) => this.moveNavigator(Math.sign(e.delta.y) * Math.max(1, Math.round(Math.abs(e.delta.y) / ROW_H)), cx))
+        .child(v_virtual_list("review-file-rows", treeRows.length, treeRows.map(() => ROW_H), index => `review-row-${index}`, range =>
+          treeRows.slice(range.start, range.end).map((row, offset) => {
+            const i = range.start + offset, selected = i === this.navCursor && this.reviewFocus === "files";
+            const base = h_flex().id(`review-row-${i}`).w_full().h(ROW_H).flex_none().px(6).gap(6).items_center().rounded(0)
+              .bg(selected ? t.selected : t.background).hover(el => el.bg(t.hover)).cursor_pointer()
+              .on_click((_e, cx) => {
+                this.reviewFocus = "files"; this.navCursor = i; this.handle.focus();
+                if (row.type === "directory") this.toggleDirectory(row.path, cx);
+                else this.openFile(row.path, cx);
+              })
+              .child(div().w(row.depth * 12).flex_none());
+            if (row.type === "directory") return base.child(div().w(14).flex_none().text_size(12).text_color(t.dim).child(row.expanded ? "▾" : "▸"))
+              .child(div().flex_1().min_w(0).truncate().text_size(15).text_color(t.muted).child(row.name));
+            return base.child(div().w(14).flex_none().text_size(12).text_color(row.status === "A" ? t.ansi2 : row.status === "D" ? t.ansi1 : row.status === "U" ? t.ansi1 : t.blocked).child(row.status))
+              .child(div().flex_1().min_w(0).truncate().text_size(15).text_color(t.foreground).child(row.name))
+              .when(row.add > 0, el => el.child(div().text_size(12).text_color(t.ansi2).child(`+${row.add}`)))
+              .when(row.del > 0, el => el.child(div().text_size(12).text_color(t.ansi1).child(`−${row.del}`)));
+          })).track_scroll(this.navScroll).size_full())
+        .child(Scrollbar.vertical("review-file-rows").viewport_from_layout().absolute().inset_0()));
     const diffPane = v_flex().id("review-diff").h_full().flex_1().min_w(0).min_h(0).relative().font_family(settings().font_family ?? "JetBrains Mono").text_size(13)
       .on_mouse_down("left", (_e, cx) => { this.reviewFocus = "diff"; this.handle.focus(); })
       .on_size_change(size => { this.diffHeight = size.height; })
@@ -541,7 +430,8 @@ export default class Changes extends View {
         cx.notify();
       })
       .child(h_flex().h(36).flex_none().pl(headerLeft).pr(10).gap(8).items_center()
-        .child(div().font_semibold().child(focusedReview ? "Diff" : "Changes"))
+        .when(focusedReview, el => el.child(svg("mods/changes-close/diff.svg").size(14).flex_none().text_color(t.muted)))
+        .when(!focusedReview, el => el.child(div().font_semibold().child("Changes")))
         .child(div().px(5).py(1).rounded(0).bg(t.raised).text_size(10).text_color(t.muted).child(`${this.files.length} files`))
         .when(focusedReview, el => el.child(div().flex_1().min_w(0).truncate().text_color(t.muted).child(this.open ?? "")))
         .when(!focusedReview, el => el.child(div().flex_1()))

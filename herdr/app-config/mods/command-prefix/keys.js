@@ -11,9 +11,30 @@ export function bindingKey(event, bindings) {
   return null;
 }
 
+// hc hands children a bare launchd PATH (/usr/bin:/bin:/usr/sbin:/sbin), and a
+// login shell rebuilds the rest from .zprofile/.zshrc at 25-80ms per popup.
+// Supply the env explicitly instead, like the rex launcher does.
+// Bindings must resolve through this PATH or use an absolute path, and are
+// responsible for starting a login shell themselves if they need one.
+const PATH_PREPEND = [
+  "$HOME/.local/bin",
+  "$HOME/dotfiles/bin",
+  "/opt/homebrew/bin",
+  "/opt/homebrew/sbin",
+  "/usr/local/bin",
+].join(":");
+
+// ORG_PATH is required: orgmode falls back to ~/Documents without it, not
+// ~/Documents/org, which silently misdirects capture and the agenda.
+const TOOL_ENV = [
+  `PATH="${PATH_PREPEND}:$PATH"`,
+  'ORG_PATH="${ORG_PATH:-$HOME/Documents/org}"',
+  'EDITOR="${EDITOR:-nvim}"',
+].join(" ");
+
 export function terminalArgs(action, context, machine) {
   const args = ["run", "--bg", "--json", "--no-parent", "--no-notify"];
   if (machine) args.push("--on", machine);
   if (context?.cwd) args.push("--cwd", context.cwd);
-  return [...args, "--", "/bin/zsh", "-lic", action.shell];
+  return [...args, "--", "/bin/zsh", "-c", `export ${TOOL_ENV}; ${action.shell}`];
 }

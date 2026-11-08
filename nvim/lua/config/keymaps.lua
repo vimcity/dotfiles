@@ -3,17 +3,52 @@
 -- Add any additional keymaps here
 
 -- Pane navigation: Herdr-aware Ctrl+h/j/k/l.
-local pane_directions = {
-  h = { action = "move_cursor_left", desc = "Navigate left" },
-  j = { action = "move_cursor_down", desc = "Navigate down" },
-  k = { action = "move_cursor_up", desc = "Navigate up" },
-  l = { action = "move_cursor_right", desc = "Navigate right" },
-}
+--
+-- Two paths, because the terminal multiplexer differs:
+--   TUI  — HERDR_ENV is set, herdr-splits.nvim is loaded (its spec is gated on
+--          it) and owns split detection plus the cross-pane hop.
+--   app  — HERDR_ENV is unset, so that plugin is never loaded and requiring it
+--          here would throw. The app swallows ctrl+h/j/k/l and forwards them
+--          back (mods/minimal-pane/main.js), so move between splits directly
+--          and ask the app to change pane only at an edge.
+local nav = {}
 
-for key, direction in pairs(pane_directions) do
-  vim.keymap.set("n", "<C-" .. key .. ">", function()
-    require("herdr-splits")[direction.action]()
-  end, { silent = true, desc = direction.desc .. " (Herdr)" })
+if vim.env.HERDR_ENV == "1" then
+  nav = {
+    h = { desc = "Navigate left", run = function()
+      require("herdr-splits").move_cursor_left()
+    end },
+    j = { desc = "Navigate down", run = function()
+      require("herdr-splits").move_cursor_down()
+    end },
+    k = { desc = "Navigate up", run = function()
+      require("herdr-splits").move_cursor_up()
+    end },
+    l = { desc = "Navigate right", run = function()
+      require("herdr-splits").move_cursor_right()
+    end },
+  }
+elseif vim.fn.executable("herdr-app") == 1 then
+  local function pane(direction, wincmd)
+    return function()
+      local before = vim.api.nvim_get_current_win()
+      vim.cmd("noautocmd wincmd " .. wincmd)
+      if vim.api.nvim_get_current_win() ~= before then
+        return
+      end
+      vim.fn.jobstart({ "herdr-app", "do", "pane.go", "--direction", direction }, { detach = true })
+    end
+  end
+  nav = {
+    h = { desc = "Navigate left", run = pane("left", "h") },
+    j = { desc = "Navigate down", run = pane("down", "j") },
+    k = { desc = "Navigate up", run = pane("up", "k") },
+    l = { desc = "Navigate right", run = pane("right", "l") },
+  }
+end
+
+for key, direction in pairs(nav) do
+  vim.keymap.set("n", "<C-" .. key .. ">", direction.run, { silent = true, desc = direction.desc .. " (Herdr)" })
 end
 
 -- Move lines up/down with Alt+Up/Down (K is keyword lookup)

@@ -135,13 +135,13 @@ export function chip(o, id, parts, { color = null, mono = false, click = null } 
   return h_flex()
     .id(id)
     .flex_none()
-    .h(22)
-    .px(8)
-    .gap(5)
+    .h(26)
+    .px(9)
+    .gap(6)
     .items_center()
     .rounded(6)
     .bg(color ? tint(color, 0.12) : o.sunk)
-    .text_size(mono ? 11 : 11.5)
+    .text_size(mono ? 13 : 14)
     .text_color(color ?? o.muted)
     .when(!mono, (el) => el.font_medium())
     .when(mono, (el) => el.font_family(MONO))
@@ -190,30 +190,29 @@ export function words(o, groups, idBase) {
   return h_flex().gap(8).items_center().flex_wrap().children(out);
 }
 
-// What's drawn on a keycap: the keys with a symbol of their own as icons
-// (enter as an arrow down and left, ⌃, ⌘, tab, the arrows), letters
-// capitalised as on the key; "^g" or "ctrl-g" is ⌃G, "cmd-g" ⌘G.
-const KEY_ICONS = {
-  enter: "key-enter", "⏎": "key-enter", "↵": "key-enter",
-  tab: "key-tab", "⇥": "key-tab",
-  "↑": "key-up", up: "key-up", "↓": "key-down", down: "key-down",
-  "←": "key-left", left: "key-left", "→": "key-right", right: "key-right",
-  ctrl: "key-ctrl", "^": "key-ctrl", "⌃": "key-ctrl",
-  cmd: "key-cmd", "⌘": "key-cmd",
+// Keycaps use text glyphs so they stay legible without mod-local icon assets.
+// "^g" or "ctrl-g" is ⌃G; "cmd-g" is ⌘G.
+const KEY_LABELS = {
+  enter: "↵", "⏎": "↵", "↵": "↵",
+  tab: "⇥", "⇥": "⇥",
+  "↑": "↑", up: "↑", "↓": "↓", down: "↓",
+  "←": "←", left: "←", "→": "→", right: "→",
+  ctrl: "⌃", "^": "⌃", "⌃": "⌃",
+  cmd: "⌘", "⌘": "⌘",
 };
 function keyParts(k) {
   const m = /^(\^|ctrl[-+]|cmd[-+])(.+)$/i.exec(k);
-  if (m) return [m[1][0] === "^" ? "ctrl" : m[1].slice(0, -1).toLowerCase(), ...keyParts(m[2])];
-  return [KEY_ICONS[k.toLowerCase()] ? k.toLowerCase() : k.length === 1 ? k.toUpperCase() : k];
+  if (m) return [m[1][0] === "^" ? "⌃" : "⌘", ...keyParts(m[2])];
+  return [KEY_LABELS[k.toLowerCase()] ?? (k.length === 1 ? k.toUpperCase() : k)];
 }
 
 // One keycap.
 export function cap(o, k) {
   return h_flex()
     .flex_none()
-    .min_w(20)
-    .h(20)
-    .px(5)
+    .min_w(24)
+    .h(24)
+    .px(6)
     .gap(1)
     .items_center()
     .justify_center()
@@ -223,9 +222,9 @@ export function cap(o, k) {
     .border_color(o.line)
     .bg(o.surface)
     .font_family(MONO)
-    .text_size(11)
+    .text_size(13)
     .text_color(o.muted)
-    .children(keyParts(k).map((p) => (KEY_ICONS[p] ? icon(KEY_ICONS[p], o.muted, 11) : div().child(p))));
+    .children(keyParts(k).map((part) => div().child(part)));
 }
 
 // A key in the footer: its keycaps and what it does. Clickable.
@@ -236,7 +235,7 @@ export function key(o, keys, label, click, id) {
     .gap(6)
     .items_center()
     .cursor_pointer()
-    .text_size(12)
+    .text_size(14)
     .text_color(o.dim)
     .hover((s) => s.text_color(o.fg))
     .on_click((_e, cx) => click(cx))
@@ -249,16 +248,16 @@ export function key(o, keys, label, click, id) {
 export function countPill(o, n, on) {
   return div()
     .flex_none()
-    .min_w(24)
-    .h(18)
-    .px(6)
+    .min_w(28)
+    .h(21)
+    .px(7)
     .flex()
     .items_center()
     .justify_center()
     .rounded(9)
     .bg(on ? o.sunk : tint(o.line, 0.6))
     .font_family(MONO)
-    .text_size(11)
+    .text_size(13)
     .font_medium()
     .text_color(on ? o.fg : o.dim)
     .child(n == null || n === "" ? "–" : String(n));

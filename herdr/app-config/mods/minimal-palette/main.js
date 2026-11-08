@@ -1,14 +1,13 @@
 import { View, div, svg } from "gpui-kit";
-import { v_flex, h_flex, InputState, Input } from "gpui-base";
-import { commands, layouts, keys, run, theme, props, closeOverlay, openOverlay, shared, window as win } from "herdr";
+import { v_flex, h_flex, InputState } from "gpui-base";
+import { commands, layouts, keys, run, settings, nextCommand, theme, props, closeOverlay, openOverlay, shared, window as win } from "herdr";
 
-// The list keeps one height while you move: rows and group titles have fixed
-// heights, and the window shows as many as fit in LIST_H.
-// 10 rows: with the search line it fits the popup (at most 85% of the
-// window) down to ~580 px windows at zoom 1.3.
+import { MENU_CHROME, MenuMotion, menuFrame, menuSearch, menuScrollbar } from "./menu-ui.js";
+
+// Fixed row geometry keeps keyboard selection aligned with the drawn viewport.
 const SHOWN = 10;
-const ROW_H = 32;
-const HEAD_H = 26;
+const ROW_H = 38;
+const HEAD_H = 32;
 const LIST_H = SHOWN * ROW_H;
 const GROUPS = ["Recent", "Tab", "Pane", "Space", "Layout", "Terminal", "Agent", "Window", "App"];
 
@@ -50,9 +49,9 @@ const NAMED = [
   ["app.welcome", {}, "App", "Welcome", "intro start onboarding"],
   ["app.whats_new", {}, "App", "What's new", "release changes news update"],
   ["app.reset", {}, "App", "Reset to the default screen", "escape hatch broken restore"],
-  ["app.zoom_in", {}, "App", "Zoom in", "bigger font size"],
-  ["app.zoom_out", {}, "App", "Zoom out", "smaller font size"],
-  ["app.zoom_reset", {}, "App", "Reset zoom", "font size"],
+  ["app.zoom_in", {}, "App", "Zoom whole interface in", "bigger interface"],
+  ["app.zoom_out", {}, "App", "Zoom whole interface out", "smaller interface"],
+  ["app.zoom_reset", {}, "App", "Reset interface zoom", "interface size"],
   ["app.quit", {}, "App", "Quit Herdr", "exit"],
   ...["graphite", "ink", "moss", "atom-one-dark"].map((n) => ["app.theme", { name: n }, "App", `Theme: ${n.replace(/-/g, " ")}`, "colors look"]),
 ];
@@ -78,6 +77,11 @@ function entries() {
   const list = NAMED.filter(([n]) => known.has(n))
     .filter(([n]) => !(mac && n.startsWith("window.")))
     .map(([name, args, group, title, words]) => ({ name, args, group, title, words }));
+  if (shared("layout") === "minimal-frappe") {
+    for (const [action, title] of [["in", "Larger terminal text"], ["out", "Smaller terminal text"], ["reset", "Reset terminal text size"]]) {
+      list.push({ name: `minimal-pane.text-zoom-${action}`, args: {}, group: "Terminal", title, words: "font zoom text size" });
+    }
+  }
   for (const l of layouts()) {
     const t = { main: "Herdr", terminals: "Terminals", win98: "Herdr 98" }[l] ?? l.charAt(0).toUpperCase() + l.slice(1);
     list.push({ name: "layout.switch", args: { name: l }, group: "Layout", title: `Layout: ${t}`, words: `look ${l}` });
@@ -95,8 +99,11 @@ function entries() {
 function keyOf(e, bound) {
   const v = Object.values(e.args)[0];
   const want = v === undefined ? e.name : `${e.name}:${v}`;
-  const k = bound.find((b) => b.section === "global" && b.action === want);
-  return k ? k.keys : null;
+  const effective = new Map();
+  for (const section of ["global", `layout:${shared("layout")}`]) {
+    for (const binding of bound.filter(binding => binding.section === section)) effective.set(binding.keys, binding);
+  }
+  return [...effective.values()].find(binding => binding.action === want)?.keys ?? null;
 }
 
 // "ctrl-shift-p" -> ["ctrl", "shift", "p"]; "ctrl--" -> ["ctrl", "-"].
@@ -125,36 +132,68 @@ function fuzzy(q, text) {
 
 export default class Palette extends View {
   init(_props, cx) {
+    this.motion = new MenuMotion();
+    this.motion.start(cx);
     this.query = "";
     this.input = InputState.new({ placeholder: "Type a command…" });
-    this.input.on("change", (_e, cx) => { this.query = this.input.value(); this.at = 0; cx.notify(); });
-    this.input.on("submit", () => this.go(this.rows()[this.at]?.e));
-    this.input.focus();
-    cx.timer.after(600, () => this.input.focus());
+    this.input.on("change", (_e, cx) => { this.query = this.input.value(); this.at = 0; this.revealPending = true; cx.notify(); });
+    this.input.on("submit", (_event, cx) => this.go(this.rows()[this.at]?.e, cx));
+    cx.timer.after(0, () => this.input.focus());
     this.at = 0;
     // How far the list is scrolled, px.
     this.scroll = 0;
+    this.revealPending = true;
     this.recent = JSON.parse(localStorage.getItem("recent") ?? "[]");
     this.handle = cx.focus_handle();
+    cx.spawn(async cx => {
+      for (;;) this.navigate(await nextCommand(), cx);
+    });
   }
 
-  close() {
-    closeOverlay(props().overlay);
+  dismiss(cx, after) {
+    const done = () => { closeOverlay(props().overlay); after?.(); };
+    if (this.motion && cx) this.motion.dismiss(cx, done);
+    else done();
   }
 
-  go(e) {
-    if (!e) return;
-    this.recent = [e.id, ...this.recent.filter((r) => r !== e.id)].slice(0, 20);
+  go(e, cx) {
+    if (!e || this.motion?.phase === "closing") return;
+    this.recent = [e.id, ...this.recent.filter(r => r !== e.id)].slice(0, 20);
     localStorage.setItem("recent", JSON.stringify(this.recent));
-    this.close();
-    if (e.name === "mod.clone") {
-      openOverlay({ mod: "prompt", kind: "dialog", width: 380, props: {
-        title: "Duplicate mod", hint: "Mod to copy; creates <name>-copy",
-        command: { name: "mod.clone", args: {} },
-      } });
-    } else {
-      run(e.name, e.name === "layout.clone" ? { name: shared("layout") ?? "main" } : e.args);
+    this.dismiss(cx, () => {
+      if (e.name === "mod.clone") {
+        openOverlay({ mod: "prompt", kind: "dialog", width: 380, props: {
+          title: "Duplicate mod", hint: "Mod to copy; creates <name>-copy",
+          command: { name: "mod.clone", args: {} },
+        } });
+      } else run(e.name, e.name === "layout.clone" ? { name: shared("layout") ?? "main" } : e.args);
+    });
+  }
+
+  setScroll(offset, cx) {
+    this.scroll = Math.max(0, Math.min(offset, this.maxScroll ?? 0));
+    this.revealPending = false;
+    cx.notify();
+  }
+
+  navigate(command, cx) {
+    if (command === "zoom") {
+      this.revealPending = true;
+      this.motion.toggleZoom(cx);
+      return;
     }
+    if (command === "escape") return this.dismiss(cx);
+    const count = this.rows().length;
+    if (!count) return;
+    if (command === "down") this.at = Math.min(this.at + 1, count - 1);
+    else if (command === "up") this.at = Math.max(this.at - 1, 0);
+    else if (command === "pagedown") this.at = Math.min(this.at + SHOWN, count - 1);
+    else if (command === "pageup") this.at = Math.max(this.at - SHOWN, 0);
+    else if (command === "home") this.at = 0;
+    else if (command === "end") this.at = count - 1;
+    else return;
+    this.revealPending = true;
+    cx.notify();
   }
 
   // The rows to show: grouped when empty, ranked while typing.
@@ -180,7 +219,7 @@ export default class Palette extends View {
   }
 
   title(t, text, hits, on) {
-    if (!hits?.length) return div().text_color(on ? t.foreground : t.muted).child(text);
+    if (!hits?.length) return div().text_color(t.foreground).font_medium().when(on, el => el.font_semibold()).child(text);
     const parts = [];
     let cur = "";
     let lit = false;
@@ -194,126 +233,87 @@ export default class Palette extends View {
       cur += ch;
     });
     if (cur) parts.push([cur, lit]);
-    return h_flex().children(parts.map(([s, h]) => div().text_color(h ? t.accent : on ? t.foreground : t.muted).when(h, (d) => d.font_semibold()).child(s.replace(/ /g, "\u00a0"))));
+    return h_flex().children(parts.map(([s, h]) => div().text_color(h ? t.ansi4 : t.foreground).when(h, (d) => d.font_semibold()).child(s.replace(/ /g, "\u00a0"))));
   }
 
-  render() {
+  render(cx) {
     const t = theme();
+    const zoom = Number(settings().zoom) || 1;
+    const viewport = window.viewport_size();
     const rows = this.rows();
     const bound = keys();
     this.at = Math.min(this.at, Math.max(0, rows.length - 1));
-    // One continuous strip: each row (and the group title before it) at a
-    // fixed y. Scrolling moves the strip in pixels, only as far as it takes to
-    // keep the selected row (and its group's title, if it opens one) in view.
     const tops = [];
-    let y = 0;
-    rows.forEach((r, i) => {
-      const head = !this.query && (i === 0 || r.head !== rows[i - 1].head);
-      tops.push({ head, title: y, row: y + (head ? HEAD_H : 0) });
-      y += (head ? HEAD_H : 0) + ROW_H;
+    let total = 0;
+    rows.forEach((row, index) => {
+      const head = !this.query && (index === 0 || row.head !== rows[index - 1].head);
+      tops.push({ head, title: total, row: total + (head ? HEAD_H : 0) });
+      total += (head ? HEAD_H : 0) + ROW_H;
     });
-    const total = y;
-    const fixed = total > LIST_H;
-    this.maxScroll = Math.max(0, total - LIST_H);
-    const sel = tops[this.at];
-    if (sel) {
-      const from = sel.head ? sel.title : sel.row;
+    const limit = Math.max(120, Math.min(LIST_H, viewport.height * 0.86 / zoom - MENU_CHROME));
+    const height = this.motion?.heightLimit?.(viewport.height / zoom)
+      ?? (rows.length ? Math.min(total, limit) : 48);
+    const fixed = total > height;
+    this.maxScroll = Math.max(0, total - height);
+    const selected = tops[this.at];
+    if (selected && this.revealPending) {
+      const from = selected.head ? selected.title : selected.row;
       if (from < this.scroll) this.scroll = from;
-      if (sel.row + ROW_H > this.scroll + LIST_H) this.scroll = sel.row + ROW_H - LIST_H;
+      if (selected.row + ROW_H > this.scroll + height) this.scroll = selected.row + ROW_H - height;
     }
+    this.revealPending = false;
     this.scroll = Math.max(0, Math.min(this.scroll, this.maxScroll));
-    const key = (k) =>
-      h_flex().gap(3).children(keyParts(k).map((p) => div().px(5).rounded(0).border_1().border_color(t.border).bg(t.raised).text_size(11).text_color(t.dim).child(p)));
-    // In a scrolling list each item is placed at its edges from the model
-    // above, not stacked: GPUI rounds every height to whole pixels, and a
-    // stack of rounded heights drifts away from the model (19 px at zoom 1.3
-    // by row 40, cutting the selection off). Edges from the model can't add up.
-    const place = (el, start, end) =>
-      fixed
-        ? el.absolute().left(0).right(0).top(start - this.scroll).bottom(LIST_H - (end - this.scroll))
-        : el.flex_none().h(end - start);
-    const visible = (start, end) => !fixed || (end > this.scroll && start < this.scroll + LIST_H);
+    const keycap = key => h_flex().flex_none().gap(3).children(keyParts(key).map(part =>
+      div().px(5).py(2).rounded(4).border(0.5).border_color("#ffffff0b").bg(t.chrome).text_size(10).text_color(t.muted).child(part)));
+    const place = (element, start, end) => fixed
+      ? element.absolute().left(0).right(10).top(start - this.scroll).bottom(height - (end - this.scroll))
+      : element.flex_none().h(end - start);
+    const visible = (start, end) => !fixed || (end > this.scroll && start < this.scroll + height);
+    const icons = { Tab: "layers", Pane: "panel-right", Space: "folder", Layout: "sidebar", Terminal: "terminal", Agent: "terminal", Window: "monitor", App: "settings" };
+    const colors = { Tab: t.ansi4, Pane: t.ansi4, Space: t.ansi5, Layout: t.ansi5, Terminal: t.ansi6, Agent: t.ansi6 };
     const list = [];
-    rows.forEach((r, i) => {
-      const { head, title, row } = tops[i];
-      if (head && visible(title, row)) list.push(place(h_flex(), title, row).px(14).pb(4).items_end().text_size(11).font_semibold().text_color(t.dim).child(r.head));
-      if (!visible(row, row + ROW_H)) return;
-      const on = i === this.at;
-      const k = keyOf(r.e, bound);
-      list.push(
-        place(h_flex(), row, row + ROW_H)
-          .id(`pl-${i}`)
-          .px(10)
-          .border_l(2).border_color(on ? t.accent : t.popover)
-          .gap(10)
-          .items_center()
-          .rounded(0)
-          .cursor_pointer()
-          .text_size(12)
-          .when(on, (el) => el.bg(t.selected))
-          .hover((s) => s.bg(t.hover))
-          .on_click(() => this.go(r.e))
-          .child(div().flex_1().min_w(0).child(this.title(t, r.e.title, r.hits, on)))
-          .when(Boolean(this.query), (el) => el.child(div().text_size(11.5).text_color(t.dim).child(r.e.group)))
-          .when(Boolean(k), (el) => el.child(key(k))),
-      );
+    rows.forEach((row, index) => {
+      const position = tops[index];
+      if (position.head && visible(position.title, position.row)) list.push(
+        place(h_flex(), position.title, position.row).px(10).items_center().text_size(13).font_bold().text_color(t.muted).child(row.head));
+      if (!visible(position.row, position.row + ROW_H)) return;
+      const on = index === this.at;
+      const fill = on ? t.selected : this.hoveredRow === row.e.id ? t.hover : t.popover;
+      const key = keyOf(row.e, bound);
+      list.push(place(h_flex(), position.row, position.row + ROW_H).id(`pl-${index}`).px(10).gap(9).items_center()
+        .rounded(18).bg(fill).border(0.5).border_color(on ? "#ffffff14" : fill)
+        .cursor_pointer().text_size(14).font_medium()
+        .on_hover((hovered, cx) => { this.hoveredRow = hovered ? row.e.id : null; cx.notify(); })
+        .on_click((_event, cx) => this.go(row.e, cx))
+        .child(svg(`mods/workspace-chrome/${icons[row.e.group] || "square"}.svg`).size(15).flex_none().text_color(colors[row.e.group] || t.muted))
+        .child(div().flex_1().min_w(0).overflow_hidden().whitespace_nowrap().child(this.title(t, row.e.title, row.hits, on)))
+        .when(Boolean(key), el => el.child(keycap(key))));
     });
-    return v_flex()
-      .id("palette")
-      .track_focus(this.handle)
-      .w_full()
-      .min_h(0)
-      .px(10).pt(6).pb(10)
-      .gap(8)
-      .border_1().border_color(t.border)
-      .text_size(12).line_height(1.2)
-      .bg(t.popover)
-      .on_key_down((e, cx) => {
-        const k = e.key;
-        if (k === "escape") return this.close();
-        // Stops at the ends: wrapping jumps out of sight.
-        if (k === "down") this.at = Math.min(this.at + 1, rows.length - 1);
-        else if (k === "up") this.at = Math.max(this.at - 1, 0);
-        else if (k === "pagedown") this.at = Math.min(this.at + SHOWN, rows.length - 1);
-        else if (k === "pageup") this.at = Math.max(this.at - SHOWN, 0);
-        else return;
-        cx.stop_propagation();
-        cx.notify();
+    const frame = menuFrame(t).id("palette").track_focus(this.handle).h(height + MENU_CHROME)
+      .on_mouse_move((event, cx) => {
+        if (this.drag) this.setScroll(this.drag.offset + (event.position.y - this.drag.y) * this.drag.factor, cx);
       })
-      .child(h_flex().items_center()
-        .child(div().flex_1().text_size(11).font_semibold().text_color(t.foreground).child("COMMANDS"))
-        .child(div().text_size(11).text_color(t.dim).child("Esc")))
-      .child(
-        h_flex()
-          .h(36)
-          .flex_none()
-          .px(10)
-          .gap(10)
-          .items_center()
-          .rounded(0)
-          .border_1()
-          .border_color(t.border)
-          .bg(t.background)
-          .child(svg("mods/minimal-palette/command.svg").size(15).text_color(t.dim))
-          .child(Input.new(this.input).flex_1().h_full().text_size(12).text_color(t.foreground))
-      )
-      .child(
-        rows.length
-          ? div()
-              .id("palette-rows")
-              .relative()
-              .mb(6)
-              .when(fixed, (el) => el.h(LIST_H).overflow_hidden())
-              .on_scroll_wheel((e, cx) => {
-                // The event bridge converts both wheel and touchpad deltas to pixels.
-                this.scroll = Math.max(0, Math.min(this.scroll - e.delta.y, this.maxScroll));
-                // The selection stays on screen, so the next frame doesn't scroll back to it.
-                while (this.at < rows.length - 1 && tops[this.at].row < this.scroll) this.at++;
-                while (this.at > 0 && tops[this.at].row + ROW_H > this.scroll + LIST_H) this.at--;
-                cx.notify();
-              })
-              .children(fixed ? list : [v_flex().children(list)])
-          : div().px(16).py(14).text_size(13).text_color(t.dim).child(`Nothing matches "${this.query}". Places are in the picker.`),
-      );
+      .on_mouse_up("left", () => { this.drag = null; })
+      .on_hover(hovered => { if (!hovered) this.drag = null; })
+      .on_key_down((event, cx) => {
+        if (["up", "down", "pageup", "pagedown", "home", "end", "escape"].includes(event.key)) {
+          cx.stop_propagation();
+          this.navigate(event.key, cx);
+        }
+      })
+      .child(menuSearch(this.input, "mods/minimal-palette/command.svg", t))
+      .child(h_flex().h(28).flex_none().px(8).items_center().justify_between()
+        .child(div().text_size(12).font_bold().text_color(t.muted).child("Commands"))
+        .child(div().text_size(11).text_color(t.dim).child("Enter to run · Esc to close")))
+      .child(div().id("palette-rows").relative().h(height).flex_none().overflow_hidden()
+        .on_scroll_wheel((event, cx) => {
+          cx.stop_propagation();
+          const scale = height / (event.bounds?.height || height);
+          this.setScroll(this.scroll - event.delta.y * scale, cx);
+        })
+        .children(rows.length ? fixed ? list : [v_flex().children(list)] : [div().px(10).py(14).text_size(13).text_color(t.dim).child(`Nothing matches "${this.query}".`)])
+        .when(this.maxScroll > 0, el => el.child(menuScrollbar("palette-scrollbar", height, total, this.scroll, t,
+          (offset, cx) => this.setScroll(offset, cx), drag => { this.drag = drag; }))));
+    return this.motion ? this.motion.wrap(frame, "palette", cx => this.dismiss(cx), { ...viewport, zoom }) : frame;
   }
 }

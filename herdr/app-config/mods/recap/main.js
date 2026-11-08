@@ -22,87 +22,8 @@ const LOOKUP_MS = 20000;
 // The list's height at most; the popup's own height caps it too.
 const LIST_MAX = 680;
 
-const clean = (s) => (s ?? "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
-
-// An agent on another machine (`ax42/t1`) says which.
-const machineOf = (address) => (address.includes("/") ? address.split("/")[0] : null);
-
-// Branches that are a repo's own default, not work of an agent's.
-const DEFAULT_BRANCHES = new Set(["main", "master", "trunk", "develop"]);
-
-// A ticket's key in a title, as herdr-recap finds one in a branch.
-const TICKET = /(?:^|[^a-z0-9])([a-z][a-z0-9]{1,9})-([1-9][0-9]{0,5})(?=[^a-z0-9]|$)/gi;
-const NOT_TICKETS = new Set(("phase step part pr v version release issue fix bug test try attempt wave stage sprint " +
-  "week day round batch task milestone iteration option plan draft rev").split(" "));
-function ticketKey(s) {
-  for (const m of (s ?? "").matchAll(TICKET)) {
-    if (!NOT_TICKETS.has(m[1].toLowerCase())) return `${m[1].toUpperCase()}-${m[2]}`;
-  }
-  return null;
-}
-
-// The herdr-recap this mod is part of (its release; the repo's tests hold it
-// to herdr-plugin.toml's version). It does the work on each machine with
-// agents: their sessions, recaps and titles, with the TUI plugin's cache.
-export const RECAP_VERSION = "0.12.11";
-
-// Puts that release on a machine, once: into a folder of its own version, so
-// it never touches a herdr-recap installed for the TUI. The archive for the
-// machine's system is checked against the release's checksums before it's
-// used. Prints the binary's path.
-const PROVISION = String.raw`
-v=$1
-dest="$HOME/.local/share/herdr-recap/app/$v"
-bin="$dest/herdr-recap"
-[ -x "$bin" ] && { printf '%s' "$bin"; exit 0; }
-case "$(uname -s)" in Darwin) os=darwin ;; Linux) os=linux ;; *) echo "no herdr-recap for $(uname -s)" >&2; exit 1 ;; esac
-case "$(uname -m)" in x86_64|amd64) arch=amd64 ;; arm64|aarch64) arch=arm64 ;; *) echo "no herdr-recap for $(uname -m)" >&2; exit 1 ;; esac
-name="herdr-recap_$v""_$os""_$arch.tar.gz"
-url="https://github.com/mrolafsson/herdr-recap/releases/download/v$v"
-tmp=$(mktemp -d) || exit 1
-trap 'rm -rf "$tmp"' EXIT
-curl -fsSL "$url/$name" -o "$tmp/$name" && curl -fsSL "$url/checksums.txt" -o "$tmp/sums" || { echo "couldn't download herdr-recap $v" >&2; exit 1; }
-want=$(grep " $name\$" "$tmp/sums" | cut -d' ' -f1)
-if command -v sha256sum >/dev/null 2>&1; then have=$(sha256sum "$tmp/$name" | cut -d' ' -f1); else have=$(shasum -a 256 "$tmp/$name" | cut -d' ' -f1); fi
-[ -n "$want" ] && [ "$want" = "$have" ] || { echo "herdr-recap $v didn't match its checksum" >&2; exit 1; }
-tar -xzf "$tmp/$name" -C "$tmp" herdr-recap || exit 1
-mkdir -p "$dest" && mv "$tmp/herdr-recap" "$bin.new" && chmod 755 "$bin.new" && mv "$bin.new" "$bin" || exit 1
-printf '%s' "$bin"
-`;
-
-// The path of herdr-recap on a machine (null: this one), put there first if
-// it isn't: asked once per machine while the mod runs.
-const binaries = new Map();
-function recapBinary(machine) {
-  const key = machine ?? "";
-  if (!binaries.has(key)) {
-    const p = exec("sh", ["-c", PROVISION, "sh", RECAP_VERSION], { on: machine }).then((r) => {
-      if (r.code !== 0 || !r.stdout.trim()) throw new Error(r.stderr.trim().split("\n").pop() || `herdr-recap: exit ${r.code}`);
-      return r.stdout.trim();
-    });
-    // A failure is tried again next time (offline, say), not remembered.
-    p.catch(() => binaries.delete(key));
-    binaries.set(key, p);
-  }
-  return binaries.get(key);
-}
-
-// Runs a program on a machine (null: this one): herdr-recap, the mod's own;
-// herdr-github and herdr-linear, where they're installed.
-async function tool(name, args, machine) {
-  if (name === "herdr-recap") {
-    const path = await recapBinary(machine);
-    const r = await exec("sh", ["-c", 'exec "$0" "$@"', path, ...args], { on: machine });
-    if (r.code !== 0) throw new Error(r.stderr.trim().split("\n").pop() || `${name}: exit ${r.code}`);
-    return JSON.parse(r.stdout);
-  }
-  // herdr-github and herdr-linear: the copy their app mod fetched (the newest),
-  // else the one installed for the TUI.
-  const find = `for b in $(ls -d "$HOME/.local/share/${name}/app/"*/${name} 2>/dev/null | sort -V -r) "$HOME/.local/bin/${name}"; do [ -x "$b" ] && exec "$b" "$@"; done; echo "${name} isn't installed" >&2; exit 127`;
-  const r = await exec("sh", ["-c", find, "sh", ...args], { on: machine });
-  if (r.code !== 0) throw new Error(r.stderr.trim().split("\n").pop() || `${name}: exit ${r.code}`);
-  return JSON.parse(r.stdout);
-}
+import { clean, machineOf, DEFAULT_BRANCHES, ticketKey } from "./session-policy.js";
+import { recapBinary, tool } from "./tools.js";
 
 const prKey = (i) => `${i.remote}\u0000${i.branch}`;
 
@@ -442,23 +363,26 @@ export default class Recap extends View {
   // write the recaps out of date, for agents not working.
   ask(cx, write) {
     // The demo asks no machine anything.
-    if (this.demo) return;
+    if (this.demo || this.asking) return;
+    this.asking = true;
     cx.spawn(async (cx) => {
-      const list = agents();
-      const got = await Promise.all(list.map((a) => hc(["get", "--json", a.address]).then((r) => (r.code === 0 ? JSON.parse(r.stdout) : null)).catch(() => null)));
-      const core = new Map(list.map((a, i) => [a.address, got[i]]).filter(([, t]) => t));
-      // What's drawn of it: only a change there is worth a redraw.
-      const seen = JSON.stringify([...core].map(([k, t]) => [k, t.status_ms, t.status?.msg]));
-      this.core = core;
-      this.askEach(cx, write);
-      if (seen !== this.seenCore) {
-        this.seenCore = seen;
-        cx.notify();
-      }
+      try {
+        const list = agents();
+        const got = await Promise.all(list.map((a) => hc(["get", "--json", a.address]).then((r) => (r.code === 0 ? JSON.parse(r.stdout) : null)).catch(() => null)));
+        const core = new Map(list.map((a, i) => [a.address, got[i]]).filter(([, t]) => t));
+        // What's drawn of it: only a change there is worth a redraw.
+        const seen = JSON.stringify([...core].map(([k, t]) => [k, t.status_ms, t.status?.msg]));
+        this.core = core;
+        await this.askEach(cx, write);
+        if (seen !== this.seenCore) {
+          this.seenCore = seen;
+          cx.notify();
+        }
+      } finally { this.asking = false; }
     });
   }
 
-  askEach(cx, write) {
+  async askEach(cx, write) {
     const core = this.core;
     const byMachine = new Map();
     for (const a of agents()) {
@@ -469,23 +393,21 @@ export default class Recap extends View {
       if (!byMachine.has(m)) byMachine.set(m, []);
       byMachine.get(m).push({ a, pid, cwd: t.foreground?.cwd ?? t.cwd });
     }
-    for (const [machine, list] of byMachine) {
+    await Promise.all([...byMachine].map(async ([machine, list]) => {
       const args = [JSON.stringify(list.map(({ a, pid, cwd }) => ({ pid, cwd, title: clean(a.title) })))];
       if (write && list.some(({ a }) => a.status !== "working")) args.unshift("--write");
-      cx.spawn(async (cx) => {
-        try {
-          const said = new Map((await tool("herdr-recap", ["sessions", ...args], machine)).map((s) => [s.pid, s]));
-          for (const { a, pid } of list) if (said.has(pid)) this.info[a.address] = said.get(pid);
-          delete this.unasked[machine ?? ""];
-        } catch (e) {
-          this.unasked[machine ?? ""] = `No recaps from ${machine ?? "this computer"}: ${e?.message ?? e}`;
-        }
-        if (Date.now() - this.lookedUp > LOOKUP_MS) this.lookUp(cx);
-        this.giveTitles(cx);
-        // Herdr's script engine is slow to draw: only when something changed.
-        if (this.keep()) cx.notify();
-      });
-    }
+      try {
+        const said = new Map((await tool("herdr-recap", ["sessions", ...args], machine)).map((s) => [s.pid, s]));
+        for (const { a, pid } of list) if (said.has(pid)) this.info[a.address] = said.get(pid);
+        delete this.unasked[machine ?? ""];
+      } catch (e) {
+        this.unasked[machine ?? ""] = `No recaps from ${machine ?? "this computer"}: ${e?.message ?? e}`;
+      }
+      if (Date.now() - this.lookedUp > LOOKUP_MS) this.lookUp(cx);
+      this.giveTitles(cx);
+      // Herdr's script engine is slow to draw: only when something changed.
+      if (this.keep()) cx.notify();
+    }));
   }
 
   // Where herdr-github and herdr-linear are signed in: the machine that
@@ -517,25 +439,27 @@ export default class Recap extends View {
       const k = this.info[a.address]?.ticket ?? ticketKey(clean(a.title));
       if (k) keys.add(k);
     }
-    if (prAsks.size) {
+    if (prAsks.size && !this.prPending) {
+      this.prPending = true;
       cx.spawn(async (cx) => {
         try {
           for (const p of await this.where("herdr-github", ["prs", JSON.stringify([...prAsks.values()])])) this.prs[prKey(p)] = p.pr;
           delete this.unasked.github;
         } catch (e) {
           this.unasked.github = `No pull requests: ${e?.message ?? e}`;
-        }
+        } finally { this.prPending = false; }
         if (this.keep()) cx.notify();
       });
     }
-    if (keys.size) {
+    if (keys.size && !this.issuePending) {
+      this.issuePending = true;
       cx.spawn(async (cx) => {
         try {
           for (const i of await this.where("herdr-linear", ["issues", JSON.stringify([...keys])])) this.issues[i.key] = i.issue;
           delete this.unasked.linear;
         } catch (e) {
           this.unasked.linear = `No Linear issues: ${e?.message ?? e}`;
-        }
+        } finally { this.issuePending = false; }
         if (this.keep()) cx.notify();
       });
     }
@@ -624,14 +548,14 @@ export default class Recap extends View {
   // About how tall an agent's card is, for the list's height: lines of the
   // recap at the popup's width, and a line each for what else it shows.
   height(r) {
-    const perLine = Math.max(40, Math.floor((this.width - 120) / 6.6));
+    const perLine = Math.max(36, Math.floor((this.width - 120) / 7.5));
     const said = this.said(r) ?? "Nothing to recap yet.";
     // Padding and the title line; the recap's lines; the callout, the rename
     // line and the chips, each with its gap.
-    let h = 23 + 22 + Math.ceil(said.length / perLine) * 19.5;
-    if (r.pending) h += 46;
-    if (r.suggested || r.renaming) h += 25;
-    if (r.branch || r.ticket || r.pr || r.info.tasks_total) h += 28;
+    let h = 25 + 26 + Math.ceil(said.length / perLine) * 22.5;
+    if (r.pending) h += 52;
+    if (r.suggested || r.renaming) h += 30;
+    if (r.branch || r.ticket || r.pr || r.info.tasks_total) h += 32;
     return h + 4;
   }
 
@@ -710,7 +634,7 @@ export default class Recap extends View {
               .child(
                 h_flex().gap(8).items_center()
                   // The chosen card's title: a click renames it (no key: a click it is).
-                  .child(div().id(`ti-${r.address}`).min_w(0).truncate().text_size(14.5).font_semibold().text_color(o.fg)
+                  .child(div().id(`ti-${r.address}`).min_w(0).truncate().text_size(17).font_semibold().text_color(o.fg)
                     .when(on, (el) => el.cursor_text().hover((s) => s.underline()).on_click((_e, cx) => {
                       cx.stop_propagation();
                       this.startReply(r, cx, "title");
@@ -718,13 +642,13 @@ export default class Recap extends View {
                     .child(r.name || r.address))
                   // Its machine, every card: another by name, this one as the app calls it.
                   .child(
-                    h_flex().flex_none().h(18).px(6).gap(4).items_center().rounded(5).border_1().border_color(o.line).bg(o.sunk)
-                      .font_family(MONO).text_size(10.5).text_color(o.fg)
-                      .child(icon(r.machine ? "server" : "laptop", o.muted, 11))
+                    h_flex().flex_none().h(22).px(7).gap(5).items_center().rounded(5).border_1().border_color(o.line).bg(o.sunk)
+                      .font_family(MONO).text_size(13).text_color(o.fg)
+                      .child(icon(r.machine ? "server" : "laptop", o.muted, 14))
                       .child(div().child(r.machine ?? "this computer")))
-                  .when(Boolean(r.space), (el) => el.child(div().flex_none().text_size(12).text_color(o.dim).child(r.space)))
+                  .when(Boolean(r.space), (el) => el.child(div().flex_none().text_size(14).text_color(o.dim).child(r.space)))
                   .child(div().flex_1())
-                  .child(div().flex_none().text_size(12).when(!quiet, (el) => el.font_medium()).text_color(quiet ? o.dim : tone).child(this.when(r, now))),
+                  .child(div().flex_none().text_size(14).when(!quiet, (el) => el.font_medium()).text_color(quiet ? o.dim : tone).child(this.when(r, now))),
               )
               // A question waiting for you: a callout with its own Reply.
               .when(Boolean(r.pending), (el) =>
@@ -741,20 +665,20 @@ export default class Recap extends View {
                           this.startReply(r, cx);
                         })
                         .child(icon("reply", o.surface, 12))
-                        .child(div().text_size(11.5).font_semibold().text_color(o.surface).child("Reply")))))
+                        .child(div().text_size(14).font_semibold().text_color(o.surface).child("Reply")))))
               .when(Boolean(r.asking), (el) =>
-                el.child(div().truncate().text_size(12.5).italic().text_color(o.dim).child("Asking for a better title…")))
+                el.child(div().truncate().text_size(14.5).italic().text_color(o.dim).child("Asking for a better title…")))
               .when(Boolean(r.renaming), (el) =>
-                el.child(div().truncate().text_size(12.5).text_color(o.dim).child(`Renaming to ${r.renaming}${r.status === "working" ? " once it's finished" : "…"}`)))
+                el.child(div().truncate().text_size(14.5).text_color(o.dim).child(`Renaming to ${r.renaming}${r.status === "working" ? " once it's finished" : "…"}`)))
               .when(Boolean(r.suggested && !r.renaming), (el) =>
                 el.child(
-                  h_flex().gap(8).items_center().text_size(12.5)
-                    .child(icon("edit", o.dim, 13))
+                  h_flex().gap(8).items_center().text_size(14.5)
+                    .child(icon("edit", o.dim, 16))
                     .child(div().flex_none().text_color(o.muted).child("Rename to"))
                     .child(div().min_w(0).truncate().font_medium().text_color(o.fg).child(r.suggested))
                     .child(words(o, [[["Rename", o.accent, (cx) => this.rename(r, cx)]], [["Ignore", o.dim, (cx) => this.ignore(r, cx)]]], `sg-${r.address}`)),
                 ))
-              .child(div().text_size(13).line_height(1.5).text_color(said && r.recap ? o.muted : o.dim).when(!r.recap, (el) => el.italic()).child(said || "Nothing to recap yet."))
+              .child(div().text_size(15).line_height(1.5).text_color(said && r.recap ? o.muted : o.dim).when(!r.recap, (el) => el.italic()).child(said || "Nothing to recap yet."))
               .when(details.length > 0, (el) => el.child(h_flex().gap(6).flex_wrap().items_center().children(details))),
           ),
       );
@@ -783,13 +707,13 @@ export default class Recap extends View {
       return h_flex()
         .id(`tab-${s.id}`)
         .flex_none()
-        .h(28)
-        .px(10)
-        .gap(7)
+        .h(34)
+        .px(12)
+        .gap(8)
         .items_center()
         .rounded(7)
         .cursor_pointer()
-        .text_size(12.5)
+        .text_size(15)
         .when(on, (el) => el.bg(o.raised).shadow_sm())
         .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
         .on_click((_e, cx) => {
@@ -807,10 +731,10 @@ export default class Recap extends View {
     // for them): up to the chosen one when it's above, and on from the top
     // while what's between doesn't fit.
     const headed = (i) => this.tab === "all" && (i === 0 || this.shown[i].stage !== this.shown[i - 1].stage);
-    const est = (i) => this.height(this.shown[i]) + (headed(i) ? 32 : 0);
+    const est = (i) => this.height(this.shown[i]) + (headed(i) ? 36 : 0);
     this.first = Math.max(0, Math.min(this.first ?? 0, this.at));
     while (this.first < this.at) {
-      let h = 32; // the first one's heading
+      let h = 36; // the first one's heading
       for (let i = this.first; i <= this.at; i++) h += est(i);
       if (h <= LIST_MAX) break;
       this.first++;
@@ -821,14 +745,14 @@ export default class Recap extends View {
     let last = null;
     let headings = 0;
     if (this.first > 0) {
-      items.push(div().flex_none().px(10).text_size(11).text_color(o.dim).child(`↑ ${this.first} more`));
+      items.push(div().flex_none().px(10).text_size(13).text_color(o.dim).child(`↑ ${this.first} more`));
     }
     for (const r of this.shown.slice(this.first)) {
       if (this.tab === "all" && r.stage !== last) {
         const s = STAGES.find((s) => s.id === r.stage);
         // Small capitals in the stage's colour, its count, a rule.
         items.push(
-          h_flex().flex_none().px(10).pt(headings ? 12 : 4).pb(4).gap(8).items_center().text_size(10.5)
+          h_flex().flex_none().px(10).pt(headings ? 14 : 6).pb(5).gap(9).items_center().text_size(13)
             .child(div().font_semibold().text_color(o[s.tone]).child(s.label.toUpperCase()))
             .child(div().font_medium().text_color(o.dim).child(String(count(s.id))))
             .child(div().flex_1().h(1).bg(o.line)),
@@ -842,7 +766,7 @@ export default class Recap extends View {
     // The popup is as tall as what's in it, up to its height, so the list says
     // how tall it'd like to be, and shrinks (and scrolls) when that's too tall.
     const listH = this.shown.length
-      ? Math.min(LIST_MAX, headings * 32 + this.shown.reduce((h, r) => h + this.height(r), 0))
+      ? Math.min(LIST_MAX, headings * 36 + this.shown.reduce((h, r) => h + this.height(r), 0))
       : 44;
     const empty = this.filter ? "No agent matches." : "No agents yet. Agents started in Herdr show up here, from every machine.";
     const info = sel?.info ?? {};
@@ -858,9 +782,9 @@ export default class Recap extends View {
       .w_full()
       .min_h(0)
       .p(16)
-      .gap(10)
+      .gap(12)
       .bg(t.popover)
-      .text_size(13)
+      .text_size(15)
       .on_size_change((size, cx) => {
         if (Math.abs(size.width - this.width) > 20) {
           this.width = size.width;
@@ -891,10 +815,10 @@ export default class Recap extends View {
         cx.notify();
       })
       .child(
-        h_flex().h(36).flex_none().px(12).gap(10).items_center().rounded(9).border_1().border_color(o.line).bg(o.sunk)
-          .child(icon("search", o.dim, 15))
-          .child(Input.new(this.input).flex_1().h_full().text_size(13).text_color(o.fg))
-          .child(div().flex_none().text_size(12).text_color(o.muted).child(summary)),
+        h_flex().h(42).flex_none().px(14).gap(12).items_center().rounded(9).border_1().border_color(o.line).bg(o.sunk)
+          .child(icon("search", o.dim, 17))
+          .child(Input.new(this.input).flex_1().h_full().text_size(15).text_color(o.fg))
+          .child(div().flex_none().text_size(14).text_color(o.muted).child(summary)),
       )
       .child(h_flex().flex_none().gap(4).flex_wrap().children(this.tabs.map(tab)))
       .child(
@@ -915,15 +839,15 @@ export default class Recap extends View {
             }
             cx.notify();
           })
-          .when(!this.shown.length, (el) => el.child(div().px(14).py(10).text_size(12.8).text_color(o.dim).child(empty)))
+          .when(!this.shown.length, (el) => el.child(div().px(16).py(12).text_size(15).text_color(o.dim).child(empty)))
           .children(items),
       )
-      .when(trouble.length > 0, (el) => el.children(trouble.map((why) => div().flex_none().text_size(11).text_color(o.dim).truncate().child(why))))
+      .when(trouble.length > 0, (el) => el.children(trouble.map((why) => div().flex_none().text_size(13).text_color(o.dim).truncate().child(why))))
       // Replying: who to, and the box, where the footer was.
       .when(Boolean(replying), (el) =>
         el.child(
-          h_flex().flex_none().gap(8).items_center().text_size(12.5)
-            .child(icon("reply", o.need, 13))
+          h_flex().flex_none().gap(9).items_center().text_size(14.5)
+            .child(icon("reply", o.need, 16))
             .child(div().font_medium().text_color(o.fg).child(replying.kind === "title" ? `Rename ${replying.name} to` : `Reply to ${replying.name}`))
             .child(div().text_color(o.dim).child(machineOf(replying.address) ?? "")),
         ))
@@ -932,11 +856,11 @@ export default class Recap extends View {
           .when(Boolean(replying), (el) => el.h(36).border_1().border_color(o.need))
           .when(!replying, (el) => el.h(0).overflow_hidden())
           .child(div().text_color(o.need).child("›"))
-          .child(Input.new(this.reply).flex_1().h_full().text_size(13).text_color(o.fg)),
+          .child(Input.new(this.reply).flex_1().h_full().text_size(15).text_color(o.fg)),
       )
       .when(!replying, (el) =>
         el.child(
-          h_flex().flex_none().gap(10).items_center().text_size(12)
+          h_flex().flex_none().gap(10).items_center().text_size(14)
             .child(div().flex_1().min_w(0).truncate().italic().text_color(o.dim).child(info.last_prompt ? `› ${info.last_prompt}` : ""))
             .when(Boolean(info.model), (el) => el.child(div().flex_none().font_medium().text_color(o.accent).child(info.model)))
             .when(Boolean(info.model && info.mode), (el) => el.child(div().flex_none().text_color(o.dim).child("·")))

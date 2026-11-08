@@ -1,5 +1,5 @@
 import { View, div } from "gpui-kit";
-import { closeOverlay, props, run, focused, openOverlay, notify, hc, layout, spaces, terminals, nextCommand } from "herdr";
+import { closeOverlay, props, run, focused, openOverlay, notify, hc, layout, spaces, terminals, nextCommand, settings } from "herdr";
 import bindings from "./bindings.js";
 import { bindingKey, terminalArgs } from "./keys.js";
 
@@ -12,7 +12,7 @@ function find(node, id) {
   return null;
 }
 
-export default class LegacyPrefix extends View {
+export default class CommandPrefix extends View {
   init(_props, cx) {
     this.context = focused();
     this.handle = cx.focus_handle();
@@ -40,10 +40,13 @@ export default class LegacyPrefix extends View {
       run("terminal.keep", { terminal: address, place: "tab" });
       return;
     }
+    const viewport = window.viewport_size();
+    const zoom = Number(settings().zoom) || 1;
     openOverlay({
-      kind: "dialog", width: 0.85, height: 0.85,
-      layout: { type: "column", children: [
-        { type: "block", size: { px: 26 }, content: { mod: "tool-popup", props: { terminal: address, title: action.name } } },
+      kind: "popup", frame: "none", width: 0.68, height: 0.68,
+      at: { x: viewport.width * 0.16 / zoom, y: viewport.height * 0.16 / zoom },
+      layout: { type: "column", radius: 12, shadow: "lg", background: "background", border: { width: 0.5, color: "#ffffff18" }, children: [
+        { type: "block", size: { px: 0 }, content: { mod: "tool-popup", props: { terminal: address } } },
         { type: "block", content: { terminal: address } },
       ] },
     });
@@ -98,7 +101,7 @@ export default class LegacyPrefix extends View {
         else notify({ title: "Tool exited before opening", body: action.name, level: "error" });
       });
     }
-    return div().id("legacy-prefix").size(1).track_focus(this.handle)
+    return div().id("command-prefix").size(1).track_focus(this.handle)
       .on_key_down((event, cx) => {
         cx.stop_propagation();
         this.dispatch(bindingKey(event, bindings), cx);
