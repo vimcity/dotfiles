@@ -197,5 +197,15 @@
     "ctrl-shift-p": "minimal-palette.escape",
     "cmd-shift-enter": "minimal-palette.zoom",
     "alt-z": "minimal-palette.zoom"
+  },
+  "layout:main": {
+    "alt-h": "tab.prev",
+    "alt-l": "tab.next",
+    "alt-j": "space.next",
+    "alt-k": "space.prev",
+    "ctrl-h": "pane.go:left",
+    "ctrl-j": "pane.go:down",
+    "ctrl-k": "pane.go:up",
+    "ctrl-l": "pane.go:right"
   }
 }

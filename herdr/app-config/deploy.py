@@ -19,8 +19,8 @@ def files(source):
     manifest = json.loads((source / "deploy.json").read_text())
     entries = {name: "link" for name in manifest["linked"]}
     for mod in manifest["mods"]:
-        for path in sorted((source / "mods" / mod).iterdir()):
-            if path.is_file() and path.name not in GENERATED and not path.name.startswith("."):
+        for path in sorted((source / "mods" / mod).rglob("*")):
+            if path.is_file() and path.name not in GENERATED and not any(part.startswith(".") for part in path.relative_to(source / "mods" / mod).parts):
                 entries[str(path.relative_to(source))] = "copy"
     return entries, manifest["retired"]
 

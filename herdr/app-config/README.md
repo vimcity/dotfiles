@@ -153,3 +153,11 @@ Picker scrolling keeps space order stable as agents change status. Live updates 
 - Sidebar gutters intentionally retain spacing around rounded terminal cards, but both sides now paint `chrome`; the sidebar shadow is removed. Pane-to-pane spacing is unchanged.
 
 Workspace headings use `#7F86A1` text and Helvetica Neue Bold (700), including the text inside the fade wrapper, in the sidebar and Ctrl-F picker. On this Mac, changing the weight of the previous UI font alone did not visibly render bold; the system font face was verified in a live screenshot. Compact sidebar initials use the same family.
+
+## Cross-machine dependencies
+
+The root dotfiles installer deploys the herdr-nvim mod and its pinned Apple Silicon macOS runtime, including nested runtime files. Its launcher resolves paths on the destination machine. This recovers the installed runtime snapshot 06ad1347b31fb19c; other operating systems need their own runtime build. No runtime cache is included.
+
+Theme and layout are independent: settings.json selects Catppuccin Frappé for the stock Herdr layout and minimal-frappe. Layout selection is machine-local. After installing on another Mac, select minimal-frappe with `herdr-app do layout.switch --name minimal-frappe` while the app is open. Installation preserves the currently selected layout.
+
+In the stock main layout, Alt-H/L selects tabs and Alt-J/K selects spaces. Ctrl-H/J/K/L moves between app panes. In minimal-frappe, Alt-J/K traverses the sidebar across spaces and Ctrl-H/J/K/L retains the editor-aware navigation handler. Seamless Neovim split forwarding currently belongs to minimal-frappe's pane header; the stock layout uses native pane movement.
