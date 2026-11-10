@@ -56,18 +56,55 @@ rex.action{
 rex.bind("shift+cmd+d", "ignore_split_shortcut")
 rex.bind("ctrl+space>z", "pane.zoom")
 rex.bind("ctrl+space>f", "pane.float")
-rex.bind("ctrl+h", "pane.focus", { direction = "left" })
-rex.bind("ctrl+space>h", "pane.focus", { direction = "left" })
-rex.bind("resize/h", "pane.resize", { direction = "left" })
-rex.bind("ctrl+j", "pane.focus", { direction = "down" })
-rex.bind("ctrl+space>j", "pane.focus", { direction = "down" })
-rex.bind("resize/j", "pane.resize", { direction = "down" })
-rex.bind("ctrl+k", "pane.focus", { direction = "up" })
-rex.bind("ctrl+space>k", "pane.focus", { direction = "up" })
-rex.bind("resize/k", "pane.resize", { direction = "up" })
-rex.bind("ctrl+l", "pane.focus", { direction = "right" })
-rex.bind("ctrl+space>l", "pane.focus", { direction = "right" })
-rex.bind("resize/l", "pane.resize", { direction = "right" })
+local function is_vim(ctx)
+  local process = rex.block.call("com.superlogical.terminal", "process", { block_id = ctx.block_id })
+  local foreground = process and process.foreground
+  if not foreground then return false end
+
+  local argv0 = (foreground.argv0 or ""):match("[^/]*$") or ""
+  for _, name in ipairs({ foreground.name or "", argv0 }) do
+    if name:match("^n?vim") then return true end
+  end
+  return false
+end
+
+for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
+  rex.bind("ctrl+" .. key, function(ctx)
+    if is_vim(ctx) then return false end
+    rex.session.focus_direction({ direction = direction })
+    return true
+  end)
+  rex.bind("ctrl+space>" .. key, "pane.focus", { direction = direction })
+  rex.bind("resize/" .. key, "pane.resize", { direction = direction })
+end
+
+rex.action{
+  name = "smart_splits_focus",
+  title = "Smart Splits: Focus Pane",
+  run = function(ctx, args)
+    if is_vim(ctx) then
+      rex.client.queue("pane.send_key", { key = args.key })
+    else
+      rex.client.queue("pane.focus", { direction = args.direction })
+    end
+  end,
+}
+
+rex.action{
+  name = "smart_splits_resize",
+  title = "Smart Splits: Resize Pane",
+  run = function(ctx, args)
+    if is_vim(ctx) then
+      rex.client.queue("pane.send_key", { key = args.key })
+    else
+      rex.client.queue("pane.resize", { direction = args.direction, amount = 3 })
+    end
+  end,
+}
+
+for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
+  rex.bind("alt+" .. key, "smart_splits_resize", { key = "alt+" .. key, direction = direction })
+end
 
 local terminal = "com.superlogical.terminal"
 
@@ -138,6 +175,12 @@ local function launch(ctx, item)
       "/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin",
     }
   end
+  if item.org_environment then
+    options.command = {
+      "/bin/zsh", "-c",
+      'export ORG_PATH="${ORG_PATH:-$HOME/Documents/org}"; ' .. item.shell_command,
+    }
+  end
   if item.scrollback then
     options.command = {
       "/bin/zsh", "-c", 'exec /bin/bash "$@"', "rex-scrollback",
@@ -181,7 +224,7 @@ local launchers = {
   { name = "launch_confluence", key = "ctrl+space>shift+c", title = "open confluence docs", shell_command = "exec fluence pick", temporary = true, width = 0.75, height = 0.75 },
   { name = "launch_directory_picker", interactive_shell = true, key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'", temporary = true, width = 0.75, height = 0.75 },
   { name = "launch_stash", key = "ctrl+space>ctrl+s", title = "checkout stash", shell_command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md", popup = true, width = 0.65, height = 0.6 },
-  { name = "launch_agenda", key = "ctrl+space>ctrl+o", title = "open today's org agenda", shell_command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh", popup = true, width = 0.75, height = 0.75 },
+  { name = "launch_agenda", key = "ctrl+space>ctrl+o", title = "open today's org agenda", shell_command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh", org_environment = true, popup = true, width = 0.75, height = 0.75 },
   { name = "launch_org_plans", key = "ctrl+space>shift+o", title = "create new org plans", shell_command = "exec $HOME/dotfiles/herdr/scripts/org-plans.sh", popup = true, width = 0.85, height = 0.8 },
   { name = "launch_posting", key = "ctrl+space>p", title = "open Posting", shell_command = "exec posting --env \"$HOME/.local/share/posting/default/posting.env\"", temporary = true, width = 0.8, height = 0.8 },
   { name = "launch_jira", key = "ctrl+space>ctrl+j", title = "open Jira TUI", shell_command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"", temporary = true, width = 0.85, height = 0.8 },
