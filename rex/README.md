@@ -153,10 +153,11 @@ bookkeeping. This is a workaround, not a claim of equivalent OS session setup.
 Prefer an upstream fix that retains login and gives child processes appropriate
 resource limits; do not globally lower system limits to work around this.
 
-Regular tool launchers create a full-size tab and request that Rex select it.
-Popup launchers create a floating terminal. Foreground selection has been reported
-as unreliable and still needs confirmation. Ordinary split shortcuts call Rex's
-built-in split action directly.
+Temporary tool launchers create a focused floating terminal in the current tab;
+this includes the directory picker, Jira, Posting, lazygit, btop, yazi,
+lazydocker, lmstat, Splunk, PR review, and Confluence launchers. The shell tab
+and Projects editor launchers remain full-size tabs. Popup launchers use the same
+floating behavior. Ordinary split shortcuts call the custom split actions above.
 
 Single-app launchers set `login = false` and use a non-login, non-interactive zsh
 wrapper for variable expansion and commands that change directory. They skip
@@ -168,6 +169,10 @@ exported later in another pane, and do not refresh login-profile setup per launc
 Interactive shell launchers and the directory picker also bypass the macOS login
 wrapper. They retain zsh's login startup files through `-lc` and load an
 interactive shell where needed for the prompt or shell functions.
+
+Temporary floating tools keep their own pane in the current tab and focus it;
+closing the layer returns you to the previous tab and pane. They do not create a
+new workspace tab or change the current tab's tiled split tree.
 
 The scrollback helper resolves the current bundled Rex CLI instead of pinning a
 specific app version, with a CLI-on-PATH fallback. Preserve this when updating it.

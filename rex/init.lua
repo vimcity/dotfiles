@@ -145,7 +145,7 @@ local function launch(ctx, item)
     }
   end
   local layout = rex.layout.block{ flavor = terminal .. ".shell", options = options }
-  if item.popup then
+  if item.popup or item.temporary then
     local width, height = item.width or 0.75, item.height or 0.75
     return checked(rex.session.new_layer{
       session_id = ctx.session_id,
@@ -173,22 +173,22 @@ local launchers = {
   { name = "launch_popup_shell", interactive_shell = true, key = "ctrl+space>ctrl+p", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l", popup = true, width = 0.75, height = 0.75 },
   { name = "launch_shell_tab", interactive_shell = true, key = "ctrl+space>ctrl+c", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l" },
   { name = "launch_projects_editor", key = "ctrl+space>ctrl+n", title = "open Neovim in a Projects tab", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim" },
-  { name = "launch_splunk", key = "ctrl+space>shift+s", title = "start lazy splunk tui", shell_command = "exec ~/.local/bin/lzk" },
-  { name = "launch_review_prs", key = "ctrl+space>shift+g", title = "review PRs", shell_command = "exec $HOME/.local/bin/gh-pr-dash" },
+  { name = "launch_splunk", key = "ctrl+space>shift+s", title = "start lazy splunk tui", shell_command = "exec ~/.local/bin/lzk", temporary = true, width = 0.85, height = 0.8 },
+  { name = "launch_review_prs", key = "ctrl+space>shift+g", title = "review PRs", shell_command = "exec $HOME/.local/bin/gh-pr-dash", temporary = true, width = 0.85, height = 0.8 },
   { name = "launch_popup_prs", key = "ctrl+space>shift+m", title = "review PRs in a floating popup", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"$HOME/dotfiles/bin/ghprs\" mine", popup = true, width = 0.72, height = 0.65 },
-  { name = "launch_lazygit", key = "ctrl+space>ctrl+g", title = "open lazyzgit", shell_command = "exec lazygit" },
+  { name = "launch_lazygit", key = "ctrl+space>ctrl+g", title = "open lazyzgit", shell_command = "exec lazygit", temporary = true, width = 0.85, height = 0.8 },
   { name = "launch_org_task", key = "ctrl+space>ctrl+a", title = "open or create an org todo", shell_command = "exec $HOME/dotfiles/herdr/scripts/quick-org-task.sh", popup = true, width = 0.55, height = 0.5 },
-  { name = "launch_confluence", key = "ctrl+space>shift+c", title = "open confluence docs", shell_command = "exec fluence pick" },
-  { name = "launch_directory_picker", interactive_shell = true, key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'" },
+  { name = "launch_confluence", key = "ctrl+space>shift+c", title = "open confluence docs", shell_command = "exec fluence pick", temporary = true, width = 0.75, height = 0.75 },
+  { name = "launch_directory_picker", interactive_shell = true, key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'", temporary = true, width = 0.75, height = 0.75 },
   { name = "launch_stash", key = "ctrl+space>ctrl+s", title = "checkout stash", shell_command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md", popup = true, width = 0.65, height = 0.6 },
   { name = "launch_agenda", key = "ctrl+space>ctrl+o", title = "open today's org agenda", shell_command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh", popup = true, width = 0.75, height = 0.75 },
   { name = "launch_org_plans", key = "ctrl+space>shift+o", title = "create new org plans", shell_command = "exec $HOME/dotfiles/herdr/scripts/org-plans.sh", popup = true, width = 0.85, height = 0.8 },
-  { name = "launch_posting", key = "ctrl+space>p", title = "open Posting", shell_command = "exec posting --env \"$HOME/.local/share/posting/default/posting.env\"" },
-  { name = "launch_jira", key = "ctrl+space>ctrl+j", title = "open Jira TUI", shell_command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"" },
-  { name = "launch_btop", key = "ctrl+space>ctrl+b", title = "open btop", shell_command = "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\"" },
-  { name = "launch_yazi", key = "ctrl+space>ctrl+y", title = "open yazi", shell_command = "exec \"${YAZI_BIN:-yazi}\"" },
-  { name = "launch_lazydocker", key = "ctrl+space>ctrl+d", title = "open lazydocker", shell_command = "exec /opt/homebrew/bin/lazydocker" },
-  { name = "launch_lmstat", key = "ctrl+space>ctrl+l", title = "open lmstat", shell_command = "exec $HOME/.local/bin/lmstat" },
+  { name = "launch_posting", key = "ctrl+space>p", title = "open Posting", shell_command = "exec posting --env \"$HOME/.local/share/posting/default/posting.env\"", temporary = true, width = 0.8, height = 0.8 },
+  { name = "launch_jira", key = "ctrl+space>ctrl+j", title = "open Jira TUI", shell_command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"", temporary = true, width = 0.85, height = 0.8 },
+  { name = "launch_btop", key = "ctrl+space>ctrl+b", title = "open btop", shell_command = "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\"", temporary = true, width = 0.8, height = 0.8 },
+  { name = "launch_yazi", key = "ctrl+space>ctrl+y", title = "open yazi", shell_command = "exec \"${YAZI_BIN:-yazi}\"", temporary = true, width = 0.85, height = 0.8 },
+  { name = "launch_lazydocker", key = "ctrl+space>ctrl+d", title = "open lazydocker", shell_command = "exec /opt/homebrew/bin/lazydocker", temporary = true, width = 0.85, height = 0.8 },
+  { name = "launch_lmstat", key = "ctrl+space>ctrl+l", title = "open lmstat", shell_command = "exec $HOME/.local/bin/lmstat", temporary = true, width = 0.75, height = 0.75 },
 }
 
 for _, item in ipairs(launchers) do
