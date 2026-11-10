@@ -78,7 +78,7 @@ end
 
 rex.action{
   name = "test_split_no_login",
-  title = "Test split without login mode",
+  title = "Test login profiles without macOS login wrapper",
   run = function(ctx)
     local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
     return checked(rex.session.new_split{
@@ -89,11 +89,11 @@ rex.action{
       focus = true,
       layout = rex.layout.block{
         flavor = terminal .. ".shell",
-        label = "NO-LOGIN TEST",
+        label = "LOGIN-PROFILES TEST",
         options = {
           shell = "none",
           login = false,
-          command = { "/bin/zsh", "-i" },
+          command = { "/bin/zsh", "-il" },
           cwd = reported and reported.pwd,
         },
       },
