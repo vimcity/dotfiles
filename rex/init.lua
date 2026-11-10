@@ -76,6 +76,33 @@ local function checked(result, err)
   return result
 end
 
+rex.action{
+  name = "test_split_no_login",
+  title = "Test split without login mode",
+  run = function(ctx)
+    local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
+    return checked(rex.session.new_split{
+      session_id = ctx.session_id,
+      anchor_id = ctx.block_id,
+      direction = "horizontal",
+      side = "after",
+      focus = true,
+      layout = rex.layout.block{
+        flavor = terminal .. ".shell",
+        label = "NO-LOGIN TEST",
+        options = {
+          shell = "none",
+          login = false,
+          command = { "/bin/zsh", "-i" },
+          cwd = reported and reported.pwd,
+        },
+      },
+    })
+  end,
+}
+-- Temporary diagnostic: remove this binding to restore ordinary Cmd-D splits.
+rex.bind("cmd+d", "test_split_no_login")
+
 local function launch(ctx, item)
   local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
   local cwd = reported and reported.pwd
