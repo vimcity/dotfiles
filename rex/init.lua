@@ -68,16 +68,6 @@ local function is_vim(ctx)
   return false
 end
 
-for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
-  rex.bind("ctrl+" .. key, function(ctx)
-    if is_vim(ctx) then return false end
-    rex.session.focus_direction({ direction = direction })
-    return true
-  end)
-  rex.bind("ctrl+space>" .. key, "pane.focus", { direction = direction })
-  rex.bind("resize/" .. key, "pane.resize", { direction = direction })
-end
-
 rex.action{
   name = "smart_splits_focus",
   title = "Smart Splits: Focus Pane",
@@ -90,6 +80,12 @@ rex.action{
   end,
 }
 
+for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
+  rex.bind("ctrl+" .. key, "smart_splits_focus", { key = "ctrl+" .. key, direction = direction })
+  rex.bind("ctrl+space>" .. key, "pane.focus", { direction = direction })
+  rex.bind("resize/" .. key, "pane.resize", { direction = direction })
+end
+
 rex.action{
   name = "smart_splits_resize",
   title = "Smart Splits: Resize Pane",
@@ -101,10 +97,6 @@ rex.action{
     end
   end,
 }
-
-for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
-  rex.bind("alt+" .. key, "smart_splits_resize", { key = "alt+" .. key, direction = direction })
-end
 
 local terminal = "com.superlogical.terminal"
 

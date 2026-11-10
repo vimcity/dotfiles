@@ -156,11 +156,19 @@ vim.keymap.set("n", "<leader>/", function()
   Snacks.picker.grep()
 end, { desc = "Grep (project/cwd)" })
 
--- Resize windows with Ctrl + Arrow keys (10 rows/columns per press)
-vim.keymap.set("n", "<C-Up>", "<cmd>resize +10<cr>", { desc = "Increase window height" })
-vim.keymap.set("n", "<C-Down>", "<cmd>resize -10<cr>", { desc = "Decrease window height" })
-vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -10<cr>", { desc = "Decrease window width" })
-vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +10<cr>", { desc = "Increase window width" })
+-- Resize windows with Ctrl + Arrow keys (10 rows/columns per press).
+if vim.env.REX_SESSION and vim.env.REX_BLOCK then
+  for key, direction in pairs({ Up = "up", Down = "down", Left = "left", Right = "right" }) do
+    vim.keymap.set("n", "<C-" .. key .. ">", function()
+      require("smart-splits")["resize_" .. direction](10)
+    end, { desc = "Resize " .. direction .. " (Rex)" })
+  end
+else
+  vim.keymap.set("n", "<C-Up>", "<cmd>resize +10<cr>", { desc = "Increase window height" })
+  vim.keymap.set("n", "<C-Down>", "<cmd>resize -10<cr>", { desc = "Decrease window height" })
+  vim.keymap.set("n", "<C-Left>", "<cmd>vertical resize -10<cr>", { desc = "Decrease window width" })
+  vim.keymap.set("n", "<C-Right>", "<cmd>vertical resize +10<cr>", { desc = "Increase window width" })
+end
 -- vim.keymap.set("n", ":", "q:i", { noremap = true, silent = true, desc = "Cmdwin in insert mode" })
 -- vim.keymap.set("x", ":", "q:a", { noremap = true, silent = true, desc = "Vidual Cmdwin in insert mode" })
 -- Better command-line editing
