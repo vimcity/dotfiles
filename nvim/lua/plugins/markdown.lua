@@ -76,6 +76,14 @@ return {
     end,
   },
   {
+    "blackhat-7/vellum.nvim",
+    ft = "markdown",
+    keys = {
+      { "<leader>mv", "<cmd>Vellum<cr>", desc = "Markdown preview" },
+    },
+    opts = {},
+  },
+  {
     "preservim/vim-markdown",
     ft = "markdown",
     init = function()

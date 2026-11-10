@@ -10,9 +10,8 @@ shell)
 	exec "${SHELL:-/bin/zsh}" -l
 	;;
 jira)
-	cd "${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}"
-	exec "${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}"
-	;;
+    exec "$HOME/.config/jira-tui/jira-tui.sh"
+    ;;
 posting)
 	cd "$cwd"
 	exec "${POSTING_BIN:-posting}" --env "$HOME/.local/share/posting/default/posting.env"

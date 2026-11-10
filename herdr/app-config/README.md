@@ -81,13 +81,12 @@ Community candidates, reviewed 2026-11-07:
 ## Session-first navigation
 
 - Alt-J/K traverses tabs across spaces in sidebar order, even while the sidebar is hidden. Commands are handled once by the focused pane header, not by the sidebar UI.
-- Ctrl-F: type a session title, repo/path, tool name or machine; Up/Down selects, PageUp/PageDown jumps, Enter opens it, Escape dismisses.
+- Ctrl-F: find a workspace by its name or by searching for a session title, repo/path or tool. Results show one row per workspace; selecting a session match takes you directly to that tab. Up/Down selects, PageUp/PageDown jumps, Enter opens, Escape dismisses.
 - The picker uses one controlled viewport for keyboard selection, wheel scrolling and a draggable scrollbar. The bar remains visible when content overflows.
-- Coding-agent rows use the reported session title, falling back to a named tab, then the folder. The sidebar uses a program icon without a directory subtitle. Ctrl-F uses the program icon too, without a duplicate agent-name badge; tool names remain searchable and appear in tooltips.
-- Regular applications retain their app/tab name and directory. Hidden context remains searchable; sidebar rows retain full-context tooltips.
+- Ctrl-F is a workspace switcher, not a tab/pane tree: each workspace appears once with its machine context and status. Searching a session title, path or tool opens that matching tab without displaying every tab or split. Workspace names and machine context are the only visible hierarchy.
 - The sidebar and picker share the session-label policy from `lib/session-label.js`. Pane headers show their own terminal's directory, using `~` for the home directory and the absolute path in a tooltip.
 
-Picker scrolling keeps space order stable as agents change status. Live updates do not recenter the list; keyboard navigation scrolls only at viewport edges, and arrows stop at the ends. Run `node tests/picker-scroll.test.mjs` for the scrolling regression tests.
+Picker scrolling keeps workspace order stable as sessions change status. Live updates do not recenter the list; keyboard navigation scrolls only at viewport edges, and arrows stop at the ends. Run `node tests/picker-scroll.test.mjs` for the scrolling regression tests.
 
 ## Terminal-only text zoom
 
@@ -106,20 +105,20 @@ Picker scrolling keeps space order stable as agents change status. Live updates 
 - Sidebar labels use a native 22px edge fade instead of an ellipsis; full labels remain in tooltips. Sessions use 14px medium text (semibold when selected), with 13px bold gray space headings. CPU/memory percentages use 12px semibold text and hide when they no longer fit.
 - Pane headers show the cwd with `~` replacing the home directory, with no session title or branch competing for space. The tooltip retains the full absolute cwd. Very long paths can scroll horizontally and retain their full tooltip. Shared fading/icon helpers live in `lib/ui.js`, copied into each mod's import sandbox.
 - Main text remains `#C6D0F5`; secondary text uses `#A5ADCE` and tertiary metadata uses `#838BA7`.
-- Ctrl-F uses the same soft 18px-radius selection and fading labels as the sidebar, with no tree connectors or idle-agent clusters. Machine labels use blue/purple, tinted tool icons mint, and status filters red/amber/green; session titles stay neutral. Normal-case machine labels replace the old banners and LOCAL/SSH badges.
+- Ctrl-F uses the same soft 18px-radius selection and fading labels as the sidebar. Workspace names are primary; machine context and a matching session title are secondary. The picker omits machine headings, tab rows, split rows, status-filter chips and create-new shortcuts.
 - Verify the redesign with `node tests/ui-revamp.test.mjs` and `herdr-app check` for minimal-sidebar, minimal-pane and minimal-metrics. Review normal/narrow/rail widths, focus switching, zoom and hidden-sidebar clearance in the app.
 
 ### Ctrl-F input and scroll fixes
 
 - Up/Down, PageUp/PageDown, Home/End and Escape have explicit `mod:minimal-picker` bindings, so the search input cannot swallow list navigation.
-- Page movement uses actual row heights, including machine and space headings, rather than an estimated number of sessions.
+- Page movement uses the actual workspace-result row heights.
 - Selection and rendered row positions share the same scroll offset. Live updates preserve it; selecting an off-screen result brings the full row into view.
-- Coding-agent rows are 38px, ordinary app rows 50px, and the search field 36px. Session names use 14px medium text, semibold when selected; space headings are 13px bold gray.
+- Workspace results are 52px, with the workspace name prominent and machine or matching-session context secondary.
 - Live app-command tests exercised Home/End, 18 consecutive Down/Up commands and PageUp/PageDown; screenshots confirmed selection stayed visible. Wheel scaling, thumb dragging and filtered Enter behavior have controller regression tests.
 
 ## Menu style and motion
 
-- Ctrl-F and Ctrl-Shift-P share the same 600px card, full-window transparent host, popup placement, 12px frame, 18px selected-row radius, 36px search field and 14px command/session text. Group headings stay bold gray; icons and status filters carry color.
+- Ctrl-F and Ctrl-Shift-P share the same 600px card, full-window transparent host, popup placement, 12px frame, 18px selected-row radius and 36px search field. Ctrl-F shows one compact row per workspace; Ctrl-Shift-P remains the command palette.
 - Both use the same native slide/fade controller: 160ms ease-out entrance and 110ms ease-in exit. Entry is staged once after mount or the first host layout; native GPUI runs the transition, with no frame-by-frame script timers. A single completion deadline closes the popup and then runs its chosen action.
 - Escape and the menu's own toggle shortcuts animate dismissal. Backdrop clicks inside the app animate dismissal; native outside-window dismissal remains app-controlled.
 - Sidebar layout resizing and live terminal tab creation/removal have no animation hooks in this Herdr version. Smooth transitions for those surfaces require native app support; they are not implemented by the menu motion controller.
@@ -152,7 +151,7 @@ Picker scrolling keeps space order stable as agents change status. Live updates 
 - Actual terminal-pane creation/removal is owned by Herdr's split compositor. `pane.close` ends the terminal and removes its pane; exiting a terminal program also closes the pane. `terminal.park` removes a pane but keeps its terminal running. A mod pane closes its view instead. There is no exposed pre-close animation callback or compositor transition setting. JS element transitions only affect mod-drawn content. Do not emulate pane closure with timers, repeated layout writes or process restarts.
 - Sidebar gutters intentionally retain spacing around rounded terminal cards, but both sides now paint `chrome`; the sidebar shadow is removed. Pane-to-pane spacing is unchanged.
 
-Workspace headings use `#7F86A1` text and Helvetica Neue Bold (700), including the text inside the fade wrapper, in the sidebar and Ctrl-F picker. On this Mac, changing the weight of the previous UI font alone did not visibly render bold; the system font face was verified in a live screenshot. Compact sidebar initials use the same family.
+Workspace headings use `#7F86A1` text and Helvetica Neue Bold (700) in the sidebar. Compact sidebar initials use the same family.
 
 ## Cross-machine dependencies
 

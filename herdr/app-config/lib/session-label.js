@@ -11,6 +11,6 @@ export function sessionLabel(tab, pane, agent, formatPath = value => value ?? ""
       .replace(/^(?:π|pi|codex|claude(?: code)?|opencode|gemini(?: cli)?|cursor(?: agent)?)\s*[-:|·–—]\s*/i, "").trim();
     return !title || generic.has(title.toLowerCase()) || /^[~/\\]|^[A-Za-z]:[\\/]/.test(title) ? "" : title;
   };
-  const title = clean(agent?.title) || clean(pane?.title) || (tab?.named ? clean(tab.name) : "");
+  const title = tab?.named ? clean(tab.name) : clean(agent?.title) || clean(pane?.title);
   return { name: title || path || "Untitled session", detail: "", isAgent, hasTitle: Boolean(title) };
 }

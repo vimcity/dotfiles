@@ -5,6 +5,8 @@ const root = new URL("../mods/", import.meta.url);
 const load = file => import(`data:text/javascript;base64,${Buffer.from(fs.readFileSync(new URL(file, root))).toString("base64")}`);
 const { bindingKey, terminalArgs } = await load("command-prefix/keys.js");
 const { default: bindings } = await load("command-prefix/bindings.js");
+assert.equal(bindings["ctrl-j"].shell, 'exec "$HOME/.config/jira-tui/jira-tui.sh"');
+assert.equal(bindings["ctrl-j"].popup, false, "Jira uses the zoomed tool-pane launch path");
 for (const key of Object.keys(bindings)) {
   assert.equal(bindingKey({ keystroke: key }, bindings), key);
   const parts = key === "-" ? ["-"] : key.split("-");

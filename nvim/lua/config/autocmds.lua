@@ -8,6 +8,10 @@
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
 if vim.env.NVIM_ORG_POPUP == "1" then
+  vim.schedule(function()
+    local ok = pcall(require, "lazy")
+    if ok then require("lazy").load({ plugins = { "orgmode" } }) end
+  end)
   vim.api.nvim_create_autocmd("BufEnter", {
     callback = function(args)
       vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = args.buf, silent = true })

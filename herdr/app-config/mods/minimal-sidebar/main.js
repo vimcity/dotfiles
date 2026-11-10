@@ -1,6 +1,6 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { agents, home, machines, nextCommand, panes, run, settings, shared, spaces, theme } from "herdr";
+import { agents, home, machines, nextCommand, panes, run, settings, shared, setShared, spaces, theme } from "herdr";
 import { sessionLabel } from "./session-label.js";
 import { fadedLabel, programIcon, sidebarButton } from "./ui.js";
 import { navigateSidebar } from "./sidebar-navigation.js";
@@ -31,8 +31,12 @@ export default class MinimalSidebar extends View {
     this.presence = new SidebarPresence();
     this.expanded = new Set();
     this.activeSpace = null;
+    this.initializedSpaces = false;
+    this.foldedMachines = new Set();
     this.width = 275;
     this.hoveredTab = null;
+    this.hoveredSpace = null;
+    cx.timer.every(300, cx => this.reconcileToolTabs(cx));
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
@@ -40,10 +44,57 @@ export default class MinimalSidebar extends View {
         cx.notify();
       }
     });
+    cx.spawn(async (cx) => {
+      const machines = [...new Set(spaces().map((space) => space.machine).filter(Boolean))];
+      for (const machine of machines) {
+        try {
+          const result = await exec("sh", ["-lc", "printf '%s' \"$HOME\""], { on: machine });
+          if (result.code === 0 && result.stdout.trim()) this.machineHomes[machine] = result.stdout.trim();
+        } catch {}
+      }
+      cx.notify();
+    });
+  }
+
+  reconcileToolTabs(cx) {
+    const records = shared("command-prefix.tool-tabs") ?? [];
+    if (!records.length) return;
+    const allPanes = panes();
+    const remaining = [];
+    let changed = false;
+    for (const record of records) {
+      const pane = allPanes.find(item => item.terminal === record.terminal);
+      if (pane && record.phase !== "attached") {
+        if (!pane.zoomed) run("pane.zoom", { pane: pane.pane });
+        if (pane.tab !== record.previousTab) {
+          const folder = record.cwd?.replace(/\/$/, "").split("/").pop();
+          const program = pane.program?.name || record.name;
+          run("tab.rename", { id: pane.tab, name: [program, folder].filter(Boolean).join(" · ") });
+        }
+        remaining.push({ ...record, phase: "attached", toolTab: pane.tab, toolPane: pane.pane });
+        changed = true;
+      } else if (!pane && record.phase === "attached") {
+        if (record.previousPane && panes().some(item => item.pane === record.previousPane)) {
+          run("pane.focus", { pane: record.previousPane });
+        } else {
+          const previous = spaces().flatMap(space => space.tabs).find(tab => tab.id === record.previousTab);
+          if (previous) run("tab.select", { id: previous.id });
+        }
+        changed = true;
+      } else remaining.push(record);
+    }
+    if (changed) setShared("command-prefix.tool-tabs", remaining);
   }
 
   navigate(direction) {
-    navigateSidebar(direction, spaces(), run);
+    const items = spaces();
+    const tabs = items.flatMap(space => (space.tabs ?? []).map(tab => ({ space, tab })));
+    if (tabs.length) {
+      const current = tabs.findIndex(({ space, tab }) => space.active && tab.active);
+      const index = current < 0 ? (direction > 0 ? 0 : tabs.length - 1) : (current + direction + tabs.length) % tabs.length;
+      this.expanded.add(tabs[index].space.id);
+    }
+    navigateSidebar(direction, items, run);
   }
 
   select(space, tab, pane) {
@@ -89,10 +140,8 @@ export default class MinimalSidebar extends View {
     const items = spaces();
     const activeSpace = items.find(space => space.active)?.id;
     const compact = this.width < 110;
-    if (activeSpace !== this.activeSpace) {
-      this.activeSpace = activeSpace;
-      this.expanded = new Set(activeSpace ? [activeSpace] : []);
-    }
+    if (activeSpace) this.expanded.add(activeSpace);
+    this.activeSpace = activeSpace;
     const groups = this.presence.sync(items.map(space => ({ id: space.id, value: space,
       rows: (space.tabs ?? []).map(tab => {
         const tabPanes = (panesByTab.get(tab.id) ?? []);
@@ -107,6 +156,7 @@ export default class MinimalSidebar extends View {
       const space = group.value;
       const ready = group.phase === "open";
       const expanded = ready && this.expanded.has(space.id) && !compact;
+      const machineExpanded = !this.foldedMachines.has(space.machine ?? null);
       const rows = this.presence.rows(group);
       if (index === 0 || groups[index - 1].value.machine !== space.machine) {
         const machine = machineList.find(item => item.name === space.machine);
@@ -120,13 +170,24 @@ export default class MinimalSidebar extends View {
             .transition("top", SIDEBAR_HEIGHT)
             .text_size(12).font_medium().text_color(t.dim).tooltip(`${machineName}${machine?.layout && machine.layout !== "ready" ? ` · ${machine.layout}` : ""}`)
             .child(svg(`mods/workspace-chrome/${space.machine ? "server" : "monitor"}.svg`).size(13).flex_none())
+            .when(!compact, el => el.child(svg(`mods/minimal-sidebar/chevron-${machineExpanded ? "down" : "right"}.svg`).size(10).flex_none().text_color(t.dim))
+              .on_click((_event, cx) => {
+                const key = space.machine ?? null;
+                this.foldedMachines.has(key) ? this.foldedMachines.delete(key) : this.foldedMachines.add(key);
+                cx.notify();
+              }))
             .when(!compact, el => el.child(fadedLabel(machineName, t.chrome)))
             .when(!space.machine && !compact, el => el.child(machineMetrics(t)))
             .when(Boolean(machine && machine.layout !== "ready"), el => el.child(statusMark("blocked", t)))));
         content.push(spacer(`machine-gap-${key}`, visible ? 3 : 0));
       }
       content.push(v_flex().id(`space-${space.id}`).flex_none().min_h(0)
+        .when(!machineExpanded, el => el.h(0).overflow_hidden())
         .child(h_flex().id(`space-heading-${space.id}`).h(ready ? 32 : 0).min_h(0).overflow_hidden().flex_none().px(7).gap(7).items_center().rounded(7).cursor_pointer()
+          .on_hover((hovered, cx) => {
+            this.hoveredSpace = hovered ? space.id : this.hoveredSpace === space.id ? null : this.hoveredSpace;
+            cx.notify();
+          })
           .opacity(ready ? 1 : 0).transition("height", SIDEBAR_HEIGHT).transition("opacity", SIDEBAR_FADE)
           .text_color(t.muted).hover(el => el.text_color(t.foreground))
           .when(compact && space.active, el => el.bg(t.selected).rounded(16))
@@ -134,18 +195,23 @@ export default class MinimalSidebar extends View {
           .on_click((_event, cx) => {
             if (!ready) return;
             if (compact) this.select(space, space.tabs?.find(tab => tab.active) ?? space.tabs?.[0]);
-            else this.expanded.has(space.id) ? this.expanded.delete(space.id) : this.expanded.add(space.id);
+            else if (this.expanded.has(space.id)) this.expanded.delete(space.id);
+            else {
+              this.expanded.add(space.id);
+              if (!space.active) this.select(space, space.tabs?.find(tab => tab.active) ?? space.tabs?.[0]);
+            }
             cx.notify();
           })
           .when(compact, el => el.justify_center().child(div().text_size(14).font_family("Helvetica Neue").font_bold().text_color("#7F86A1").child(space.name.slice(0, 2))))
           .when(!compact, el => el
             .child(svg(`mods/minimal-sidebar/chevron-${expanded ? "down" : "right"}.svg`).size(10).flex_none().text_color(t.dim))
             .child(fadedLabel(space.name, t.chrome, true).id(`space-name-${space.id}`).text_size(13).font_family("Helvetica Neue").font_weight(700).text_color("#7F86A1"))
-            .child(div().text_size(11).font_medium().text_color(t.dim).child(String(space.tabs?.length ?? 0))))
-          .child(statusMark(expanded ? null : space.status, t)))
+            .child(div().w(18).flex_none().text_size(11).font_medium().text_color(t.dim).text_right().child(String(space.tabs?.length ?? 0))))
+          .child(div().w(6).h(6).flex_none().child(statusMark(expanded ? null : space.status, t))))
         .child(spacer(`heading-gap-${space.id}`, ready ? 3 : 0))
         .child(v_flex().id(`space-tabs-${space.id}`).overflow_hidden().min_h(0).flex_none()
-          .h(expanded ? rows.filter(row => row.phase === "open").length * 39 : 0).opacity(expanded ? 1 : 0)
+          .h(expanded ? rows.filter(row => row.phase === "open").length * 39 : 0)
+          .opacity(expanded ? 1 : 0)
           .transition("height", SIDEBAR_HEIGHT).transition("opacity", SIDEBAR_FADE)
           .children(rows.map(row => this.tabRow(space, row, t, ready))))
         .child(spacer(`space-gap-${space.id}`, ready ? index === groups.length - 1 ? 6 : 12 : 0)));
@@ -154,9 +220,16 @@ export default class MinimalSidebar extends View {
       .on_size_change((size, cx) => {
         if (this.width !== size.width) { this.width = size.width; cx.notify(); }
       })
+      .on_scroll_wheel((event, cx) => {
+        const delta = event.delta.y;
+        if (!delta) return;
+        const steps = Math.sign(delta) * (Math.abs(delta) < 3 ? 1 : Math.max(1, Math.round(Math.abs(delta) / 36)));
+        cx.stop_propagation();
+        this.navigate(steps);
+      })
       .overflow_y_scrollbar()
       .when(!compact, el => el.child(sidebarButton(t, zoom, () => run("layout.toggle", { id: "sidebar" }))
-        .absolute().left(84 / zoom).top(5 / zoom)))
+        .absolute().left(84 / zoom).top(6 / zoom)))
       .children(content);
   }
 }

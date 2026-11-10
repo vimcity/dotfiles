@@ -113,7 +113,7 @@ export default {
     "popup": false
   },
   "ctrl-j": {
-    "shell": "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"",
+    "shell": "exec \"$HOME/.config/jira-tui/jira-tui.sh\"",
     "name": "open Jira TUI",
     "popup": false
   },

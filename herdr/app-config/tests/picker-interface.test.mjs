@@ -39,65 +39,47 @@ assert.deepEqual(nodes.at(-1).bg, [theme().dim]);
 picker.glyph(theme(), "working");
 assert.deepEqual(nodes.at(-1).size, [7]);
 picker.filter = "";
-picker.statusFilter = "all";
-for (const [query, status, text] of [
-  [":w login", "blocked", "login"], [":b", "blocked", ""], ["waiting", "blocked", ""],
-  ["blocked auth", "blocked", "auth"], [":d", "done", ""], ["done", "done", ""],
-  [":r", "working", ""], ["working build", "working", "build"], [":i", "idle", ""],
-  [":a login", "all", "login"], ["w", "all", "w"], ["dialog", "all", "dialog"],
-]) {
+for (const query of [":w login", ":b", "waiting", "blocked auth", ":d", "done", ":r", "working build", ":i", ":a login", "w", "dialog"]) {
   picker.filter = query;
-  assert.deepEqual(picker.filterQuery(), { status, query: text });
+  assert.deepEqual(picker.filterQuery(), { query }, "search text is treated literally without status-filter syntax");
 }
 allSpaces = [{ id: "space", name: "project", machine: null, tabs: [{ id: "tab" }] }];
 allPanes = ["blocked", "done", "working", "idle"].map((status, index) => ({
   pane: `p${index}`, tab: "tab", terminal: `t${index}`, title: `${status} login`, status,
 }));
 allAgents = allPanes.map(pane => ({ address: pane.terminal, space: "space", status: pane.status }));
-picker.filter = ":w login";
-assert.deepEqual(picker.rows().filter(row => row.kind === "ctx").map(row => row.current.pane), ["p0"]);
-picker.filter = ":d nothing-matches";
-assert.deepEqual(picker.rows(), [{ kind: "empty", status: "done" }]);
+picker.filter = "blocked login";
+assert.equal(picker.rows().find(row => row.kind === "ctx").current.pane, "p0");
+picker.filter = "nothing-matches";
+assert.deepEqual(picker.rows(), [{ kind: "empty" }]);
 assert.doesNotThrow(() => picker.navigate("down", { notify() {} }));
 assert.doesNotThrow(() => picker.go(undefined));
-picker.filter = ":w login";
-let value;
-picker.input = { set_value(text) { value = text; }, focus() {} };
-picker.setStatus("done", { notify() {} });
-assert.equal(value, "login");
-assert.equal(picker.filterQuery().status, "done");
-assert.deepEqual(picker.rows().filter(row => row.kind === "ctx").map(row => row.current.pane), ["p1"]);
-assert.equal(picker.rows().filter(row => row.kind === "tab").length, 1, "filtered split panes retain one tab parent");
-assert.equal(picker.rows().find(row => row.kind === "tab").tabTitle, "—");
-assert.doesNotThrow(() => picker.go(picker.rows().find(row => row.kind === "tab")));
+picker.filter = "done login";
+assert.equal(picker.rows().filter(row => row.kind === "ctx").length, 1, "a matching session produces one workspace result");
+assert.equal(picker.rows().find(row => row.kind === "ctx").current.pane, "p1", "a session search targets its matching tab");
 picker.filter = "";
-picker.statusFilter = "all";
-assert.deepEqual(picker.rows().map(row => row.kind).slice(0, 7), ["machine", "head", "tab", "ctx", "ctx", "ctx", "ctx"]);
+assert.deepEqual(picker.rows().map(row => row.kind), ["ctx"], "the picker lists workspaces, not tabs or pane trees");
 const splitPanes = allPanes;
 allPanes = [allPanes[0]];
-assert.equal(picker.rows().filter(row => row.kind === "tab").length, 0, "single-pane tabs need no duplicate parent row");
+assert.equal(picker.rows().filter(row => row.kind === "ctx").length, 1, "multiple panes still produce one workspace result");
 allPanes = splitPanes;
 const paneRow = picker.rows().find(row => row.kind === "ctx");
 picker.row(paneRow, null, theme());
-const rowNode = () => nodes.findLast(node => node.id?.[0] === "ctx-p0");
+const rowNode = () => nodes.findLast(node => node.id?.[0] === "workspace-space");
 assert.deepEqual(rowNode().bg, [theme().popover]);
 assert.deepEqual(rowNode().rounded, [18]);
 assert.deepEqual(rowNode().text_size, [14]);
 picker.row({ ...paneRow, current: { ...paneRow.current, program: { name: "Pi", agent: true } } }, null, theme());
-assert.equal(rowNode().childCount, 3, "session rows contain only the program icon, label and status—not a duplicate agent-name badge");
-assert(rowNode().tooltip[0].includes("Pi"), "tool names remain available in the tooltip");
-picker.row(paneRow, "ctx-p0", theme());
+assert.equal(rowNode().childCount, 3, "workspace results show one workspace label, concise context and status");
+assert(rowNode().tooltip[0].includes("project"), "workspace details remain available in the tooltip");
+picker.row(paneRow, "workspace-space", theme());
 assert.deepEqual(rowNode().bg, [theme().selected]);
 assert.deepEqual(rowNode().border, [0.5]);
 rowNode().on_hover[0](true, { notify() {} });
 picker.row(paneRow, null, theme());
 assert.deepEqual(rowNode().bg, [theme().hover]);
-picker.row({ kind: "head", w: { id: "space", name: "project", tabs: [] } }, null, theme());
-const heading = nodes.findLast(node => node.id?.[0] === "space-name-space");
-assert.deepEqual(heading.font_weight, [700]);
-assert.deepEqual(heading.text_color, ["#7F86A1"]);
-picker.row({ kind: "machine", machine: "work" }, null, theme());
-assert(labels.includes("Work"), "machine labels use normal case without protocol banners");
+picker.row({ kind: "ctx", w: { id: "space", name: "project", machine: "work" }, ctx: { id: "tab" }, current: null, label: { name: "Session" }, status: "idle" }, null, theme());
+assert(nodes.findLast(node => node.id?.[0] === "workspace-space"), "workspace is the selectable unit");
 
 picker.dismiss = (_cx, after) => { commands.push(["dismiss"]); after?.(); };
 allPanes = [{ pane: "p1", tab: "tab", zoomed: true }, { pane: "p2", tab: "tab", zoomed: false }];
@@ -112,7 +94,7 @@ assert.deepEqual(commands.splice(0), [["dismiss"], ["tab.select", { id: "tab" }]
 allPanes = [{ pane: "p2", tab: "tab", zoomed: false }];
 picker.go({ ...selection, w: { active: true } });
 assert(!commands.splice(0).some(([command]) => command === "pane.zoom"));
-console.log("PASS: status aliases, combined search, empty results, clickable filters and zoom transfer");
+console.log("PASS: literal workspace/session search, one workspace result, matching-tab navigation, empty results and zoom transfer");
 
 let popupProps = { terminal: "test-terminal", overlay: "old" };
 let liveTerminals = [{ address: "test-terminal", state: "live" }];

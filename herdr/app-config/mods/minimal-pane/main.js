@@ -1,6 +1,6 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { appHome, exec, hc, home, layout, nextCommand, notify, panes, props, run, settings, spaces, theme, terminals, window as appWindow } from "herdr";
+import { appHome, exec, home, layout, nextCommand, notify, panes, props, run, settings, spaces, theme, terminals, window as appWindow } from "herdr";
 
 import { programIcon, sidebarButton } from "./ui.js";
 import { navigateSidebar } from "./sidebar-navigation.js";
@@ -9,7 +9,7 @@ import { navigateSidebar } from "./sidebar-navigation.js";
 // swallow those keys, so they are handed to the program and only move pane
 // focus when the program is not one of these. Same idea as the vim-herdr-
 // navigation plugin on the TUI: the decision is made outside the editor.
-const SPLIT_KEY = { left: "ctrl+h", down: "ctrl+j", up: "ctrl+k", right: "ctrl+l" };
+const SPLIT_KEY = { left: "<C-h>", down: "<C-j>", up: "<C-k>", right: "<C-l>" };
 const EDITOR_RE = /^(g?(view|l?n?vim?x?)(diff)?)$/;
 
 function find(node, id) {
@@ -27,6 +27,7 @@ export default class CompactPane extends View {
     this.navigating = false;
     this.textZoomQueue = [];
     this.textZoomBusy = false;
+    this.editorSockets = new Map();
     cx.spawn(async (cx) => {
       for (;;) this.handleCommand(await nextCommand(), cx);
     });
@@ -99,10 +100,22 @@ export default class CompactPane extends View {
     const info = terminals().find((item) => item.address === pane.terminal);
     const name = String(info?.foreground?.name ?? "").toLowerCase().split("/").pop() ?? "";
     if (!EDITOR_RE.test(name)) return false;
+    const argv = info?.foreground?.argv ?? [];
+    const serverIndex = argv.indexOf("--server");
+    const socket = serverIndex >= 0 ? argv[serverIndex + 1] : this.editorSockets?.get(info.foreground.pid);
+    const machine = spaces().find(space => space.tabs?.some(tab => tab.id === pane.tab))?.machine ?? null;
     cx.spawn(async () => {
       try {
-        const result = await hc(["keys", pane.terminal, SPLIT_KEY[direction]]);
+        // hc keys waits for keyboard inactivity; editor navigation must bypass that queue.
+        const expression = `nvim_input('${SPLIT_KEY[direction]}')`;
+        const result = socket
+          ? await exec("nvim", ["--server", socket, "--remote-expr", expression], { on: machine })
+          : await exec("python3", [`${appHome()}/mods/minimal-pane/nvim-input.py`, String(info.foreground.pid), SPLIT_KEY[direction]], { on: machine });
         if (result.code !== 0) throw new Error(result.stderr || "Could not send the key");
+        if (!socket) {
+          this.editorSockets ??= new Map();
+          this.editorSockets.set(info.foreground.pid, result.stdout.trim());
+        }
       } catch (error) {
         notify({ title: "Could not reach the editor", body: String(error), level: "error" });
       }

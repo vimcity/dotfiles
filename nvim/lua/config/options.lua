@@ -4,6 +4,9 @@
 
 vim.g.loaded_python3_provider = 0
 
+-- Register Herdr app pane navigation before LazyVim's VeryLazy keymap load.
+require("config.pane_navigation").setup()
+
 -- Tab and indentation settings
 vim.opt.tabstop = 4 -- Number of spaces that a <Tab> in the file counts for
 vim.opt.shiftwidth = 4 -- Number of spaces to use for each step of (auto)indent

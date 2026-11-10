@@ -86,29 +86,29 @@ assert.equal(picker.scroll, 0, "dragging the scrollbar must reach the top");
 handlers.get("picker:on_mouse_up")();
 rows = [{ ...rows[0], current: { pane: "inserted" } }, ...rows];
 render();
-assert.equal(picker.selectedKey, "ctx-p2", "selection must follow the pane identity when rows are inserted");
+assert.equal(picker.selectedKey, "workspace-p2", "selection must follow the pane identity when rows are inserted");
 picker.navigate("end", taskCx); render();
 picker.navigate("down", taskCx); render();
-assert.equal(picker.selectedKey, "ctx-p79", "Down must stop at the end");
+assert.equal(picker.selectedKey, "workspace-p79", "Down must stop at the end");
 
 const ordering = new Picker();
 ordering.filter = "";
 spaces = [{ id: "a", name: "a", status: "idle", tabs: [{ id: "ta" }] },
   { id: "b", name: "b", status: "working", tabs: [{ id: "tb" }] }];
-assert.deepEqual(ordering.rows().filter(row => row.kind === "head").map(row => row.w.id), ["a", "b"]);
+assert.deepEqual(ordering.rows().filter(row => row.kind === "ctx").map(row => row.w.id), ["a", "b"]);
 spaces[0].status = "blocked";
 spaces[1].status = null;
-assert.deepEqual(ordering.rows().filter(row => row.kind === "head").map(row => row.w.id), ["a", "b"]);
+assert.deepEqual(ordering.rows().filter(row => row.kind === "ctx").map(row => row.w.id), ["a", "b"]);
 spaces = [
   { id: "local", name: "rice", machine: null, tabs: [{ id: "local-tab" }] },
   { id: "work-a", name: "project", machine: "work", tabs: [{ id: "work-tab-a" }] },
   { id: "work-b", name: "other", machine: "work", tabs: [{ id: "work-tab-b" }] },
 ];
-assert.deepEqual(ordering.rows().filter(row => row.kind === "machine").map(row => row.machine), [null, "work"]);
+assert.deepEqual(ordering.rows().filter(row => row.kind === "ctx").map(row => row.w.id), ["local", "work-a", "work-b"]);
 let dismissed = false;
 ordering.dismiss = () => { dismissed = true; };
-ordering.go({ kind: "machine", machine: "work" });
-assert.equal(dismissed, false);
+ordering.go({ kind: "ctx", w: { id: "work-a", active: false }, ctx: { id: "work-tab-a" } });
+assert.equal(dismissed, true);
 const keys = JSON.parse(fs.readFileSync(new URL("../keys.json", import.meta.url), "utf8"));
 for (const key of ["up", "down", "pageup", "pagedown", "home", "end"]) assert.equal(keys["mod:minimal-picker"][key], `minimal-picker.${key}`);
 const filtered = new Picker();
@@ -127,5 +127,5 @@ filtered.go = row => { opened = row; };
 inputEvents.submit();
 assert.equal(opened, matches[0], "Enter must open the selected filtered result");
 ordering.filter = "work";
-assert.deepEqual(ordering.rows().filter(row => row.kind === "machine").map(row => row.machine), ["work"]);
+assert.deepEqual(ordering.rows().filter(row => row.kind === "ctx").map(row => row.w.id), ["work-a", "work-b"]);
 console.log("PASS: drawn selection visibility, arrows/pages, wheel scaling, scrollbar dragging, filtering/Enter, stable order and input bindings");

@@ -270,7 +270,7 @@ description = "open Posting"
 [[keys.command]]
 key = "prefix+ctrl+j"
 type = "pane"
-command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\""
+command = "exec \"$HOME/.config/jira-tui/jira-tui.sh\""
 description = "open Jira TUI"
 
 [[keys.command]]

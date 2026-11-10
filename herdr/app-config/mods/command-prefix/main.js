@@ -1,5 +1,5 @@
 import { View, div } from "gpui-kit";
-import { closeOverlay, props, run, focused, openOverlay, notify, hc, layout, spaces, terminals, nextCommand, settings } from "herdr";
+import { closeOverlay, props, run, focused, openOverlay, notify, hc, layout, spaces, terminals, nextCommand, settings, shared, setShared } from "herdr";
 import bindings from "./bindings.js";
 import { bindingKey, terminalArgs } from "./keys.js";
 
@@ -37,7 +37,11 @@ export default class CommandPrefix extends View {
 
   show(address, action) {
     if (!action.popup) {
-      run("terminal.keep", { terminal: address, place: "tab" });
+      setShared("command-prefix.tool-tabs", [
+        ...(shared("command-prefix.tool-tabs") ?? []),
+        { terminal: address, previousTab: this.context?.tab, previousPane: this.context?.pane, name: action.name, cwd: this.context?.cwd, phase: "waiting" },
+      ]);
+      run("terminal.keep", { terminal: address, place: "right" });
       return;
     }
     const viewport = window.viewport_size();

@@ -28,6 +28,7 @@ const t = {
   working: "#a6d189", blocked: "#e78284", done: "#e5c890",
 };
 const commands = [];
+const sharedValues = {};
 let items = [
   { id: "local", name: "rice", machine: null, active: true, tabs: [
     { id: "a", active: true, status: "working" }, { id: "b", active: false, status: "idle" },
@@ -41,11 +42,13 @@ let allPanes = [
 ];
 const uiSource = source("mods/minimal-sidebar/ui.js").replace(/^import .*;\n/gm, "").replaceAll("export function", "function");
 const sidebarButton = new Function("div", "svg", `${uiSource}\nreturn sidebarButton;`)(element, element);
-const cx = { notify() {}, spawn() {} };
+const cx = { notify() {}, spawn() {}, timer: { every() {} } };
 const labels = [];
 const shared = {
   View: class {}, div: element, svg: element, v_flex: element, h_flex: element, navigateSidebar, sidebarButton, SidebarPresence, SIDEBAR_HEIGHT, SIDEBAR_FADE,
-  settings: () => ({ zoom: 1 }), shared: () => ({ cpu: 42, memory: 58 }),
+  settings: () => ({ zoom: 1 }),
+  shared: key => key === "minimal.machine-usage.local" ? { cpu: 42, memory: 58 } : sharedValues[key],
+  setShared: (key, value) => { sharedValues[key] = value; },
   theme: () => t, home: () => "/home/test", spaces: () => items, panes: () => allPanes, agents: () => [],
   sessionLabel: (_tab, pane) => ({ name: pane?.title || "Terminal", isAgent: true }),
   fadedLabel: (text, fill) => { labels.push([text, fill]); return element(); }, programIcon: element,
@@ -58,7 +61,7 @@ const sidebar = new Sidebar();
 sidebar.init({}, cx);
 const node = id => nodes.findLast(node => node.id?.[0] === id);
 sidebar.render(cx);
-assert(sidebar.expanded.has("local"));
+assert(sidebar.expanded.has("local"), "the active space starts expanded");
 assert.deepEqual(node("tab-a").bg, [t.selected]);
 assert.deepEqual(node("tab-b").bg, [t.chrome]);
 assert.deepEqual(node("tab-a").rounded, [18]);
@@ -71,6 +74,22 @@ assert.deepEqual(node("tab-a").border, [0.5]);
 assert.deepEqual(node("tab-a").border_color, ["#ffffff0b"]);
 assert.deepEqual(node("tab-a").text_size, [14]);
 assert.deepEqual(node("tab-b").font_medium, []);
+let wheelStopped = false;
+node("sidebar-list").on_scroll_wheel[0]({ delta: { y: 1 } }, { stop_propagation() { wheelStopped = true; } });
+assert(wheelStopped, "scroll navigation consumes the sidebar wheel event");
+assert.deepEqual(commands.splice(0), [["tab.select", { id: "b" }]], "scrolling down navigates forward through tabs");
+node("sidebar-list").on_scroll_wheel[0]({ delta: { y: -1 } }, { stop_propagation() {} });
+assert.deepEqual(commands.splice(0), [["space.select", { id: "remote" }]], "scrolling up navigates backward through tabs");
+sidebar.expanded.delete("remote");
+sidebar.navigate(-1);
+assert(sidebar.expanded.has("remote"), "keyboard navigation expands the destination workspace");
+commands.splice(0);
+node("sidebar-list").on_scroll_wheel[0]({ delta: { y: 72 } }, { stop_propagation() {} });
+assert.deepEqual(commands.splice(0), [["space.select", { id: "remote" }]], "larger wheel gestures advance multiple entries");
+sidebar.expanded.delete("remote");
+node("sidebar-list").on_scroll_wheel[0]({ delta: { y: -1 } }, { stop_propagation() {} });
+assert(sidebar.expanded.has("remote"), "wheel navigation expands the destination workspace");
+commands.splice(0);
 assert.deepEqual(node("machine-local").text_size, [12]);
 assert(node("machine-metric-cpu").children.includes("42%"));
 assert(node("machine-metric-memory").children.includes("58%"));
@@ -87,8 +106,7 @@ sidebar.navigate(1);
 assert.deepEqual(commands.splice(0), [["tab.select", { id: "b" }]]);
 sidebar.navigate(-1);
 assert.deepEqual(commands.splice(0), [["space.select", { id: "remote" }]]);
-node("space-heading-remote").on_click[0]({}, cx);
-assert(sidebar.expanded.has("remote"));
+assert(sidebar.expanded.has("remote"), "keyboard navigation expands its destination");
 sidebar.render(cx);
 assert.deepEqual(node("space-tabs-remote").h, [39]);
 assert(node("space-tabs-remote").transitions.some(([property, policy]) => property === "height" && policy.easing === "ease-out"));
@@ -97,11 +115,38 @@ node("sidebar-list").on_size_change[0]({ width: 76, height: 600 }, cx);
 sidebar.render(cx);
 assert.deepEqual(node("space-tabs-local").h, [0]);
 assert.deepEqual(node("space-heading-local").bg, [t.selected], "compact rail retains active-space selection");
+node("sidebar-list").on_size_change[0]({ width: 275, height: 600 }, cx);
+sidebar.render(cx);
+sidebar.expanded.delete("remote");
 node("space-heading-remote").on_click[0]({}, cx);
 assert.deepEqual(commands.splice(0), [["space.select", { id: "remote" }], ["tab.select", { id: "c" }]]);
 items = items.map(item => ({ ...item, active: item.id === "remote" }));
 sidebar.render(cx);
-assert.deepEqual([...sidebar.expanded], ["remote"]);
+assert.deepEqual([...sidebar.expanded], ["local", "remote"], "keyboard navigation opens the destination space");
+items = items.map(item => ({ ...item, active: item.id === "local" }));
+sidebar.render(cx);
+node("space-heading-remote").on_click[0]({}, cx);
+assert(!sidebar.expanded.has("remote"), "clicking expanded workspace collapses it");
+items = items.map(item => ({ ...item, active: item.id === "remote" }));
+sidebar.render(cx);
+assert(sidebar.expanded.has("remote"), "the newly active space expands after selection changes");
+
+sharedValues["command-prefix.tool-tabs"] = [{ terminal: "tool-terminal", previousTab: "a", name: "open lazygit", cwd: "/home/test/project", phase: "waiting" }];
+allPanes.push({ pane: "tool-pane", terminal: "tool-terminal", tab: "tool-tab", program: { name: "lazygit" } });
+sidebar.reconcileToolTabs(cx);
+assert.deepEqual(commands.splice(0), [["pane.zoom", { pane: "tool-pane" }], ["tab.rename", { id: "tool-tab", name: "lazygit · project" }]]);
+assert.equal(sharedValues["command-prefix.tool-tabs"][0].phase, "attached");
+allPanes = allPanes.filter(pane => pane.terminal !== "tool-terminal");
+sidebar.reconcileToolTabs(cx);
+assert.deepEqual(commands.splice(0), [["tab.select", { id: "a" }]]);
+assert.deepEqual(sharedValues["command-prefix.tool-tabs"], []);
+sharedValues["command-prefix.tool-tabs"] = [{ terminal: "tool-pane-terminal", previousTab: "a", previousPane: "p1", name: "open lazygit", cwd: "/home/test/project", phase: "waiting" }];
+allPanes.push({ pane: "tool-pane-2", terminal: "tool-pane-terminal", tab: "a", program: { name: "lazygit" } });
+sidebar.reconcileToolTabs(cx);
+assert.deepEqual(commands.splice(0), [["pane.zoom", { pane: "tool-pane-2" }]], "tools kept beside the current pane are zoomed without renaming the tab");
+allPanes = allPanes.filter(pane => pane.terminal !== "tool-pane-terminal");
+sidebar.reconcileToolTabs(cx);
+assert.deepEqual(commands.splice(0), [["pane.focus", { pane: "p1" }]], "closing a tool pane restores focus to the pane that launched it");
 
 let paneProps = { pane: "p1" };
 const frame = { radius: 10, border: { width: 0.5 }, focus: { width: 0.5 } };
@@ -139,6 +184,7 @@ headerLayout.children.push({ id: "work-body", padding: [0, 8] });
 header.render(cx);
 assert.deepEqual(node("pane-head-p1").pl, [109.5], "a hidden sidebar reserves the window-control region within the first header");
 assert.deepEqual(node("fixed-sidebar-toggle").left, [75.5]);
+assert.deepEqual(node("fixed-sidebar-toggle").top, [4.5], "sidebar icon aligns vertically with the native traffic-light row");
 headerLayout.children.find(node => node.id === "work-body").padding = [6, 8];
 header.render(cx);
 assert.deepEqual(node("fixed-sidebar-toggle").top, [0], "control clearance accounts for the pane inset");
@@ -148,6 +194,7 @@ assert(node("pane-path-p1").children.includes("~/project"), "header abbreviates 
 assert.deepEqual(node("pane-path-p1").tooltip, ["/home/test/project"], "the tooltip retains the absolute path");
 assert.deepEqual(node("pane-path-p1").overflow_x_scroll, []);
 assert.equal(node("pane-path-p1").truncate, undefined);
+commands.splice(0);
 node("pane-head-p1").on_hover[0](true, cx);
 header.render(cx);
 let stopped = false;
