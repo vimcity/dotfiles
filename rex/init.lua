@@ -126,7 +126,7 @@ local function launch(ctx, item)
   local home = os.getenv("HOME")
   local options = {
     shell = "none",
-    login = item.interactive_shell == true,
+    login = false,
     command = item.command or {
       "/bin/zsh", item.interactive_shell and "-lc" or "-c", item.shell_command,
     },

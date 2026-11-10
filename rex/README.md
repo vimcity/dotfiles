@@ -165,9 +165,9 @@ Rex server's inherited environment and prepends the user tool directories and
 common Homebrew executable directories. They do not copy environment changes
 exported later in another pane, and do not refresh login-profile setup per launch.
 
-Interactive shell launchers and the directory picker retain their login startup
-because they need the interactive environment or shell functions. Keep this
-distinction when adding launchers.
+Interactive shell launchers and the directory picker also bypass the macOS login
+wrapper. They retain zsh's login startup files through `-lc` and load an
+interactive shell where needed for the prompt or shell functions.
 
 The scrollback helper resolves the current bundled Rex CLI instead of pinning a
 specific app version, with a CLI-on-PATH fallback. Preserve this when updating it.
