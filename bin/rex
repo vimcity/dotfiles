@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+for app in \
+    "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex" \
+    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex" \
+    "$HOME/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex" \
+    "$HOME/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"
+do
+    if [ -x "$app" ]; then
+        exec "$app" "$@"
+    fi
+done
+
+echo "Rex app CLI not found. Install Rex Beta or Rex.app first." >&2
+exit 127
