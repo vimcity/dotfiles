@@ -127,8 +127,31 @@ Compare default login startup, `login = false`, and a clean shell with user star
 files skipped. Use zsh's `zprof` for function costs and separate wall-clock timing
 for external commands, process creation, and first output. Preserve the normal
 environment when evaluating non-login startup; do not silently discard login
-profile setup. Single-app launchers disable login mode; ordinary tabs and splits
-retain Rex's default shell behavior.
+profile setup. Single-app launchers disable login mode. Configured split shortcuts
+use the workaround below; ordinary tabs retain Rex's default shell behavior.
+
+### Current split workaround
+
+Cmd-D and Ctrl-Space V open right splits; Cmd-S, Ctrl-Space S, and
+Ctrl-Space minus open down splits. These actions launch `/bin/zsh -il` directly
+with `shell = "none"` and `login = false`, retaining zsh's login and interactive
+startup files while bypassing `/usr/bin/login`. They preserve the source pane's
+directory and leave titles automatic. Menu commands and other built-in split
+actions do not inherit these options. To undo, restore the `pane.split` bindings
+and remove the custom Cmd-D binding.
+
+On the affected M3, both direct `zsh -i` and `zsh -il` splits were fast.
+Timing `/usr/bin/login -fp <current-user> /usr/bin/true` from Rex took
+0.44–0.54 seconds, versus 0.02 seconds with a temporary soft open-file limit of
+256. The same login test in Ghostty took 0.03–0.04 seconds. A reported shell soft
+limit was 245760; the corresponding Ghostty limit and Rex server's own limit
+have not been confirmed. This supports descriptor cleanup as the main cost,
+but does not prove where Rex sets or inherits that limit.
+
+Bypassing `/usr/bin/login` also bypasses its account/session hooks and login
+bookkeeping. This is a workaround, not a claim of equivalent OS session setup.
+Prefer an upstream fix that retains login and gives child processes appropriate
+resource limits; do not globally lower system limits to work around this.
 
 Regular tool launchers create a full-size tab and request that Rex select it.
 Popup launchers create a floating terminal. Foreground selection has been reported

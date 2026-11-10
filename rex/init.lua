@@ -34,10 +34,10 @@ rex.bind("alt+8", "client.tab.goto", { index = 8 })
 rex.bind("alt+9", "client.tab.goto", { index = 9 })
 rex.bind("ctrl+space>r", "client.tab.rename")
 rex.bind("ctrl+space>w", "client.tab.close")
-rex.bind("ctrl+space>v", "pane.split", { direction = "right" })
-rex.bind("ctrl+space>s", "pane.split", { direction = "down" })
-rex.bind("cmd+s", "pane.split", { direction = "down" })
-rex.bind("ctrl+space>-", "pane.split", { direction = "down" })
+rex.bind("ctrl+space>v", "split_shell_right")
+rex.bind("ctrl+space>s", "split_shell_down")
+rex.bind("cmd+s", "split_shell_down")
+rex.bind("ctrl+space>-", "split_shell_down")
 rex.bind("ctrl+space>x", "pane.close")
 rex.bind("alt+z", "pane.zoom")
 rex.bind("ctrl+space>shift+h", "client.tab.move", { direction = "backward" })
@@ -76,41 +76,53 @@ local function checked(result, err)
   return result
 end
 
-rex.action{
-  name = "test_split_no_login",
-  title = "Test login profiles without macOS login wrapper",
-  run = function(ctx)
-    local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
-    return checked(rex.session.new_split{
-      session_id = ctx.session_id,
-      anchor_id = ctx.block_id,
-      direction = "horizontal",
-      side = "after",
-      focus = true,
-      layout = rex.layout.block{
-        flavor = terminal .. ".shell",
-        label = "LOGIN-PROFILES TEST",
-        options = {
-          shell = "none",
-          login = false,
-          command = { "/bin/zsh", "-il" },
-          cwd = reported and reported.pwd,
-        },
-      },
-    })
-  end,
-}
--- Temporary diagnostic: remove this binding to restore ordinary Cmd-D splits.
-rex.bind("cmd+d", "test_split_no_login")
-
-local function launch(ctx, item)
+local function pane_cwd(ctx)
   local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
   local cwd = reported and reported.pwd
+  if not cwd or cwd == "" then
+    local process = rex.block.call(terminal, "process", { block_id = ctx.block_id })
+    cwd = process and ((process.foreground and process.foreground.cwd)
+      or (process.child and process.child.cwd))
+  end
   if cwd and cwd:match("^file://") then
     cwd = cwd:gsub("^file://[^/]*", ""):gsub("%%(%x%x)", function(hex)
       return string.char(tonumber(hex, 16))
     end)
   end
+  return cwd
+end
+
+-- Bypass slow macOS login descriptor cleanup; zsh still loads login profiles.
+for _, item in ipairs({
+  { name = "split_shell_right", title = "Split shell right", direction = "horizontal" },
+  { name = "split_shell_down", title = "Split shell down", direction = "vertical" },
+}) do
+  local split = item
+  rex.action{
+    name = split.name,
+    title = split.title,
+    run = function(ctx) return checked(rex.session.new_split{
+      session_id = ctx.session_id,
+      anchor_id = ctx.block_id,
+      direction = split.direction,
+      side = "after",
+      focus = true,
+      layout = rex.layout.block{
+        flavor = terminal .. ".shell",
+        options = {
+          shell = "none",
+          login = false,
+          command = { "/bin/zsh", "-il" },
+          cwd = pane_cwd(ctx),
+        },
+      },
+    }) end,
+  }
+end
+rex.bind("cmd+d", "split_shell_right")
+
+local function launch(ctx, item)
+  local cwd = pane_cwd(ctx)
   local home = os.getenv("HOME")
   local options = {
     shell = "none",
