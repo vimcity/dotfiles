@@ -102,12 +102,6 @@ install_omz_plugin "jeffreytse/zsh-vi-mode" "$ZSH_CUSTOM/plugins/zsh-vi-mode"
 
 # TPM removed (Herdr-only workflow)
 
-# Herdr app layout/mod configuration. This links only the dotfiles-owned
-# settings; Herdr's generated and per-machine state stays in ~/.config/herdr-app.
-if [ -x "$DOTFILES_DIR/herdr/app-config/install.sh" ]; then
-	"$DOTFILES_DIR/herdr/app-config/install.sh"
-fi
-
 # ============================================================================
 # OS-specific package installation
 # ============================================================================
@@ -168,11 +162,9 @@ else
 		bat
 		btop
 		eza
-		fastfetch
 		fd-find
 		fzf
 		git-delta
-		jq
 		lazygit
 		lazydocker
 		ripgrep
@@ -224,10 +216,8 @@ echo "󰔌 Creating symlinks..."
 mkdir -p "$HOME_DIR/.config"
 mkdir -p "$HOME_DIR/.config/lazygit"
 mkdir -p "$HOME_DIR/.config/btop/themes"
-mkdir -p "$HOME_DIR/.config/herdr"
 mkdir -p "$HOME_DIR/.config/rex/scripts"
 mkdir -p "$HOME_DIR/.local/share/harness"
-mkdir -p "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr"
 mkdir -p "$HOME_DIR/.config/tailspin"
 mkdir -p "$HOME_DIR/.pi/agent"
 
@@ -282,10 +272,10 @@ if [ -d "$DOTFILES_DIR/pi" ]; then
 	fi
 	link_dotfile "$DOTFILES_DIR/pi/SYSTEM.md" "$HOME_DIR/.pi/agent/SYSTEM.md"
 	if [ -d "$DOTFILES_DIR/pi/skills" ]; then
-		mkdir -p "$HOME_DIR/.pi/agent/skills"
+		mkdir -p "$HOME_DIR/.agents/skills"
 		for skill_dir in "$DOTFILES_DIR/pi/skills"/*; do
 			[ -d "$skill_dir" ] || continue
-			link_dotfile "$skill_dir" "$HOME_DIR/.pi/agent/skills/$(basename "$skill_dir")"
+			link_dotfile "$skill_dir" "$HOME_DIR/.agents/skills/$(basename "$skill_dir")"
 		done
 	fi
 	if [ ! -f "$HOME_DIR/.pi/agent/settings.local.json" ] && [ -f "$DOTFILES_DIR/pi/settings.local.json.example" ]; then
@@ -303,11 +293,6 @@ if [ -d "$DOTFILES_DIR/atuin" ]; then
 	link_dotfile "$DOTFILES_DIR/atuin" "$HOME_DIR/.config/atuin"
 fi
 
-if [ -d "$DOTFILES_DIR/fastfetch" ]; then
-	remove_if_exists "$HOME_DIR/.config/fastfetch"
-	link_dotfile "$DOTFILES_DIR/fastfetch" "$HOME_DIR/.config/fastfetch"
-fi
-
 if [ -d "$DOTFILES_DIR/posting" ]; then
 	mkdir -p "$HOME_DIR/.config/posting" "$HOME_DIR/.local/share/posting/themes"
 	link_dotfile "$DOTFILES_DIR/posting/config.yaml" "$HOME_DIR/.config/posting/config.yaml"
@@ -317,45 +302,6 @@ if [ -d "$DOTFILES_DIR/posting" ]; then
 	done
 fi
 
-if [ -f "$DOTFILES_DIR/herdr/config.toml" ]; then
-	link_dotfile "$DOTFILES_DIR/herdr/config.toml" "$HOME_DIR/.config/herdr/config.toml"
-fi
-
-if [ -f "$DOTFILES_DIR/herdr/reviewr.toml" ]; then
-	link_dotfile "$DOTFILES_DIR/herdr/reviewr.toml" "$HOME_DIR/.config/herdr/plugins/config/persiyanov.reviewr/config.toml"
-fi
-
-if [ -d "$DOTFILES_DIR/herdr/scripts" ]; then
-	chmod +x "$DOTFILES_DIR"/herdr/scripts/*.sh
-fi
-
-# Helper: install a Herdr plugin from GitHub if herdr is available and the plugin
-# isn't already installed. Skips silently if herdr is not in PATH (Docker/Linux).
-install_herdr_plugin() {
-	local repo="$1"
-	local plugin_id="$2"
-	if command -v herdr >/dev/null 2>&1; then
-		if herdr plugin list 2>/dev/null | grep -q "$plugin_id"; then
-			echo "  󰄵 herdr plugin $plugin_id already installed"
-		else
-			echo "  󰌶 Installing herdr plugin $plugin_id from $repo..."
-			herdr plugin install "$repo" -y 2>/dev/null || echo "  󰅖 Failed to install $plugin_id (herdr may not be running)"
-		fi
-	fi
-}
-
-# Symlink the tiny-fingers config (user preferences). Plugin binary is installed
-# via herdr plugin install below — the old install.sh approach only symlinked config
-# without building the Rust binary, which made prefix+t silently fail.
-if [ -f "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" ]; then
-	mkdir -p "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers"
-	link_dotfile "$DOTFILES_DIR/herdr/plugins/tiny-fingers/config.toml" "$HOME_DIR/.config/herdr/plugins/config/hotchpotch.herdr-tiny-fingers/config.toml"
-fi
-
-# Install herdr plugins that require binary builds (not just config symlinks).
-# This runs only on machines where herdr is installed and active.
-install_herdr_plugin "hotchpotch/herdr-tiny-fingers" "hotchpotch.herdr-tiny-fingers"
-install_herdr_plugin "persiyanov/herdr-reviewr" "persiyanov.reviewr"
 
 if [ -f "$DOTFILES_DIR/tailspin/theme.toml" ]; then
 	link_dotfile "$DOTFILES_DIR/tailspin/theme.toml" "$HOME_DIR/.config/tailspin/theme.toml"

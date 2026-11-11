@@ -5,6 +5,8 @@ rex.bind("ctrl+space>ctrl+,", "client.settings")
 rex.bind("ctrl+space>,", "client.config.reload")
 rex.bind("alt+e", "client.sidebar.toggle")
 rex.bind("ctrl+space>q", "session.switch")
+rex.bind("ctrl+space>h", "session.collapse")
+rex.bind("ctrl+space>ctrl+h", "session.collapse_others")
 rex.bind("ctrl+f", "session.switch")
 rex.bind("ctrl+space>ctrl+z", "client.mode.enter", { name = "resize" })
 rex.bind("resize/left", "pane.resize", { direction = "left" })
@@ -48,190 +50,549 @@ rex.bind("alt+k", "client.tab.previous")
 rex.bind("alt+j", "client.tab.next")
 rex.bind("ctrl+space>ctrl+space", "pane.send_key", { key = "ctrl+space" })
 
-rex.action{
-  name = "ignore_split_shortcut",
-  title = "Disable Shift Command D Split",
-  run = function() end,
-}
+rex.action({
+	name = "ignore_split_shortcut",
+	title = "Disable Shift Command D Split",
+	run = function() end,
+})
 rex.bind("shift+cmd+d", "ignore_split_shortcut")
 rex.bind("ctrl+space>z", "pane.zoom")
 rex.bind("ctrl+space>f", "pane.float")
 local function is_vim(ctx)
-  local process = rex.block.call("com.superlogical.terminal", "process", { block_id = ctx.block_id })
-  local foreground = process and process.foreground
-  if not foreground then return false end
+	local process = rex.block.call("com.superlogical.terminal", "process", { block_id = ctx.block_id })
+	local foreground = process and process.foreground
+	if not foreground then
+		return false
+	end
 
-  local argv0 = (foreground.argv0 or ""):match("[^/]*$") or ""
-  for _, name in ipairs({ foreground.name or "", argv0 }) do
-    if name:match("^n?vim") then return true end
-  end
-  return false
+	local argv0 = (foreground.argv0 or ""):match("[^/]*$") or ""
+	for _, name in ipairs({ foreground.name or "", argv0 }) do
+		if name:match("^n?vim") then
+			return true
+		end
+	end
+	return false
 end
 
-rex.action{
-  name = "smart_splits_focus",
-  title = "Smart Splits: Focus Pane",
-  run = function(ctx, args)
-    if is_vim(ctx) then
-      rex.client.queue("pane.send_key", { key = args.key })
-    else
-      rex.client.queue("pane.focus", { direction = args.direction })
-    end
-  end,
-}
+rex.action({
+	name = "smart_splits_focus",
+	title = "Smart Splits: Focus Pane",
+	run = function(ctx, args)
+		if is_vim(ctx) then
+			rex.client.queue("pane.send_key", { key = args.key })
+		else
+			rex.client.queue("pane.focus", { direction = args.direction })
+		end
+	end,
+})
 
 for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
-  rex.bind("ctrl+" .. key, "smart_splits_focus", { key = "ctrl+" .. key, direction = direction })
-  rex.bind("ctrl+space>" .. key, "pane.focus", { direction = direction })
-  rex.bind("resize/" .. key, "pane.resize", { direction = direction })
+	rex.bind("ctrl+" .. key, "smart_splits_focus", { key = "ctrl+" .. key, direction = direction })
+	-- rex.bind("ctrl+space>" .. key, "pane.focus", { direction = direction })
+	rex.bind("resize/" .. key, "pane.resize", { direction = direction })
 end
 
-rex.action{
-  name = "smart_splits_resize",
-  title = "Smart Splits: Resize Pane",
-  run = function(ctx, args)
-    if is_vim(ctx) then
-      rex.client.queue("pane.send_key", { key = args.key })
-    else
-      rex.client.queue("pane.resize", { direction = args.direction, amount = 3 })
-    end
-  end,
-}
+rex.bind("ctrl+d", "smart_scroll", { key = "ctrl+d" })
+rex.bind("ctrl+u", "smart_scroll", { key = "ctrl+u" })
+
+rex.action({
+	name = "smart_splits_resize",
+	title = "Smart Splits: Resize Pane",
+	run = function(ctx, args)
+		if is_vim(ctx) then
+			rex.client.queue("pane.send_key", { key = args.key })
+		else
+			rex.client.queue("pane.resize", { direction = args.direction, amount = 3 })
+		end
+	end,
+})
+
+rex.action({
+	name = "smart_scroll",
+	title = "Smart Scroll: Terminal/Nvim",
+	run = function(ctx, args)
+		if is_vim(ctx) then
+			rex.client.queue("pane.send_key", { key = "escape" })
+			rex.client.queue("pane.send_key", { key = args.key })
+		else
+			rex.client.queue("pane.send_key", { key = args.key })
+		end
+	end,
+})
 
 local terminal = "com.superlogical.terminal"
 
 local function checked(result, err)
-  if not result then error(err, 0) end
-  return result
+	if not result then
+		error(err, 0)
+	end
+	return result
 end
 
 local function pane_cwd(ctx)
-  local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
-  local cwd = reported and reported.pwd
-  if not cwd or cwd == "" then
-    local process = rex.block.call(terminal, "process", { block_id = ctx.block_id })
-    cwd = process and ((process.foreground and process.foreground.cwd)
-      or (process.child and process.child.cwd))
-  end
-  if cwd and cwd:match("^file://") then
-    cwd = cwd:gsub("^file://[^/]*", ""):gsub("%%(%x%x)", function(hex)
-      return string.char(tonumber(hex, 16))
-    end)
-  end
-  return cwd
+	local reported = rex.block.call(terminal, "pwd", { block_id = ctx.block_id })
+	local cwd = reported and reported.pwd
+	if not cwd or cwd == "" then
+		local process = rex.block.call(terminal, "process", { block_id = ctx.block_id })
+		cwd = process and ((process.foreground and process.foreground.cwd) or (process.child and process.child.cwd))
+	end
+	if cwd and cwd:match("^file://") then
+		cwd = cwd:gsub("^file://[^/]*", ""):gsub("%%(%x%x)", function(hex)
+			return string.char(tonumber(hex, 16))
+		end)
+	end
+	return cwd
 end
 
 -- Bypass slow macOS login descriptor cleanup; zsh still loads login profiles.
 for _, item in ipairs({
-  { name = "split_shell_right", title = "Split shell right", direction = "horizontal" },
-  { name = "split_shell_down", title = "Split shell down", direction = "vertical" },
+	{ name = "split_shell_right", title = "Split shell right", direction = "horizontal" },
+	{ name = "split_shell_down", title = "Split shell down", direction = "vertical" },
 }) do
-  local split = item
-  rex.action{
-    name = split.name,
-    title = split.title,
-    run = function(ctx) return checked(rex.session.new_split{
-      session_id = ctx.session_id,
-      anchor_id = ctx.block_id,
-      direction = split.direction,
-      side = "after",
-      focus = true,
-      layout = rex.layout.block{
-        flavor = terminal .. ".shell",
-        options = {
-          shell = "none",
-          login = false,
-          command = { "/bin/zsh", "-il" },
-          cwd = pane_cwd(ctx),
-        },
-      },
-    }) end,
-  }
+	local split = item
+	rex.action({
+		name = split.name,
+		title = split.title,
+		run = function(ctx)
+			return checked(rex.session.new_split({
+				session_id = ctx.session_id,
+				anchor_id = ctx.block_id,
+				direction = split.direction,
+				side = "after",
+				focus = true,
+				layout = rex.layout.block({
+					flavor = terminal .. ".shell",
+					options = {
+						shell = "none",
+						login = false,
+						command = { "/bin/zsh", "-il" },
+						cwd = pane_cwd(ctx),
+					},
+				}),
+			}))
+		end,
+	})
 end
+rex.action({
+	name = "split_nvim",
+	title = "Split pane and open nvim",
+	run = function(ctx)
+		return checked(rex.session.new_split({
+			session_id = ctx.session_id,
+			anchor_id = ctx.block_id,
+			direction = "horizontal",
+			side = "after",
+			focus = true,
+			layout = rex.layout.block({
+				flavor = terminal .. ".shell",
+				options = {
+					shell = "none",
+					login = false,
+					command = { "/bin/zsh", "-lc", "exec nvim" },
+					cwd = pane_cwd(ctx),
+				},
+			}),
+		}))
+	end,
+})
+rex.bind("ctrl+space>shift+n", "split_nvim")
 rex.bind("cmd+d", "split_shell_right")
 
 local function launch(ctx, item)
-  local cwd = pane_cwd(ctx)
-  local home = os.getenv("HOME")
-  local options = {
-    shell = "none",
-    login = false,
-    command = item.command or {
-      "/bin/zsh", item.interactive_shell and "-lc" or "-c", item.shell_command,
-    },
-    cwd = cwd,
-  }
-  if not item.interactive_shell then
-    options.path_prepend = {
-      home .. "/.local/bin", home .. "/dotfiles/bin",
-      "/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin",
-    }
-  end
-  if item.org_environment then
-    options.command = {
-      "/bin/zsh", "-c",
-      'export ORG_PATH="${ORG_PATH:-$HOME/Documents/org}"; ' .. item.shell_command,
-    }
-  end
-  if item.scrollback then
-    options.command = {
-      "/bin/zsh", "-c", 'exec /bin/bash "$@"', "rex-scrollback",
-      os.getenv("HOME") .. "/.config/rex/scripts/scrollback-nvim.sh", ctx.session_id, ctx.block_id,
-    }
-  end
-  local layout = rex.layout.block{ flavor = terminal .. ".shell", options = options }
-  if item.popup or item.temporary then
-    local width, height = item.width or 0.75, item.height or 0.75
-    return checked(rex.session.new_layer{
-      session_id = ctx.session_id,
-      bounds = { (1 - width) / 2, (1 - height) / 2, width, height },
-      layout = layout,
-      focus = true,
-    })
-  end
-  local window = checked(rex.session.new_window{
-    session_id = ctx.session_id,
-    window_label = item.title,
-    layout = layout,
-    focus = true,
-  })
-  rex.client.queue("session.select", {
-    session_id = ctx.session_id,
-    window_id = window.window_id,
-  })
-  rex.client.queue("client.tab.goto", { index = -1 })
-  return window
+	local cwd = pane_cwd(ctx)
+	local home = os.getenv("HOME")
+	local options = {
+		shell = "none",
+		login = false,
+		command = item.command or {
+			"/bin/zsh",
+			item.interactive_shell and "-lc" or "-c",
+			item.shell_command,
+		},
+		cwd = cwd,
+	}
+	if not item.interactive_shell then
+		options.path_prepend = {
+			home .. "/.local/bin",
+			home .. "/dotfiles/bin",
+			"/opt/homebrew/bin",
+			"/opt/homebrew/sbin",
+			"/usr/local/bin",
+		}
+	end
+	if item.org_environment then
+		options.command = {
+			"/bin/zsh",
+			"-c",
+			'export ORG_PATH="${ORG_PATH:-$HOME/Documents/org}"; ' .. item.shell_command,
+		}
+	end
+	if item.scrollback then
+		options.command = {
+			"/bin/zsh",
+			"-c",
+			'exec /bin/bash "$@"',
+			"rex-scrollback",
+			os.getenv("HOME") .. "/.config/rex/scripts/scrollback-nvim.sh",
+			ctx.session_id,
+			ctx.block_id,
+		}
+	end
+	local layout = rex.layout.block({ flavor = terminal .. ".shell", options = options })
+	if item.popup or item.temporary then
+		local width, height = item.width or 0.75, item.height or 0.75
+		return checked(rex.session.new_layer({
+			session_id = ctx.session_id,
+			bounds = { (1 - width) / 2, (1 - height) / 2, width, height },
+			layout = layout,
+			focus = true,
+		}))
+	end
+	local window = checked(rex.session.new_window({
+		session_id = ctx.session_id,
+		window_label = item.title,
+		layout = layout,
+		focus = true,
+	}))
+	rex.client.queue("session.select", {
+		session_id = ctx.session_id,
+		window_id = window.window_id,
+	})
+	rex.client.queue("client.tab.goto", { index = -1 })
+	return window
 end
 
 local launchers = {
-  { name = "launch_scrollback", key = "ctrl+space>/", title = "scrollback in nvim with tailspin highlighting", scrollback = true },
-  { name = "launch_popup_shell", interactive_shell = true, key = "ctrl+space>ctrl+p", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l", popup = true, width = 0.75, height = 0.75 },
-  { name = "launch_shell_tab", interactive_shell = true, key = "ctrl+space>ctrl+c", title = "open floating shell", shell_command = "exec \"${SHELL:-/bin/zsh}\" -l" },
-  { name = "launch_projects_editor", key = "ctrl+space>ctrl+n", title = "open Neovim in a Projects tab", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec nvim" },
-  { name = "launch_splunk", key = "ctrl+space>shift+s", title = "start lazy splunk tui", shell_command = "exec ~/.local/bin/lzk", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_review_prs", key = "ctrl+space>shift+g", title = "review PRs", shell_command = "exec $HOME/.local/bin/gh-pr-dash", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_popup_prs", key = "ctrl+space>shift+m", title = "review PRs in a floating popup", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && exec \"$HOME/dotfiles/bin/ghprs\" mine", popup = true, width = 0.72, height = 0.65 },
-  { name = "launch_lazygit", key = "ctrl+space>ctrl+g", title = "open lazyzgit", shell_command = "exec lazygit", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_org_task", key = "ctrl+space>ctrl+a", title = "open or create an org todo", shell_command = "exec $HOME/dotfiles/herdr/scripts/quick-org-task.sh", popup = true, width = 0.55, height = 0.5 },
-  { name = "launch_confluence", key = "ctrl+space>shift+c", title = "open confluence docs", shell_command = "exec fluence pick", temporary = true, width = 0.75, height = 0.75 },
-  { name = "launch_directory_picker", interactive_shell = true, key = "ctrl+space>ctrl+f", title = "pick a directory with g", shell_command = "cd \"${PROJECTS_DIR:-$HOME/Projects}\" && \"${SHELL:-/bin/zsh}\" -lic 'g; exec \"${SHELL:-/bin/zsh}\" -l'", temporary = true, width = 0.75, height = 0.75 },
-  { name = "launch_stash", key = "ctrl+space>ctrl+s", title = "checkout stash", shell_command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md", popup = true, width = 0.65, height = 0.6 },
-  { name = "launch_agenda", key = "ctrl+space>ctrl+o", title = "open today's org agenda", shell_command = "exec $HOME/dotfiles/herdr/scripts/agenda-today.sh", org_environment = true, popup = true, width = 0.75, height = 0.75 },
-  { name = "launch_org_plans", key = "ctrl+space>shift+o", title = "create new org plans", shell_command = "exec $HOME/dotfiles/herdr/scripts/org-plans.sh", popup = true, width = 0.85, height = 0.8 },
-  { name = "launch_posting", key = "ctrl+space>p", title = "open Posting", shell_command = "exec posting --env \"$HOME/.local/share/posting/default/posting.env\"", temporary = true, width = 0.8, height = 0.8 },
-  { name = "launch_jira", key = "ctrl+space>ctrl+j", title = "open Jira TUI", shell_command = "cd \"${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}\" && exec \"${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}\"", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_btop", key = "ctrl+space>ctrl+b", title = "open btop", shell_command = "exec \"${BTOP_BIN:-/opt/homebrew/bin/btop}\"", temporary = true, width = 0.8, height = 0.8 },
-  { name = "launch_yazi", key = "ctrl+space>ctrl+y", title = "open yazi", shell_command = "exec \"${YAZI_BIN:-yazi}\"", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_lazydocker", key = "ctrl+space>ctrl+d", title = "open lazydocker", shell_command = "exec /opt/homebrew/bin/lazydocker", temporary = true, width = 0.85, height = 0.8 },
-  { name = "launch_lmstat", key = "ctrl+space>ctrl+l", title = "open lmstat", shell_command = "exec $HOME/.local/bin/lmstat", temporary = true, width = 0.75, height = 0.75 },
+	{
+		name = "launch_scrollback",
+		key = "ctrl+space>/",
+		title = "scrollback in nvim with tailspin highlighting",
+		scrollback = true,
+	},
+	{
+		name = "launch_popup_shell",
+		interactive_shell = true,
+		key = "ctrl+space>ctrl+p",
+		title = "open floating shell",
+		shell_command = 'exec "${SHELL:-/bin/zsh}" -l',
+		popup = true,
+		width = 0.75,
+		height = 0.75,
+	},
+	{
+		name = "launch_shell_tab",
+		interactive_shell = true,
+		key = "ctrl+space>ctrl+c",
+		title = "open floating shell",
+		shell_command = 'exec "${SHELL:-/bin/zsh}" -l',
+	},
+	{
+		name = "launch_projects_editor",
+		key = "ctrl+space>ctrl+n",
+		title = "open Neovim in a Projects tab",
+		shell_command = 'cd "${PROJECTS_DIR:-$HOME/Projects}" && exec nvim',
+	},
+	{
+		name = "launch_splunk",
+		key = "ctrl+space>shift+s",
+		title = "start lazy splunk tui",
+		shell_command = "exec ~/.local/bin/lzk",
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_review_prs",
+		key = "ctrl+space>shift+g",
+		title = "review PRs",
+		shell_command = "exec $HOME/.local/bin/gh-pr-dash",
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_popup_prs",
+		key = "ctrl+space>shift+m",
+		title = "review PRs in a floating popup",
+		shell_command = 'cd "${PROJECTS_DIR:-$HOME/Projects}" && exec "$HOME/dotfiles/bin/ghprs" mine',
+		popup = true,
+		width = 0.72,
+		height = 0.65,
+	},
+	{
+		name = "launch_lazygit",
+		key = "ctrl+space>ctrl+g",
+		title = "open lazyzgit",
+		shell_command = "exec lazygit",
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_org_task",
+		key = "ctrl+space>ctrl+a",
+		title = "open or create an org todo",
+		shell_command = "exec $HOME/dotfiles/bin/quick-org-task.sh",
+		popup = true,
+		width = 0.55,
+		height = 0.5,
+	},
+	{
+		name = "launch_confluence",
+		key = "ctrl+space>shift+c",
+		title = "open confluence docs",
+		shell_command = "exec fluence pick",
+		temporary = true,
+		width = 0.75,
+		height = 0.75,
+	},
+	{
+		name = "launch_directory_picker",
+		interactive_shell = true,
+		key = "ctrl+space>ctrl+f",
+		title = "pick a directory with g",
+		shell_command = 'cd "${PROJECTS_DIR:-$HOME/Projects}" && "${SHELL:-/bin/zsh}" -lic \'g; exec "${SHELL:-/bin/zsh}" -l\'',
+		temporary = true,
+		width = 0.75,
+		height = 0.75,
+	},
+	{
+		name = "launch_stash",
+		key = "ctrl+space>ctrl+s",
+		title = "checkout stash",
+		shell_command = "/opt/homebrew/bin/nvim ~/Documents/org/stash.md",
+		popup = true,
+		width = 0.65,
+		height = 0.6,
+	},
+	{
+		name = "launch_agenda",
+		key = "ctrl+space>ctrl+o",
+		title = "open today's org agenda",
+		shell_command = "exec $HOME/dotfiles/bin/agenda-today.sh",
+		org_environment = true,
+		popup = true,
+		width = 0.75,
+		height = 0.75,
+	},
+	{
+		name = "launch_org_plans",
+		key = "ctrl+space>shift+o",
+		title = "create new org plans",
+		shell_command = "exec $HOME/dotfiles/bin/org-plans.sh",
+		popup = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_posting",
+		key = "ctrl+space>p",
+		title = "open Posting",
+		shell_command = 'exec posting --env "$HOME/.local/share/posting/default/posting.env"',
+		temporary = true,
+		width = 0.8,
+		height = 0.8,
+	},
+	{
+		name = "launch_jira",
+		key = "ctrl+space>ctrl+j",
+		title = "open Jira TUI",
+		shell_command = 'cd "${JIRA_TUI_ROOT:-$HOME/Projects/jira-tui/bin}" && exec "${JIRA_TUI_BIN:-$HOME/.local/bin/jira-tui}"',
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_btop",
+		key = "ctrl+space>ctrl+b",
+		title = "open btop",
+		shell_command = 'exec "${BTOP_BIN:-/opt/homebrew/bin/btop}"',
+		temporary = true,
+		width = 0.8,
+		height = 0.8,
+	},
+	{
+		name = "launch_yazi",
+		key = "ctrl+space>ctrl+y",
+		title = "open yazi",
+		shell_command = 'exec "${YAZI_BIN:-yazi}"',
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_lazydocker",
+		key = "ctrl+space>ctrl+d",
+		title = "open lazydocker",
+		shell_command = "exec /opt/homebrew/bin/lazydocker",
+		temporary = true,
+		width = 0.85,
+		height = 0.8,
+	},
+	{
+		name = "launch_lmstat",
+		key = "ctrl+space>ctrl+l",
+		title = "open lmstat",
+		shell_command = "exec $HOME/.local/bin/lmstat",
+		temporary = true,
+		width = 0.75,
+		height = 0.75,
+	},
 }
 
 for _, item in ipairs(launchers) do
-  local launcher = item
-  rex.action{
-    name = launcher.name,
-    title = launcher.title,
-    run = function(ctx) return launch(ctx, launcher) end,
-  }
-  rex.bind(launcher.key, launcher.name)
+	local launcher = item
+	rex.action({
+		name = launcher.name,
+		title = launcher.title,
+		run = function(ctx)
+			return launch(ctx, launcher)
+		end,
+	})
+	rex.bind(launcher.key, launcher.name)
 end
+
+-- ============================================================================
+-- Rex-resume actions: restore agent sessions after restart/reboot.
+-- ============================================================================
+
+local rex_resume_bin = os.getenv("HOME") .. "/.local/bin/rex-resume"
+
+-- Check if a process name looks like an interactive shell.
+local function is_shell(name)
+	if not name then return false end
+	return name:match("^zsh$") or name:match("^bash$") or
+		name:match("^fish$") or name:match("^sh$") or
+		name:match("^-zsh$") or name:match("^-bash$")
+end
+
+-- Check if a block's foreground process is a shell (not an agent).
+local function is_shell_block(session_id, block_id)
+	local process = rex.block.call("com.superlogical.terminal", "process", {
+		session_id = session_id,
+		block_id = block_id,
+	})
+	if not process then return false end
+	local fg = process.foreground
+	if not fg then return false end
+	return is_shell(fg.name)
+end
+
+-- Restore all panes from rex-resume records.
+-- Skips panes whose foreground isn't a shell (already running an agent).
+rex.action({
+	name = "rex_resume_restore",
+	title = "Rex Resume: Restore All Agent Sessions",
+	run = function(ctx)
+		local result, err = rex.exec({ rex_resume_bin, "list" })
+		if not result or not result.ok then
+			rex.log("warn", "rex-resume list failed: " .. tostring(err))
+			return nil
+		end
+
+		local stdout = result.stdout or ""
+		if stdout == "" then
+			return { message = "No records found" }
+		end
+
+		-- Get current session view to find blocks.
+		local view, view_err = rex.session.view({ session_id = ctx.session_id })
+		if not view then
+			rex.log("warn", "rex.session.view failed: " .. tostring(view_err))
+			return nil
+		end
+
+		local restored = 0
+		-- Iterate over all blocks in the session.
+		for _, window in ipairs(view.windows or {}) do
+			for _, block in ipairs(window.blocks or {}) do
+				local bid = block.block_id
+				if not bid then goto continue end
+
+				-- Skip if foreground is not a shell (agent already running).
+				if not is_shell_block(ctx.session_id, bid) then
+					goto continue
+				end
+
+				-- Try to resume this pane.
+				local res, err2 = rex.exec({ rex_resume_bin, "resume", bid })
+				if not res or not res.ok then
+					goto continue
+				end
+
+				local cmd_line = res.stdout or ""
+				if cmd_line == "" then goto continue end
+
+				-- Type the resume command into the pane using write.
+				local ok, werr = rex.call("block.method", {
+					session_id = ctx.session_id,
+					block_id = bid,
+					method = "write",
+					args = { data = cmd_line .. "\n" },
+				})
+				if not ok then
+					rex.log("warn", "write failed for block " .. bid .. ": " .. tostring(werr))
+				else
+					restored = restored + 1
+				end
+
+				::continue::
+			end
+		end
+
+		return { message = "Restored " .. restored .. " pane(s)" }
+	end,
+})
+rex.bind("ctrl+space>shift+r", "rex_resume_restore")
+
+-- Resume agent session in the current pane.
+rex.action({
+	name = "rex_resume_this_pane",
+	title = "Rex Resume: Resume in This Pane",
+	run = function(ctx)
+		local result, err = rex.exec({ rex_resume_bin, "resume", ctx.block_id })
+		if not result or not result.ok then
+			rex.log("warn", "rex-resume resume failed: " .. tostring(err))
+			return nil
+		end
+
+		local cmd_line = result.stdout or ""
+		if cmd_line == "" then
+			return { message = "No record found for this pane" }
+		end
+
+		-- Type the resume command into the current pane.
+		local ok, werr = rex.call("block.method", {
+			session_id = ctx.session_id,
+			block_id = ctx.block_id,
+			method = "write",
+			args = { data = cmd_line .. "\n" },
+		})
+		if not ok then
+			rex.log("warn", "write failed: " .. tostring(werr))
+		end
+
+		return { message = "Typed resume command for this pane" }
+	end,
+})
+rex.bind("ctrl+space>shift+s", "rex_resume_this_pane")
+
+-- List all rex-resume records.
+rex.action({
+	name = "rex_resume_list",
+	title = "Rex Resume: List Records",
+	run = function(ctx)
+		local result, err = rex.exec({ rex_resume_bin, "list" })
+		if not result or not result.ok then
+			return { message = "No records found" }
+		end
+
+		local stdout = result.stdout or ""
+		if stdout == "" then
+			return { message = "No records found" }
+		end
+
+		return { message = stdout }
+	end,
+})
+rex.bind("ctrl+space>shift+l", "rex_resume_list")

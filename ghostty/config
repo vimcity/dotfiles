@@ -3,7 +3,7 @@
 # ==================================================
 
 theme = "Catppuccin Frappe"
-window-decoration = false
+# window-decoration = false
 window-step-resize = true
 window-save-state = always
 mouse-hide-while-typing = true
@@ -41,7 +41,6 @@ font-size = 16
 
 cursor-style = block
 adjust-cursor-thickness = 4
-custom-shader = shaders/cursor_smear_fade.glsl
 
 shell-integration = zsh
 

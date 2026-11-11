@@ -1,0 +1,339 @@
+#!/bin/sh
+# rex-resume — agent session recovery for Rex panes.
+# Records one JSON record per pane so coding agents survive a Rex restart or reboot.
+# Usage: rex-resume [record|resume|list|restore|cleanup] [options]
+#
+# Data directory: ~/.local/state/rex-resume/.json
+# Each record: { agent, session_ref, cwd, pid, block, rex_session, updated_at }
+#
+# Called from:
+#   - Claude/Codex/PI hooks on SessionStart (with REX_SESSION/REX_BLOCK set)
+#   - Rex init.lua actions via rex.exec
+#   - Shell precmd for auto-resume
+
+set -eu
+
+DATA_DIR="${REX_RESUME_DIR:-$HOME/.local/state/rex-resume}"
+DATA_FILE="$DATA_DIR/.json"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+now_iso() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
+
+mkdir -p "$DATA_DIR"
+
+# Get the foreground process of a Rex pane via rex CLI.
+# Returns the PID, or empty if not available.
+pane_foreground_pid() {
+  rex block call -s "$1" -b "$2" process 2>/dev/null |
+    jq -r '.foreground.pid // empty' || true
+}
+
+# Get the current shell's PID (the actual interactive shell, not a wrapper).
+my_pid() {
+  echo "$$"
+}
+
+# Check if we're inside a hook wrapper shell.
+# Hook wrappers are typically /bin/sh -c or bash invoked by the agent's hook system.
+is_hook_wrapper() {
+  # If PPID is a known shell wrapper PID, skip.
+  # We detect this by checking if our cmdline looks like a hook invocation.
+  local cmd
+  cmd=$(ps -p "$$" -o args= 2>/dev/null || true)
+  case "$cmd" in
+    */bin/sh\ -c*|*/bin/bash\ -c*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Get the agent type from environment or command line.
+detect_agent() {
+  if [ -n "${REX_RESUME_AGENT:-}" ]; then
+    echo "$REX_RESUME_AGENT"
+    return
+  fi
+  # Check common agent environment markers
+  if [ -n "${CLAUDE_VERSION:-}" ] || command -v claude >/dev/null 2>&1; then
+    if [ -n "${CODEX_THREAD_ID:-}" ]; then
+      echo "codex"
+    else
+      echo "claude"
+    fi
+  elif [ -n "${PI_VERSION:-}" ] || command -v pi >/dev/null 2>&1; then
+    echo "pi"
+  else
+    echo "unknown"
+  fi
+}
+
+# Get the current working directory.
+my_cwd() {
+  pwd 2>/dev/null || echo ""
+}
+
+# ---------------------------------------------------------------------------
+# record: Write a JSON record for the current Rex pane.
+# Called by agent hooks on SessionStart.
+# Nested-agent guard: only records if current PID matches pane foreground PID.
+# ---------------------------------------------------------------------------
+
+do_record() {
+  [ -n "${REX_SESSION:-}" ] || { echo "error: REX_SESSION not set" >&2; return 1; }
+  [ -n "${REX_BLOCK:-}" ] || { echo "error: REX_BLOCK not set" >&2; return 1; }
+
+  local agent session_ref cwd pid block rex_session updated_at
+  agent=$(detect_agent)
+  session_ref=""
+  cwd=$(my_cwd)
+  pid=$(my_pid)
+  block="$REX_BLOCK"
+  rex_session="$REX_SESSION"
+  updated_at=$(now_iso)
+
+  # Nested-agent guard: only record if our PID matches the pane's foreground PID.
+  # This prevents hook wrappers and subagents from overwriting the pane's record.
+  # Bypass when REX_RESUME_AGENT is explicitly set (Pi/Claude/Codex extension calls
+  # it deliberately; the agent process itself is the foreground).
+  if [ -z "${REX_RESUME_AGENT:-}" ]; then
+    local fg_pid
+    fg_pid=$(pane_foreground_pid "$rex_session" "$block")
+
+    if [ -n "$fg_pid" ] && [ "$pid" != "$fg_pid" ]; then
+      # We're not the foreground process — don't overwrite.
+      return 0
+    fi
+  fi
+
+  # Get session ref from agent-specific env if available.
+  case "$agent" in
+    claude) session_ref="${CLAUDE_SESSION_ID:-}" ;;
+    codex)  session_ref="${CODEX_THREAD_ID:-}" ;;
+    pi)     session_ref="${PI_SESSION_FILE:-${PI_SESSION_ID:-}}" ;;
+  esac
+
+  # Build JSON record (compact, one line per record).
+  local record
+  record=$(jq -cn \
+    --arg agent "$agent" \
+    --arg session_ref "$session_ref" \
+    --arg cwd "$cwd" \
+    --arg pid "$pid" \
+    --arg block "$block" \
+    --arg rex_session "$rex_session" \
+    --arg updated_at "$updated_at" \
+    '{agent: $agent, session_ref: $session_ref, cwd: $cwd, pid: ($pid | tonumber), block: $block, rex_session: $rex_session, updated_at: $updated_at}')
+
+  # Append to data file (one record per line for idempotency).
+  # Remove any existing record for this block/agent, then append.
+  if [ -f "$DATA_FILE" ]; then
+    local tmp
+    tmp=$(mktemp "$DATA_DIR/.rex-resume.XXXXXX")
+    jq -c "select(.block != \"$block\" or .agent != \"$agent\")" "$DATA_FILE" > "$tmp" 2>/dev/null || true
+    mv "$tmp" "$DATA_FILE"
+  fi
+
+  echo "$record" >> "$DATA_FILE"
+}
+
+# ---------------------------------------------------------------------------
+# resume: Print the resume command for a given block.
+# Usage: rex-resume resume [block]
+# ---------------------------------------------------------------------------
+
+do_resume() {
+  local target_block="${1:-}"
+  [ -f "$DATA_FILE" ] || { echo "no records found" >&2; return 1; }
+
+  local query
+  if [ -n "$target_block" ]; then
+    query="select(.block == \"$target_block\")"
+  else
+    # Default: current block or last written.
+    if [ -n "${REX_BLOCK:-}" ]; then
+      query="select(.block == \"$REX_BLOCK\")"
+    else
+      # Return the most recent record.
+      echo "usage: rex-resume resume [block]" >&2
+      return 1
+    fi
+  fi
+
+  local record
+  record=$(jq -e "$query | last" "$DATA_FILE" 2>/dev/null) || {
+    echo "no record for block $target_block" >&2
+    return 1
+  }
+
+  local agent session_ref cwd pid block rex_session updated_at
+  agent=$(echo "$record" | jq -r '.agent')
+  session_ref=$(echo "$record" | jq -r '.session_ref // ""')
+  cwd=$(echo "$record" | jq -r '.cwd')
+  pid=$(echo "$record" | jq -r '.pid')
+  block=$(echo "$record" | jq -r '.block')
+  rex_session=$(echo "$record" | jq -r '.rex_session')
+  updated_at=$(echo "$record" | jq -r '.updated_at')
+
+  # Check if record is stale (>14 days).
+  local cutoff_epoch now_epoch age_days
+  now_epoch=$(date +%s)
+  cutoff_epoch=$((now_epoch - 14 * 86400))
+  updated_epoch=$(date -d "$updated_at" +%s 2>/dev/null || echo "0")
+
+  if [ "$updated_epoch" -lt "$cutoff_epoch" ]; then
+    echo "record for block $block is stale ($updated_at)" >&2
+    return 1
+  fi
+
+  # Print resume command based on agent type.
+  case "$agent" in
+    claude)
+      if [ -n "$session_ref" ]; then
+        echo "claude --resume \"$session_ref\""
+      else
+        echo "# No session ref recorded; try: claude --resume"
+      fi
+      ;;
+    codex)
+      if [ -n "$session_ref" ]; then
+        echo "codex resume \"$session_ref\""
+      else
+        echo "# No session ref recorded; try: codex resume"
+      fi
+      ;;
+    pi)
+      if [ -n "$session_ref" ]; then
+        echo "pi --session \"$session_ref\""
+      else
+        # Pi uses session files; try to resume by block.
+        echo "pi --session \"$rex_session:$block\""
+      fi
+      ;;
+    *)
+      echo "# Unknown agent: $agent" >&2
+      return 1
+      ;;
+  esac
+
+  # Also print context info.
+  echo "# cwd: $cwd | pid: $pid | updated: $updated_at" >&2
+}
+
+# ---------------------------------------------------------------------------
+# list: List all recorded agent sessions.
+# Usage: rex-resume list
+# ---------------------------------------------------------------------------
+
+do_list() {
+  [ -f "$DATA_FILE" ] || { echo "no records found"; return 0; }
+  jq -r '[.block, .agent, .rex_session, .updated_at, (.session_ref // "no ref")] | @tsv' "$DATA_FILE" |
+    column -t -s $'\t' || cat "$DATA_FILE" | jq -r '"\(.block) [\(.agent)] \(.rex_session) updated: \(.updated_at) ref: \(.session_ref // "none")"'
+}
+
+# ---------------------------------------------------------------------------
+# restore: Restore a pane to its recorded session (for Rex init.lua actions).
+# Usage: rex-resume restore [block]
+# ---------------------------------------------------------------------------
+
+do_restore() {
+  local target_block="${1:-}"
+  [ -f "$DATA_FILE" ] || { echo "no records found"; return 1; }
+
+  local query
+  if [ -n "$target_block" ]; then
+    query="select(.block == \"$target_block\")"
+  else
+    # Restore all panes that are currently empty (shell only, no agent).
+    query="."
+  fi
+
+  local records
+  records=$(jq -c "$query" "$DATA_FILE") || return 1
+
+  local count=0
+  echo "$records" | while IFS= read -r record; do
+    local agent block rex_session session_ref cwd
+    agent=$(echo "$record" | jq -r '.agent')
+    block=$(echo "$record" | jq -r '.block')
+    rex_session=$(echo "$record" | jq -r '.rex_session')
+    session_ref=$(echo "$record" | jq -r '.session_ref // ""')
+    cwd=$(echo "$record" | jq -r '.cwd')
+
+    case "$agent" in
+      claude)
+        if [ -n "$session_ref" ]; then
+          echo "rex run -s \"$rex_session\" -- claude --resume \"$session_ref\""
+        fi
+        ;;
+      codex)
+        if [ -n "$session_ref" ]; then
+          echo "rex run -s \"$rex_session\" -- codex resume \"$session_ref\""
+        fi
+        ;;
+      pi)
+        if [ -n "$session_ref" ]; then
+          echo "rex run -s \"$rex_session\" -- pi --session \"$session_ref\""
+        else
+          echo "rex run -s \"$rex_session\" -- pi"
+        fi
+        ;;
+    esac
+    count=$((count + 1))
+  done
+}
+
+# ---------------------------------------------------------------------------
+# cleanup: Remove records whose PID is dead (user quit intentionally).
+# Usage: rex-resume cleanup [block]
+# ---------------------------------------------------------------------------
+
+do_cleanup() {
+  local target_block="${1:-}"
+  [ -f "$DATA_FILE" ] || return 0
+
+  local tmp
+  tmp=$(mktemp "$DATA_DIR/.rex-resume.XXXXXX")
+
+  # Read each record and check if its PID is alive.
+  while IFS= read -r record; do
+    local pid block shell_start_time should_keep
+
+    pid=$(echo "$record" | jq -r '.pid')
+    block=$(echo "$record" | jq -r '.block')
+
+    # Skip if not our target block.
+    if [ -n "$target_block" ] && [ "$block" != "$target_block" ]; then
+      echo "$record" >> "$tmp"
+      continue
+    fi
+
+    # Check if PID is still alive.
+    if kill -0 "$pid" 2>/dev/null; then
+      # PID is alive — keep the record.
+      echo "$record" >> "$tmp"
+    else
+      # PID is dead — remove the record.
+      : # silently drop
+    fi
+  done < "$DATA_FILE"
+
+  mv "$tmp" "$DATA_FILE"
+}
+
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
+
+case "${1:-record}" in
+  record)   do_record ;;
+  resume)   do_resume "${2:-}" ;;
+  list)     do_list ;;
+  restore)  do_restore "${2:-}" ;;
+  cleanup)  do_cleanup "${2:-}" ;;
+  *)
+    echo "usage: rex-resume [record|resume [block]|list|restore [block]|cleanup [block]]" >&2
+    exit 1
+    ;;
+esac

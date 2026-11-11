@@ -11,7 +11,7 @@
   "app.editor.external": ["ctrl+g"],
   "app.session.new": ["ctrl+n"],
   "app.session.tree": ["ctrl+shift+t"],
-  "app.session.fork": ["ctrl+f"],
+  "app.session.fork": ["ctrl+shift+f"],
   "app.session.resume": ["ctrl+shift+r"],
   "app.session.togglePath": ["ctrl+/"],
   "app.session.toggleSort": ["ctrl+s"],
