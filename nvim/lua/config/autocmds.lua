@@ -14,6 +14,9 @@ if vim.env.NVIM_ORG_POPUP == "1" then
   end)
   vim.api.nvim_create_autocmd("BufEnter", {
     callback = function(args)
+      if vim.b[args.buf].org_capture then
+        return
+      end
       vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = args.buf, silent = true })
     end,
   })

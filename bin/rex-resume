@@ -220,7 +220,6 @@ do_resume() {
   esac
 
   # Also print context info.
-  echo "# cwd: $cwd | pid: $pid | updated: $updated_at" >&2
 }
 
 # ---------------------------------------------------------------------------
