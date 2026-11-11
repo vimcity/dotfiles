@@ -149,11 +149,12 @@ do_resume() {
 
   local query
   if [ -n "$target_block" ]; then
-    query="select(.block == \"$target_block\")"
+    # With -s (slurp), input is an array — iterate with .[] then select.
+    query=".[] | select(.block == \"$target_block\")"
   else
     # Default: current block or last written.
     if [ -n "${REX_BLOCK:-}" ]; then
-      query="select(.block == \"$REX_BLOCK\")"
+      query=".[] | select(.block == \"$REX_BLOCK\")"
     else
       # Return the most recent record.
       echo "usage: rex-resume resume [block]" >&2
@@ -162,7 +163,8 @@ do_resume() {
   fi
 
   local record
-  record=$(jq -e "$query | last" "$DATA_FILE" 2>/dev/null) || {
+  # Slurp lines into array so select works on multi-line JSON files.
+  record=$(jq -es "$query" "$DATA_FILE" 2>/dev/null) || {
     echo "no record for block $target_block" >&2
     return 1
   }
@@ -177,10 +179,10 @@ do_resume() {
   updated_at=$(echo "$record" | jq -r '.updated_at')
 
   # Check if record is stale (>14 days).
-  local cutoff_epoch now_epoch age_days
+  local cutoff_epoch now_epoch
   now_epoch=$(date +%s)
   cutoff_epoch=$((now_epoch - 14 * 86400))
-  updated_epoch=$(date -d "$updated_at" +%s 2>/dev/null || echo "0")
+  updated_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$updated_at" +%s 2>/dev/null || echo "0")
 
   if [ "$updated_epoch" -lt "$cutoff_epoch" ]; then
     echo "record for block $block is stale ($updated_at)" >&2

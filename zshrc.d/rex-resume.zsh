@@ -37,7 +37,7 @@ _rex_resume_precmd() {
   [ -f "$REX_RESUME_DATA_FILE" ] || return 0
 
   local record
-  record=$(jq -e "select(.block == \"$REX_BLOCK\") | last" "$REX_RESUME_DATA_FILE" 2>/dev/null) || return 0
+  record=$(jq -es ".[] | select(.block == \"$REX_BLOCK\")" "$REX_RESUME_DATA_FILE" 2>/dev/null) || return 0
 
   local updated_at agent pid
   updated_at=$(echo "$record" | jq -r '.updated_at')
@@ -47,7 +47,7 @@ _rex_resume_precmd() {
   # Skip if stale (>14 days).
   local updated_epoch now_epoch cutoff_epoch
   now_epoch=$(date +%s)
-  updated_epoch=$(date -d "$updated_at" +%s 2>/dev/null || echo "0")
+  updated_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$updated_at" +%s 2>/dev/null || echo "0")
   cutoff_epoch=$((now_epoch - 14 * 86400))
 
   if [ "$updated_epoch" -lt "$cutoff_epoch" ]; then
