@@ -227,17 +227,6 @@ local function launch(ctx, item)
 			'export ORG_PATH="${ORG_PATH:-$HOME/Documents/org}"; ' .. item.shell_command,
 		}
 	end
-	if item.scrollback then
-		options.command = {
-			"/bin/zsh",
-			"-c",
-			'exec /bin/bash "$@"',
-			"rex-scrollback",
-			os.getenv("HOME") .. "/.config/rex/scripts/scrollback-nvim.sh",
-			ctx.session_id,
-			ctx.block_id,
-		}
-	end
 	local layout = rex.layout.block({ flavor = terminal .. ".shell", options = options })
 	if item.popup or item.temporary then
 		local width, height = item.width or 0.75, item.height or 0.75
@@ -264,33 +253,24 @@ end
 
 local launchers = {
 	{
-		name = "launch_scrollback",
-		key = "ctrl+space>/",
-		title = "scrollback in nvim with tailspin highlighting",
-		scrollback = true,
-	},
-	{
 		name = "launch_popup_shell",
 		interactive_shell = true,
-		key = "ctrl+space>ctrl+p",
-		title = "open floating shell",
+		key = "ctrl+space>t",
+		title = "open floating popup",
 		shell_command = 'exec "${SHELL:-/bin/zsh}" -l',
 		popup = true,
 		width = 0.75,
 		height = 0.75,
 	},
 	{
-		name = "launch_shell_tab",
-		interactive_shell = true,
-		key = "ctrl+space>ctrl+c",
-		title = "open floating shell",
-		shell_command = 'exec "${SHELL:-/bin/zsh}" -l',
-	},
-	{
 		name = "launch_projects_editor",
 		key = "ctrl+space>ctrl+n",
 		title = "open Neovim in a Projects tab",
 		shell_command = 'cd "${PROJECTS_DIR:-$HOME/Projects}" && exec nvim',
+        popup = true,
+		width = 1,
+		height = 1,
+
 	},
 	{
 		name = "launch_splunk",
@@ -310,6 +290,7 @@ local launchers = {
 		width = 0.85,
 		height = 0.8,
 	},
+    -- TODO: replace this 
 	{
 		name = "launch_popup_prs",
 		key = "ctrl+space>shift+m",
@@ -456,7 +437,7 @@ end
 -- Rex-resume actions: restore agent sessions after restart/reboot.
 -- ============================================================================
 
-local rex_resume_bin = os.getenv("HOME") .. "/.local/bin/rex-resume"
+local rex_resume_bin = os.getenv("HOME") .. "/dotfiles/bin/rex-resume"
 
 -- Check if a process name looks like an interactive shell.
 local function is_shell(name)
